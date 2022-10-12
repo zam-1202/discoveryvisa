@@ -1,0 +1,24 @@
+select {
+	text-align-last: center;
+}
+
+textarea {
+	resize: none;
+}
+label {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.table > tbody > tr > td {
+	vertical-align: middle;
+}
+
+#receive_payment_form {
+	overflow-x: hidden;
+}
+
+::placeholder{
+	font-style: italic;
+	text-align: center;
+}
