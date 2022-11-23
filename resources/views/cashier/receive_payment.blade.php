@@ -68,7 +68,7 @@
 				return;
 			}
 			$.ajax({
-				url: "/cashier/customer_payment",
+				url: "../cashier/customer_payment",
 				data: {or_number:$('#or_number').val(),vpr_number:$('#vpr_number').val(),reference_no:$('#reference_no').val()},
 				success: function(message){
 					$('#confirm_payment_message').html(message);
