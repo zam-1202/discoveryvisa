@@ -98,6 +98,22 @@ class AdminController extends Controller
 		}
 	}
 
+    public function updateBranch(Request $request)
+	{
+		if($request->ajax()){
+            $branch_id = $request->get('branch_id');
+			$branch_code = $request->get('branch_code');
+			$branch_desc = $request->get('branch_desc');
+
+            $branch = Branch::find($branch_id);
+            $branch->code = $branch_code;
+            $branch->description = $branch_desc;
+            $branch->save();
+
+			$request->session()->flash('status', 'Branch successfully updated');
+		}
+	}
+
 	/**
 	 * Show list of pending approvals
 	 *

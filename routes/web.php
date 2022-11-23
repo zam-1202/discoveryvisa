@@ -38,6 +38,7 @@ Route::get('admin/users/{id}/edit', 'AdminController@editUser')->name('admin.edi
 Route::post('admin/users/{id}', 'AdminController@updateUser')->name('admin.update')->middleware('CheckRole:Admin');
 Route::get('admin/branches', 'AdminController@branchList')->name('admin.branches')->middleware('CheckRole:Admin');
 Route::get('admin/addbranch', 'AdminController@addBranch')->name('admin.addbranch')->middleware('CheckRole:Admin');
+Route::get('admin/updatebranch', 'AdminController@updateBranch')->name('admin.updatebranch')->middleware('CheckRole:Admin');
 Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name('admin.approvals')->middleware('CheckRole:Admin');
 
 Route::resource('account_receivables', 'AccountReceivableController');
