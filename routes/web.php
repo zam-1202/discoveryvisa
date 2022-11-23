@@ -34,6 +34,8 @@ Route::get('application_batches/finalize_batch', 'ApplicationBatchController@fin
 Route::resource('application_batches', 'ApplicationBatchController')->middleware('CheckRole:Encoder,Admin');
 
 Route::get('admin/users', 'AdminController@userList')->name('admin.users')->middleware('CheckRole:Admin');
+Route::get('admin/users/{id}/edit', 'AdminController@editUser')->name('admin.edit')->middleware('CheckRole:Admin');
+Route::post('admin/users/{id}', 'AdminController@updateUser')->name('admin.update')->middleware('CheckRole:Admin');
 Route::get('admin/branches', 'AdminController@branchList')->name('admin.branches')->middleware('CheckRole:Admin');
 Route::get('admin/addbranch', 'AdminController@addBranch')->name('admin.addbranch')->middleware('CheckRole:Admin');
 Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name('admin.approvals')->middleware('CheckRole:Admin');

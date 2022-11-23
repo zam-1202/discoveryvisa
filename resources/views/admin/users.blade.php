@@ -23,7 +23,7 @@
 							<a href="{{route('register')}}" class="btn btn-success">Add NEW User</a>
 						</div>
 					</div>
-					
+
 					<table class="table table-hover table-bordered text-center">
 						<thead class="thead-dark">
 							<tr>
@@ -44,7 +44,7 @@
 										<td>{{$row->email}}</td>
 										<td>{{$row->role}}</td>
 										<td>{{$branch_list[$row->branch]}}</td>
-										<td><a class="btn btn-primary text-white" id="{{$row->id}}">Update</a></td>
+										<td><a class="btn btn-primary text-white" href="{{route('admin.edit', $row->id)}}">Update</a></td>
 									</tr>
 								@endforeach
 							@else
@@ -54,9 +54,9 @@
 							@endif
 						</tbody>
 					</table>
-					
+
 					{!! $users->links() !!}
-					
+
 					<div class="row">
 						<div class="col-md-12 text-center">
 							<a href="{{url('/')}}" class="btn btn-danger">Back</a>
