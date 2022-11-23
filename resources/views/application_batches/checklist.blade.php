@@ -31,8 +31,8 @@
 									<td style="width:25%;"> </td>
 								</tr>
 								@if($walkin_applications->count() > 0)
-									@php 
-										$i = 1; 
+									@php
+										$i = 1;
 									@endphp
 									@foreach($walkin_applications as $walkin)
 										<tr>
@@ -72,7 +72,7 @@
 											<td>{{ $i }}</td>
 											<td>{{ $piata->lastname }}, {{ $piata->firstname }} {{ $piata->middlename }}</td>
 											<td>{{ $piata->reference_no }}</td>
-											<td> 
+											<td>
 												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$piata->id}}" name="incomplete_btn">
 													<span class="text-white small">Mark as Incomplete</span>
 												</button>
@@ -105,7 +105,7 @@
 											<td>{{ $i }}</td>
 											<td>{{ $ptaa->lastname }}, {{ $ptaa->firstname }} {{ $ptaa->middlename }}</td>
 											<td>{{ $ptaa->reference_no }}</td>
-											<td> 
+											<td>
 												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$ptaa->id}}" name="incomplete_btn">
 													<span class="text-white small">Mark as Incomplete</span>
 												</button>
@@ -138,7 +138,7 @@
 											<td>{{ $i }}</td>
 											<td>{{ $corporate->lastname }}, {{ $corporate->firstname }} {{ $corporate->middlename }}</td>
 											<td>{{ $corporate->reference_no }}</td>
-											<td> 
+											<td>
 												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$corporate->id}}" name="incomplete_btn">
 													<span class="text-white small">Mark as Incomplete</span>
 												</button>
@@ -188,10 +188,10 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-	
+
 	function submit_incomplete_form(){
 		$.ajax({
-			url: "/applications/mark_as_incomplete",
+			url: "../applications/mark_as_incomplete",
 			data: {request_type:'Mark as Incomplete',application_id:$('#selected_application').val(), approval_code:$('#approval_code').val()},
 			success: function()
 			{
@@ -199,7 +199,7 @@ $(document).ready(function(){
 			}
 		});
 	}
-	
+
 	$(document).on('click','button[name="incomplete_btn"]',function(){
 		var current_row = $(this).closest('tr');
 		var incomplete_form_html = "<div class='container'>" +
@@ -215,22 +215,22 @@ $(document).ready(function(){
 								   "<div class='row p-1'>" +
 								   "<div class='col-md-4 text-right'>Approval Code: </div>" +
 								   "<div class='col-md-8'><input class='form-control text-center' type='text' id='approval_code'></div>" +
-								   "</div>" + 
+								   "</div>" +
 								   "<div class='row p-1'>" +
 								   "<div class='col-md-8 offset-md-4 text-center'><a class='btn btn-success text-white' id='incomplete_form_btn'>Mark as Incomplete</a></div>" +
 								   "</div>" +
 								   "</div>";
 		$('#mark_as_incomplete div div.modal-body').html(incomplete_form_html);
 	});
-	
+
 	$(document).on('click','#incomplete_form_btn', function(){
 		submit_incomplete_form();
 	});
-	
+
 	$('#mark_as_incomplete').on('hidden.bs.modal', function(){
 		$('#mark_as_incomplete div div.modal-body').html('<div class="spinner-border text-info"></div>');
 	});
-});	
+});
 </script>
 
 @endsection

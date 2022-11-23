@@ -41,24 +41,24 @@
 <script type="text/javascript">
 
 	$(document).ready(function(){
-		
+
 		$('[data-toggle="tooltip"]').tooltip();
-		
+
 		$(document).on('click','#receive_payment_btn', function(){
 			$.ajax({
-				url: "/cashier/confirm_payment",
+				url: "../cashier/confirm_payment",
 				data: {searchString:$('#search_string').val()},
 				success: function(applicationForm){
 					$('#receive_payment_form').html(applicationForm);
 				}
 			});
 		});
-		
+
 		$(document).on('click','#close_btn', function(){
 			$('#search_string').val('');
 			$('#receive_payment_form').html('');
 		});
-		
+
 		$(document).on('click', '#confirm_btn', function(){
 			$('#vpr_number').tooltip('hide');
 			if($('#vpr_number').val() == '')
@@ -76,7 +76,7 @@
 				}
 			});
 		});
-		
+
 		$('#confirm_payment_modal').on('hidden.bs.modal', function(){
 			$('#receive_payment_btn').click();
 		});

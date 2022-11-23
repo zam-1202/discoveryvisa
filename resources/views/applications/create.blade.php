@@ -238,7 +238,7 @@
 		function populate_partner_companies(filterType = '')
 		{
 			$.ajax({
-				url: "/partner_companies/getpartners",
+				url: "../partner_companies/getpartners",
 				data: {filterType:filterType},
 				success: function(data)
 				{
@@ -268,7 +268,7 @@
 
 		$(document).on('click', '#verifyBtn', function(){
 			$.ajax({
-				url: "/applications/past_applications",
+				url: "../applications/past_applications",
 				data: {lastname:$('#createApplication_lastname').val(),firstname:$('#createApplication_firstname').val()},
 				success: function(pastApplications)
 				{

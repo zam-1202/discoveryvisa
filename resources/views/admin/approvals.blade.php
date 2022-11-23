@@ -13,7 +13,7 @@
 					</button>
 				</div>
 			@endif
-			
+
 			<div class="card">
 				<div class="card-header bg-primary text-white text-center"><h1>Approval Requests</h1></div>
 				<div class="card-body">
@@ -24,7 +24,7 @@
 							<th style="width: 15%;" class="align-middle">Requested By</th>
 							<th style="width: 20%;" class="align-middle">Request Date</th>
 							<th style="width: 30%;" class="align-middle">Action</th>
-						</thead>						
+						</thead>
 						<tbody>
 							@if($approval_requests->count() > 0)
 								@foreach($approval_requests as $req)
@@ -46,7 +46,7 @@
 							@endif
 						</tbody>
 					</table>
-					
+
 					<div class="text-center">
 						<a href="{{url('/')}}" class="btn btn-danger">Back</a>
 					</div>
@@ -81,7 +81,7 @@
 <script type="text/javascript">
 
 	$(document).ready(function(){
-		
+
 		$(document).on('click','.btn', function(){
 			if($(this).attr('reqid') != null)
 			{
@@ -93,11 +93,11 @@
 				$("#confirm_modal").modal("show");
 			}
 		});
-		
+
 		$(document).on('click', '#submit_btn', function()
 		{
 			$.ajax({
-				url: "/applications/mark_as_incomplete",
+				url: "../applications/mark_as_incomplete",
 				data: {request_type:'Mark as Incomplete',application_id:$(this).attr("data-id"), approval_code:$(this).attr("data-action")},
 				success: function()
 				{
@@ -105,7 +105,7 @@
 				}
 			});
 		});
-		
+
 	});
 </script>
 

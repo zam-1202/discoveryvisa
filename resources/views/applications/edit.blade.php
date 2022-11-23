@@ -6,11 +6,11 @@
 	{
 		$visatypearray[$type->id] = $type->name;
 	}
-	
+
 	$application_status_array = array('1' => 'NEW Application', '2' => 'Incomplete', '3' => 'Submitted to Embassy', '4' => 'Received from Embassy', '5' => 'Sent to/Claimed by Client');
 @endphp
 
- 
+
 @section('content')
 <div class="row">
     <div class="col-md-8 offset-md-2 text-center">
@@ -26,10 +26,10 @@
                 @endforeach
             </ul>
         </div>
-        <br /> 
+        <br />
         @endif
         <form method="post" action="{{ route('applications.update', $application->id) }}">
-            @method('PATCH') 
+            @method('PATCH')
             @csrf
             <div class="form-group row">
 				<div class="col-md-4">
@@ -82,21 +82,21 @@
 					  {{Form::text('lastname', $application->lastname, ['class' => 'form-control text-center text-uppercase'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-9">
 					  <label for="first_name">First Name</label>
 					  {{Form::text('firstname', $application->firstname, ['class' => 'form-control text-center text-uppercase'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-9">
 					  <label for="middlename">Middle Name</label>
 					  {{Form::text('middlename', $application->middlename, ['class' => 'form-control text-center text-uppercase'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-6">
 					  <label for="birthdate">Birthdate</label>
@@ -111,7 +111,7 @@
 					  {{Form::select('marital_status', array('Single' => 'Single', 'Married' => 'Married', 'Widowed' => 'Widowed'), $application->marital_status, ['class' => 'form-control'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-6">
 					  <label for="email">Email:</label>
@@ -126,14 +126,14 @@
 					  {{Form::text('mobile_no', $application->mobile_no, ['class' => 'form-control text-center'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-12">
 					  <label for="address">Address</label>
 					  {{Form::textarea('address', $application->address, ['class' => 'form-control text-center text-uppercase', 'rows' => '3'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-4">
 					  <label for="passport_no">Passport No</label>
@@ -148,7 +148,7 @@
 					  {{Form::date('departure_date', $application->departure_date, ['class' => 'form-control text-center'])}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-12">
 					  <label for="remarks">Remarks:</label>
@@ -172,7 +172,7 @@
 					</div>
 					<div class="col-md-3"></div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-3"></div>
 					<div class="col-md-6">
@@ -194,7 +194,7 @@
 						{{Form::hidden('discount', 0)}}
 					</div>
 				</div>
-				
+
 				<div class="form-group row">
 					<div class="col-md-12">
 					  <label for="documents_submitted">Documents Required:</label>
@@ -226,7 +226,7 @@
 					  </div>
 					</div>
 				</div>
-				
+
 				{{Form::hidden('payment_status', $application->payment_status)}}
 				<div class="row">
 					<div class="col-md-2 offset-md-4">
@@ -245,42 +245,42 @@
 <script type="text/javascript">
 
 	$(document).ready(function(){
-		
-		
+
+
 		var visaTypeArray = {!! $visatypes->toJson() !!};
-		
+
 		populate_partner_companies("{{$application->customer_type}}");
 		get_promo_code();
 		on_change_visa_type("{{$application->visa_type}}",false);
-		
+
 		function populate_partner_companies(filterType = '')
 		{
 			$('#customer_company').html('');
 			$('#customer_company').attr('disabled', true);
-			
+
 			if(filterType == 'PIATA' || filterType == 'PTAA' && filterType == 'Corporate')
 			{
 				$.ajax({
-					url: "/partner_companies/getpartners",
+					url: "../../partner_companies/getpartners",
 					data: {filterType:filterType},
 					success: function(data)
 					{
 						var options = '';
 						var selected = '';
-						
+
 						data.forEach(function(row){
 							selected = '';
 							if("{{$application->customer_company}}" == row.id) selected = "selected ";
 							options += "<option " + selected + "value='" + row.id + "'>" + row.name + "</option>"
 						});
-						
+
 						$('#customer_company').attr('disabled', false);
 						$('#customer_company').html(options);
 					}
 				});
 			}
 		}
-		
+
 		function on_change_visa_type(visaType,fromUser)
 		{
 			var selectedVisaType = $.grep(visaTypeArray, function(obj){return obj.id == visaType;})[0];
@@ -289,31 +289,31 @@
 			$('#visa_price').val(selectedVisaType.price);
 			get_promo_code();
 		}
-		
+
 		function get_required_documents(selectedVisaType)
 		{
 			var filipinoDocuments = selectedVisaType.filipino_documents.split(",");
 			var japaneseDocuments = selectedVisaType.japanese_documents.split(",");
 			var foreignDocuments = selectedVisaType.foreign_documents.split(",");
-			
+
 			$('#filipino_documents').html(generate_checkboxes(filipinoDocuments));
 			$('#japanese_documents').html(generate_checkboxes(japaneseDocuments));
 			$('#foreign_documents').html(generate_checkboxes(foreignDocuments));
 		}
-		
+
 		function generate_checkboxes(documentArray = [])
 		{
 			var outputString = '';
 			var docsArray = {!! $documentlist->toJson() !!};
-			
+
 			documentArray.forEach(function(item){
 				var req_document = $.grep(docsArray, function(obj){return obj.id == item})[0];
 				outputString += "<li class='list-group-item'> <input type='checkbox' name='submitted_documents' value='" + req_document.id + "'/>" + req_document.name + "</li>";
 			});
-			
+
 			return outputString;
 		}
-		
+
 		function restore_checkboxes()
 		{
 			var submitted_documents = "{{$application->documents_submitted}}".split(",");
@@ -324,20 +324,20 @@
 				}
 			});
 		}
-		
+
 		function update_visa_price()
 		{
 			if($("input[name='visa_price_type']:checked").val() === 'Promo')
 			{
 				$('#visa_price').attr('readonly', false);
 			}
-			else 
+			else
 			{
 				$('#visa_price').attr('readonly', true);
 				$('#visa_type').change();
 			}
 		}
-		
+
 		function get_promo_code()
 		{
 			var promo_code = $("#promo_code").val().toUpperCase();
@@ -345,7 +345,7 @@
 			{
 				var id = {{$application->id}};
 				$.ajax({
-					url: "/applications/redeem_promo_code",
+					url: "../redeem_promo_code",
 					data: {id:id, promo_code:promo_code, page:"edit"},
 					success: function(data)
 					{
@@ -357,7 +357,7 @@
 				apply_promo_code("");
 			}
 		}
-		
+
 		function apply_promo_code(discount)
 		{
 			var visaType = $('#visa_type').find('option:selected').val();
@@ -365,7 +365,7 @@
 			if(discount != "")
 			{
 				var discount_amount = 0;
-						
+
 				if(discount.substring(discount.length-1, discount.length) == '%')
 				{
 					discount_amount = selectedVisaType.price * (Number(discount.substring(0, discount.length-1))/100);
@@ -381,34 +381,34 @@
 				$('#visa_price').val(selectedVisaType.price);
 			}
 		}
-		
+
 		$(document).on('change', '#customer_type', function(){
 			var filterType = $(this).val();
 			populate_partner_companies(filterType);
 		});
-		
+
 		$(document).on('change', '#visa_type', function(){
-			var visaType = $(this).find('option:selected').val();			
+			var visaType = $(this).find('option:selected').val();
 			on_change_visa_type(visaType,true);
 		});
-		
+
 		$(document).on('change', 'input[name="submitted_documents"]', function(){
 			var checkboxes = $('input[name="submitted_documents"]:checked');
-			
+
 			var output = [];
-			
+
 			checkboxes.each(function(){
 				output.push($(this).val());
 			});
-			
+
 			$('input[name="documents_submitted"]').val(output.join(","));
 		});
-		
+
 		$(document).on('click', '#promo_code_btn', function(){
 			get_promo_code();
 		});
-		
+
 	});
-	
+
 </script>
 @endsection

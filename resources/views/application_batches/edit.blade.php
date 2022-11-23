@@ -21,11 +21,11 @@
 					</button>
 				</div>
 			@endif
-			
+
 			<form method="post" action="{{ route('application_batches.update', $batch->id)}}">
 			@method('PATCH')
 			@csrf
-			
+
 			<div class="card">
 				<div class="card-header text-center font-weight-bold bg-primary text-white">
 					<h1>Batch No: {{$batch->batch_no}}</h1>
@@ -35,7 +35,7 @@
 						<div class="col-md-3 offset-md-3 text-right">
 							<label for="batch_date">Batch Date: </label>
 						</div>
-						
+
 						<div class="col-md-4">
 							<label>{{$batch->batch_date}}</label>
 						</div>
@@ -45,7 +45,7 @@
 						<div class="col-md-3 offset-md-3 text-right">
 							<label for="total_applications">Total Applications: </label>
 						</div>
-						
+
 						<div class="col-md-4">
 							<label>{{$batch->total_applications}}</label>
 						</div>
@@ -55,28 +55,28 @@
 						<div class="col-md-3 offset-md-3 text-right">
 							<label for="status">Status: </label>
 						</div>
-						
+
 						<div class="col-md-4">
 							{{Form::select('status', $status_array, $batch->status, ['class' => 'form-control text-center']) }}
 						</div>
 					</div>
-					
+
 					<div class="form-group row">
 						<div class="col-md-3 offset-md-3 text-right">
 							<label for="tracking_no">Tracking No: </label>
 						</div>
-						
+
 						<div class="col-md-4">
 							{{Form::text('tracking_no', $batch->tracking_no, ['class' => 'form-control text-center'])}}
 						</div>
 					</div>
-					
+
 					<div class="form-group row">
 						<div class="col-md-6 offset-md-6">
 							<button type="submit" class="btn btn-primary">Save Changes</button>
 						</div>
 					</div>
-					
+
 					<table class="table table-striped table-hover table-bordered text-center">
 						<thead class="thead-dark">
 							<tr>
@@ -119,7 +119,7 @@
 						@endif
 						</tbody>
 					</table>
-					
+
 					<div class="row">
 						<div class="col-md-12 text-center">
 							<a class="btn btn-danger" href="{{url('/application_batches')}}">Back</a>
@@ -154,10 +154,10 @@
 
 <script type="text/javascript">
 $(document).ready(function(){
-	
+
 	function submit_incomplete_form(){
 		$.ajax({
-			url: "/applications/mark_as_incomplete",
+			url: "../../applications/mark_as_incomplete",
 			data: {request_type:'Mark as Incomplete',application_id:$('#selected_application').val(), approval_code:$('#approval_code').val()},
 			success: function()
 			{
@@ -165,7 +165,7 @@ $(document).ready(function(){
 			}
 		});
 	}
-	
+
 	$(document).on('click','button[name="incomplete_btn"]',function(){
 		var current_row = $(this).closest('tr');
 		var incomplete_form_html = "<div class='container'>" +
@@ -181,22 +181,22 @@ $(document).ready(function(){
 								   "<div class='row p-1'>" +
 								   "<div class='col-md-4 text-right'>Approval Code: </div>" +
 								   "<div class='col-md-8'><input class='form-control text-center' type='text' id='approval_code'></div>" +
-								   "</div>" + 
+								   "</div>" +
 								   "<div class='row p-1'>" +
 								   "<div class='col-md-8 offset-md-4 text-center'><a class='btn btn-success text-white' id='incomplete_form_btn'>Mark as Incomplete</a></div>" +
 								   "</div>" +
 								   "</div>";
 		$('#mark_as_incomplete div div.modal-body').html(incomplete_form_html);
 	});
-	
+
 	$(document).on('click','#incomplete_form_btn', function(){
 		submit_incomplete_form();
 	});
-	
+
 	$('#mark_as_incomplete').on('hidden.bs.modal', function(){
 		$('#mark_as_incomplete div div.modal-body').html('<div class="spinner-border text-info"></div>');
 	});
-});	
+});
 </script>
 
 @endsection
