@@ -41,4 +41,10 @@ Route::get('admin/addbranch', 'AdminController@addBranch')->name('admin.addbranc
 Route::get('admin/updatebranch', 'AdminController@updateBranch')->name('admin.updatebranch')->middleware('CheckRole:Admin');
 Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name('admin.approvals')->middleware('CheckRole:Admin');
 
+Route::get('admin/promo_codes', 'PromoCodeController@index')->name('admin.promo_codes')->middleware('CheckRole:Admin');
+Route::post('admin/promo_codes', 'PromoCodeController@store')->name('admin.promo_codes.store')->middleware('CheckRole:Admin');
+Route::get('admin/promo_codes/create', 'PromoCodeController@create')->name('admin.create_promo_code')->middleware('CheckRole:Admin');
+Route::get('admin/promo_codes/{id}/edit', 'PromoCodeController@edit')->name('admin.promo_codes.edit')->middleware('CheckRole:Admin');
+Route::post('admin/promo_codes/{id}', 'PromoCodeController@update')->name('admin.promo_codes.update')->middleware('CheckRole:Admin');
+
 Route::resource('account_receivables', 'AccountReceivableController');

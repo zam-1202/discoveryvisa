@@ -31,6 +31,7 @@
 						<a href="{{route('admin.users')}}" class="btn btn-primary col-md-6 mt-3">User List</a>
 						<a href="{{route('admin.branches')}}" class="btn btn-primary col-md-6 mt-3">Branch List</a>
 						<a href="{{route('admin.approvals')}}" class="btn btn-primary col-md-6 mt-3">Pending Approvals</a>
+                        <a href="{{route('admin.promo_codes')}}" class="btn btn-primary col-md-6 mt-3">Promo Codes</a>
 					@endif
                 </div>
             </div>
