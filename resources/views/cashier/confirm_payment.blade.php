@@ -16,7 +16,7 @@
 		</tr>
 		<tr class="border bg-white">
 			<td class="text-right">Visa Price: </td>
-			<td>{{ $application->visa_price }} ({{ $application->visa_price_type }})</td>
+			<td>{{ $application->visa_price }} ({{ $application->promo_code }})</td>
 		</tr>
 		<tr class="border bg-white">
 			<td class="text-right">OR Number: </td>
@@ -29,7 +29,7 @@
 		@if($application->payment_status == 'UNPAID')
 		<tr class="border bg-white">
 			<td colspan="2" class="text-center">
-				<button class="btn btn-success" id="confirm_btn">Confirm Payment</button> 
+				<button class="btn btn-success" id="confirm_btn">Confirm Payment</button>
 				<button class="btn btn-danger" id="close_btn">Close</button>
 			</td>
 		</tr>

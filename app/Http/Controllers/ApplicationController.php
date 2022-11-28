@@ -14,13 +14,13 @@ use App\PromoCode;
 
 class ApplicationController extends Controller
 {
-	protected $customer_type_array = array("Walk-In" => "Walk-In", 
+	protected $customer_type_array = array("Walk-In" => "Walk-In",
 										   "Mobile Service" => "Mobile Service",
 										   "Via Courier" => "Via Courier",
-										   "PIATA" => "PIATA", 
-										   "PTAA" => "PTAA", 
+										   "PIATA" => "PIATA",
+										   "PTAA" => "PTAA",
 										   "Corporate" => "Corporate");
-	
+
     /**
      * Display a listing of the resource.
      *
@@ -31,7 +31,7 @@ class ApplicationController extends Controller
         $data = DB::table('applications')->where('branch', '=', $request->user()->branch)->orderBy('id','desc')->paginate(20);
 		return view('applications.index',compact('data'));
     }
-	
+
 	/**
 	 * AJAX function for Application Search
 	 */
@@ -40,7 +40,7 @@ class ApplicationController extends Controller
 		if($request->ajax())
 		{
 			$searchString = $request->get('searchString');
-			
+
 			if($searchString != '')
 			{
 				$data = DB::table('applications')
@@ -57,7 +57,7 @@ class ApplicationController extends Controller
 			else {
 				$data = DB::table('applications')->where('branch', '=', $request->user()->branch)->orderBy('id','desc')->paginate(20);
 			}
-			
+
 			return view('applications.application_list', compact('data'))->render();
 		}
 	}
@@ -71,14 +71,14 @@ class ApplicationController extends Controller
 		{
 			$lastname = $request->get('lastname');
 			$firstname = $request->get('firstname');
-			
+
 			$pastApplications = DB::table('applications')
 				->where('lastname', 'LIKE', '%'.$lastname.'%')
 				->where('firstname', 'LIKE', '%'.$firstname.'%')
 				->orderBy('id', 'desc')
 				->paginate(10);
-				
-				
+
+
 			return view('applications.past_applications', compact('pastApplications', 'application_status_array'))->render();
 		}
 	}
@@ -104,7 +104,7 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
-		
+
         $request->validate([
 			'customer_type' => 'required',
 			'lastname' => 'required',
@@ -121,10 +121,10 @@ class ApplicationController extends Controller
 			'departure_date' => 'required|date',
 			'visa_type' => 'required',
 			'visa_price' => 'required',
-			'visa_price_type' => 'required',
+			'promo_code' => 'required',
 			'documents_submitted' => 'required'
 		]);
-		
+
 		$application = new Application([
 			'reference_no' => $this->generateReferenceNo($request),
 			'application_status' => 1,
@@ -147,14 +147,14 @@ class ApplicationController extends Controller
 			'remarks' => $request->get('remarks'),
 			'visa_type' => $request->get('visa_type'),
 			'visa_price' => $request->get('visa_price'),
-			'visa_price_type' => $request->get('visa_price_type'),
+			'promo_code' => $request->get('promo_code'),
 			'documents_submitted' => $request->get('documents_submitted'),
 			'payment_status' => 'UNPAID',
 			'application_date' => Carbon::now(),
 			'encoded_by' => $request->user()->username,
 			'last_update_by' => $request->user()->username
 		]);
-		
+
 		$application->save();
 		return redirect('/applications')->with('success','Application saved!');
     }
@@ -194,7 +194,6 @@ class ApplicationController extends Controller
      */
     public function update(Request $request, $id)
     {
-		
         $request->validate([
 			'reference_no' => 'required',
 			'application_status' => 'required',
@@ -215,7 +214,7 @@ class ApplicationController extends Controller
 			'documents_submitted' => 'required',
 			'payment_status' => 'required'
 		]);
-		
+
 		$application = Application::find($id);
 		$application->reference_no = $request->get('reference_no');
 		$application->application_status = $request->get('application_status');
@@ -244,9 +243,9 @@ class ApplicationController extends Controller
 		$application->vpr_number = $request->get('vpr_number');
 		$application->tracking_no = $request->get('tracking_no');
 		$application->last_update_by = $request->user()->username;
-		
+
 		$application->save();
-		
+
 		return redirect('/applications')->with('success', 'Application saved!');
     }
 
@@ -260,7 +259,7 @@ class ApplicationController extends Controller
     {
         $application = Application::find($id);
 		$application->delete();
-		
+
 		return redirect('/applications')->with('success', 'Application deleted!');
     }
 
@@ -271,31 +270,31 @@ class ApplicationController extends Controller
 	{
 		return view('cashier.receive_payment');
 	}
-	
+
 	public function retrievePaymentForm(Request $request)
 	{
 		if($request->ajax())
 		{
 			$searchString = $request->get('searchString');
 			$application = Application::where('reference_no','=',$searchString)->first();
-			
+
 			return view('cashier.confirm_payment', compact('searchString', 'application'));
 		}
 	}
-	
+
 	public function markCustomerAsPaid(Request $request)
-	{	
+	{
 		$application = DB::table('applications')
 						->where('reference_no', '=', $request->get('reference_no'))
-						->update(['or_number' => $request->get('or_number'), 
-								  'vpr_number' => $request->get('vpr_number'), 
+						->update(['or_number' => $request->get('or_number'),
+								  'vpr_number' => $request->get('vpr_number'),
 								  'payment_date' => Carbon::now(),
 								  'payment_received_by' => $request->user()->username,
 								  'payment_status' => 'PAID']);
-						
+
 		return 'Payment for '. $request->get('reference_no') . ' received';
 	}
-	
+
 	/**
 	 * Generate unique Reference_No
 	 *
@@ -305,16 +304,16 @@ class ApplicationController extends Controller
 	protected function generateReferenceNo(Request $request)
 	{
 		$reference_no = $this->generateRandomCode($request);
-		
+
 		//ensure that $reference_no is unique
 		while(Application::where('reference_no', $reference_no)->count() > 0)
 		{
 			$reference_no = $this->generateRandomCode($request);
 		}
-		
+
 		return $reference_no;
 	}
-	
+
 	/**
 	 * Generate random code with the following format:
 	 * [Branch code of Encoder] + [current date in 'ymd' format] + [random 3-character alphabetic string]
@@ -326,7 +325,7 @@ class ApplicationController extends Controller
 	{
 		 return $request->user()->branch . date("ymd") . chr(mt_rand(65, 90)) . chr(mt_rand(65, 90)) . chr(mt_rand(65, 90));
 	}
-	
+
 	public function redeemPromoCode(Request $request)
 	{
 		if($request->ajax())
@@ -336,14 +335,14 @@ class ApplicationController extends Controller
 			$id = $request->get('id');
 			$promo_code = DB::table('promo_codes')->where('code', $code)->first();
 			$quantity = DB::table('applications')->where('promo_code', $code)->count();
-			
+
 			if($quantity+1 <= $promo_code->max_quantity)
 			{
 				//apply promo code
 				$application = Application::find($id);
 				$application->promo_code = $code;
 				$application->save();
-				
+
 				return array($promo_code->discount, "success");
 			} else {
 				return array(0,"This Promo Code has reached its max limit");

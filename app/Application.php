@@ -28,7 +28,7 @@ class Application extends Model
 		'remarks',
 		'visa_type',
 		'visa_price',
-		'visa_price_type',
+		'promo_code',
 		'documents_submitted',
 		'payment_status',
 		'or_number',

@@ -152,8 +152,8 @@
 		  <div class="form-group row">
 		    <div class="col-md-3"></div>
 			<div class="col-md-6">
-              <input type="radio" name="visa_price_type" value="Regular" checked> Regular
-			  <input type="radio" name="visa_price_type" value="Promo"> Promo
+              <input type="radio" name="promo_code" value="Regular" checked> Regular
+			  <input type="radio" name="promo_code" value="Promo"> Promo
 			</div>
 			<div class="col-md-3"></div>
           </div>
@@ -330,8 +330,8 @@
 			$('input[name="documents_submitted"]').val(output.join(","));
 		});
 
-		$(document).on('change', 'input[name="visa_price_type"]', function(){
-			if($("input[name='visa_price_type']:checked").val() === 'Promo')
+		$(document).on('change', 'input[name="promo_code"]', function(){
+			if($("input[name='promo_code']:checked").val() === 'Promo')
 			{
 				$('#visa_price').attr('readonly', false);
 			}

@@ -34,7 +34,7 @@ class CreateApplicationsTable extends Migration
 			$table->string('remarks');
 			$table->string('visa_type');
 			$table->decimal('visa_price');
-			$table->string('visa_price_type');
+			$table->string('promo_code');
 			$table->string('documents_submitted');
 			$table->string('payment_status');
 			$table->string('or_number');

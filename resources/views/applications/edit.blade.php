@@ -251,7 +251,6 @@
 
 		populate_partner_companies("{{$application->customer_type}}");
 		get_promo_code();
-		on_change_visa_type("{{$application->visa_type}}",false);
 
 		function populate_partner_companies(filterType = '')
 		{
@@ -327,7 +326,7 @@
 
 		function update_visa_price()
 		{
-			if($("input[name='visa_price_type']:checked").val() === 'Promo')
+			if($("input[name='promo_code']:checked").val() === 'Promo')
 			{
 				$('#visa_price').attr('readonly', false);
 			}
@@ -360,6 +359,7 @@
 
 		function apply_promo_code(discount)
 		{
+            var currentVisaType = {{$application->visa_type}};
 			var visaType = $('#visa_type').find('option:selected').val();
 			var selectedVisaType = $.grep(visaTypeArray, function(obj){return obj.id == visaType;})[0];
 			if(discount != "")
@@ -373,12 +373,23 @@
 					discount_amount = Number(discount);
 				}
 				$('#discount-text').html('-'.concat(discount_amount.toFixed(2)));
-				$('#visa_price').val((selectedVisaType.price - discount_amount).toFixed(2));
+
+                if (currentVisaType == selectedVisaType.id) {
+                    $('#visa_price').val(({{ $application->visa_price }} - discount_amount).toFixed(2));
+                } else {
+                    $('#visa_price').val((selectedVisaType.price - discount_amount).toFixed(2));
+                }
+
 			}
 			else
 			{
 				$('#discount-text').html('');
-				$('#visa_price').val(selectedVisaType.price);
+                if (currentVisaType == selectedVisaType.id) {
+                    $('#visa_price').val({{ $application->visa_price }});
+                } else {
+                    $('#visa_price').val(selectedVisaType.price);
+                }
+
 			}
 		}
 
