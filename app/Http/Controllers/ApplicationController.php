@@ -10,7 +10,8 @@ use App\Application;
 use App\VisaType;
 use App\RequiredDocument;
 use App\Branch;
-use App\PromoCode;
+use Excel;
+use App\Exports\DailyReportExport;
 
 class ApplicationController extends Controller
 {
@@ -351,6 +352,6 @@ class ApplicationController extends Controller
 	}
 
     public function downloadReport(Request $request){
-        info($request);
+        return Excel::download(new DailyReportExport($request->date), 'sample.xlsx', null, [\Maatwebsite\Excel\Excel::XLSX]);
     }
 }

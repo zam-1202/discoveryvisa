@@ -81,9 +81,24 @@
                 $.ajax({
                     url: "cashier/download_report",
                     data: {date:date},
-                    success: function()
+                    xhrFields: {
+                        responseType: 'blob',
+                    },
+                    success: function(result)
                     {
-                        location.reload(false);
+                        var currentDate = date.split("-").join("");
+                        var filename = currentDate +'_DailyReport.xlsx';
+                        var blob = new Blob([result], {
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        });
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+
+                        document.body.appendChild(link);
+
+                        link.click();
+                        document.body.removeChild(link);
                     }
                 });
             }
