@@ -37,6 +37,7 @@ class CreateApplicationsTable extends Migration
 			$table->string('promo_code');
 			$table->string('documents_submitted');
 			$table->string('payment_status');
+            $table->string('payment_mode');
 			$table->string('or_number');
 			$table->string('vpr_number');
 			$table->string('tracking_no');

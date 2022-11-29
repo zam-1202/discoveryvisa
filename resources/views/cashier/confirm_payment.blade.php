@@ -26,6 +26,10 @@
 			<td class="text-right">VPR Number: </td>
 			<td>{{Form::text('vpr_number', $application->vpr_number, ['class' => 'form-control', 'id' => 'vpr_number', 'placeholder' => '(required)', 'autocomplete' => 'off', 'data-tooltip' => 'tooltip', 'title' => 'Required'])}}</td>
 		</tr>
+        <tr class="border bg-white">
+			<td class="text-right">Payment Mode: </td>
+			<td>{{Form::text('payment_mode', $application->payment_mode, ['class' => 'form-control', 'id' => 'payment_mode', 'placeholder' => '(required)', 'autocomplete' => 'off', 'data-tooltip' => 'tooltip', 'title' => 'Required'])}}</td>
+		</tr>
 		@if($application->payment_status == 'UNPAID')
 		<tr class="border bg-white">
 			<td colspan="2" class="text-center">

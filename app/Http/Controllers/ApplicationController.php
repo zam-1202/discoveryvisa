@@ -289,6 +289,7 @@ class ApplicationController extends Controller
 						->where('reference_no', '=', $request->get('reference_no'))
 						->update(['or_number' => $request->get('or_number'),
 								  'vpr_number' => $request->get('vpr_number'),
+                                  'payment_mode' => $request->get('payment_mode'),
 								  'payment_date' => Carbon::now(),
 								  'payment_received_by' => $request->user()->username,
 								  'payment_status' => 'PAID']);
