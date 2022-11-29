@@ -25,6 +25,7 @@
 						<a href="{{route('show_finalize_batch_page')}}" class="btn btn-danger col-md-6 mt-3">FINALIZE Application Batch</a>
 					@elseif(Auth::user()->role == 'Cashier')
 						<a href="{{route('cashier.receive_payment')}}" class="btn btn-primary col-md-6 mt-3">Receive Payment</a>
+                        <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
 					@elseif(Auth::user()->role == 'Accounting')
 						<a href="{{route('account_receivables.index')}}" class="btn btn-primary col-md-6 mt-3">Account Receivables</a>
 					@elseif(Auth::user()->role == 'Admin')
@@ -38,4 +39,56 @@
         </div>
     </div>
 </div>
+
+<div class="modal" id="daily_reports">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-success text-white">
+				<span class="modal-title">Daily Report</span>
+				<button type="button" class="close" data-dismiss="modal">x</button>
+			</div>
+			<div class="modal-body d-flex justify-content-center">
+				<div class="container">
+					<div class="form-group row">
+						<div class="col-md-12">
+							<label><small class="text-danger" id="errorMsg">&nbsp;</small></label>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-md-2 text-right"><label>Date: </label></div>
+						<div class="col-md-10">{{Form::date('report_date', date('Y-m-d'), ['class' => 'form-control text-uppercase', 'id' => 'report_date'])}}</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="submit_btn" data-action="" data-id="">Download</button>
+				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+		    </div>
+		</div>
+	</div>
+</div>
+@endsection
+
+@section('scripts')
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(document).on('click','#submit_btn', function()
+		{
+            var date = $("#report_date").val();
+            if(date == ''){
+				$("#errorMsg").html('Date cannot be empty.');
+            } else {
+                $.ajax({
+                    url: "cashier/download_report",
+                    data: {date:date},
+                    success: function()
+                    {
+                        location.reload(false);
+                    }
+                });
+            }
+        });
+    });
+</script>
+
 @endsection

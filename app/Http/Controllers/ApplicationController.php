@@ -349,4 +349,8 @@ class ApplicationController extends Controller
 			}
 		}
 	}
+
+    public function downloadReport(Request $request){
+        info($request);
+    }
 }
