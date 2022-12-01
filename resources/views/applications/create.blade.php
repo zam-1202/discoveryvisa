@@ -26,6 +26,7 @@
 				<option value="PIATA">PIATA</option>
 				<option value="PTAA">PTAA</option>
 				<option value="Corporate">Corporate</option>
+                <option value="POEA">POEA</option>
 			  </select>
 			</div>
 			<div class="col-md-8">

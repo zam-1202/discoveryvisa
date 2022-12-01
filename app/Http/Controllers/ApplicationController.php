@@ -12,6 +12,7 @@ use App\RequiredDocument;
 use App\Branch;
 use Excel;
 use App\Exports\DailyReportExport;
+use Illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
 {
@@ -353,6 +354,10 @@ class ApplicationController extends Controller
 	}
 
     public function downloadReport(Request $request){
-        return Excel::download(new DailyReportExport($request->date), 'sample.xlsx', null, [\Maatwebsite\Excel\Excel::XLSX]);
+        if (Auth::user()) {
+            $branch = Auth::user()->branch;
+            return Excel::download(new DailyReportExport($request->date, $branch), 'sample.xlsx', null, [\Maatwebsite\Excel\Excel::XLSX]);
+        }
+
     }
 }
