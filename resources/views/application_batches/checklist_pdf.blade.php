@@ -3,26 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-	
+
 	<style>
 		table {
 			border-collapse: collapse;
 			width: 100%;
 		}
-		
+
 		table, td{
 			border: 1px solid black;
 		}
-		
+
 		td {
 			padding: 10px;
 			text-align: center;
 		}
-		
+
 		.customer_type{
 			font-weight: bold;
 		}
-		
+
 		h1 {
 			text-align: center;
 		}
@@ -111,6 +111,27 @@
 				<td colspan="3">-</td>
 			</tr>
 		@endif
+        <tr>
+			<td class="customer_type">No.</td>
+			<td class="customer_type">POEA</td>
+			<td class="customer_type">Reference No</td>
+		</tr>
+        @if($poea_applications->count() > 0)
+			@php $i = 1; @endphp
+			@foreach($poea_applications as $poea)
+			<tr>
+				<td>{{$i}}</td>
+				<td>{{$poea->lastname}}, {{$poea->firstname}} {{$poea->middlename}}</td>
+				<td>{{$poea->reference_no}}</td>
+			</tr>
+			@php $i++; @endphp
+			@endforeach
+		@else
+			<tr>
+				<td colspan="3">-</td>
+			</tr>
+		@endif
+
     </table>
   </body>
 </html>

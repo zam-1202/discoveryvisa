@@ -156,6 +156,39 @@
 										<td>-</td>
 									</tr>
 								@endif
+                                <tr class="bg-dark text-white">
+									<td style="width:10%;" class="font-weight-bold">No.</td>
+									<td style="width:40%;" class="font-weight-bold">POEA</td>
+									<td style="width:25%;" class="font-weight-bold">Reference No</td>
+									<td style="width:25%;"> </td>
+								</tr>
+                                @if($poea_applications->count() > 0)
+									@php
+										$i = 1;
+									@endphp
+									@foreach($poea_applications as $poea)
+										<tr>
+											<td>{{ $i }}</td>
+											<td>{{ $poea->lastname }}, {{ $poea->firstname }} {{ $poea->middlename }}</td>
+											<td>{{ $poea->reference_no }}</td>
+											<td>
+												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$poea->id}}" name="incomplete_btn">
+													<span class="text-white small">Mark as Incomplete</span>
+												</button>
+											</td>
+										</tr>
+										@php
+											$i++;
+										@endphp
+									@endforeach
+								@else
+									<tr>
+										<td>-</td>
+										<td>-</td>
+										<td>-</td>
+										<td>-</td>
+									</tr>
+								@endif
 							</table>
 						</div>
 					</div>

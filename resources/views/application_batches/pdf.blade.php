@@ -3,22 +3,22 @@
   <head>
     <meta charset="utf-8">
     <title></title>
-	
+
 	<style>
 		table {
 			border-collapse: collapse;
 			width: 100%;
 		}
-		
+
 		table, td{
 			border: 1px solid black;
 		}
-		
+
 		td {
 			padding: 10px;
 			text-align: center;
 		}
-		
+
 		.customer_type{
 			font-size: 20px;
 			font-weight: bold;
@@ -86,6 +86,22 @@
 				<td>{{$corporate->reference_no}}</td>
 				<td>{{$corporate->lastname}}, {{$corporate->firstname}} {{$corporate->middlename}}</td>
 				<td>{{$partner_companies_array[$corporate->customer_company]}}</td>
+			</tr>
+			@endforeach
+		@else
+			<tr>
+				<td colspan="3">-</td>
+			</tr>
+		@endif
+        <tr>
+			<td colspan="3" class="customer_type">POEA</td>
+		</tr>
+        @if($poea_applications->count() > 0)
+			@foreach($poea_applications as $poea)
+			<tr>
+				<td>{{$poea->reference_no}}</td>
+				<td>{{$poea->lastname}}, {{$poea->firstname}} {{$poea->middlename}}</td>
+				<td>{{$partner_companies_array[$poea->customer_company]}}</td>
 			</tr>
 			@endforeach
 		@else

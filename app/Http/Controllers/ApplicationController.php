@@ -21,7 +21,8 @@ class ApplicationController extends Controller
 										   "Via Courier" => "Via Courier",
 										   "PIATA" => "PIATA",
 										   "PTAA" => "PTAA",
-										   "Corporate" => "Corporate");
+										   "Corporate" => "Corporate",
+                                           "POEA" => "POEA");
 
     /**
      * Display a listing of the resource.
