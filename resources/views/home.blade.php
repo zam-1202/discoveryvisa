@@ -28,6 +28,7 @@
                         <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
 					@elseif(Auth::user()->role == 'Accounting')
 						<a href="{{route('account_receivables.index')}}" class="btn btn-primary col-md-6 mt-3">Account Receivables</a>
+                        <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
 					@elseif(Auth::user()->role == 'Admin')
 						<a href="{{route('admin.users')}}" class="btn btn-primary col-md-6 mt-3">User List</a>
 						<a href="{{route('admin.branches')}}" class="btn btn-primary col-md-6 mt-3">Branch List</a>

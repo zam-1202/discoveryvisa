@@ -23,7 +23,7 @@ Route::resource('applications','ApplicationController')->middleware('CheckRole:E
 Route::get('cashier/receive_payment','ApplicationController@showPaymentForm')->name('cashier.receive_payment')->middleware('CheckRole:Cashier');
 Route::get('cashier/confirm_payment','ApplicationController@retrievePaymentForm');
 Route::get('cashier/customer_payment','ApplicationController@markCustomerAsPaid')->name('cashier.customer_payment');
-Route::get('cashier/download_report','ApplicationController@downloadReport')->name('cashier.download_report')->middleware('CheckRole:Cashier');
+Route::get('cashier/download_report','ApplicationController@downloadReport')->name('cashier.download_report')->middleware('CheckRole:Cashier,Accounting');
 
 Route::get('partner_companies/getpartners', 'PartnerCompanyController@getPartnerCompanies');
 Route::resource('partner_companies', 'PartnerCompanyController')->middleware('CheckRole:Admin');

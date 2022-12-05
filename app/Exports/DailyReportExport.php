@@ -14,26 +14,33 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use DB;
 
 use App\Application;
+use App\Branch;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class DailyReportExport implements FromCollection, WithHeadings, WithEvents, ShouldAutoSize, WithColumnFormatting
 {
     use Exportable;
     private $date;
+    private $branch;
+    private $role;
+    private $rowCount;
 
-    public function __construct(string $date, string $branch)
+    public function __construct(string $date, string $branch, string $role)
     {
         $this->date = $date;
         $this->branch = $branch;
+        $this->role = $role;
+
     }
 
     public function collection()
     {
-        return Application::leftJoin('partner_companies', 'applications.customer_company', '=', 'partner_companies.id')
+
+        $applications = Application::leftJoin('partner_companies', 'applications.customer_company', '=', 'partner_companies.id')
                             ->leftJoin('users', 'applications.encoded_by', '=', 'users.username')
                             ->leftJoin('branches', 'applications.branch', '=', 'branches.code')
                             ->leftJoin('visa_types', 'applications.visa_type', '=', 'visa_types.id')
-                            ->whereRaw("DATE_FORMAT(applications.application_date, '%Y-%m-%d') = '".$this->date."' AND (applications.payment_status = 'PAID' OR (applications.payment_status = 'UNPAID' AND applications.customer_type = 'PIATA')) AND applications.branch = '".$this->branch."'")
+                            ->whereRaw("DATE_FORMAT(applications.application_date, '%Y-%m-%d') = '".$this->date."' AND (applications.payment_status = 'PAID' OR (applications.payment_status = 'UNPAID' AND applications.customer_type = 'PIATA'))")
                             ->orderBy('applications.application_date', 'ASC')
                             ->select('applications.reference_no',
                                       DB::raw("CONCAT(applications.lastname, ', ', applications.firstname, ' ', applications.middlename) AS fullname"),
@@ -55,6 +62,42 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                                       'applications.visa_price'
                                     )
                             ->get();
+
+
+        if ($this->role == 'Cashier') {
+            $allApplication = collect($applications)->filter(function ($application){
+                return substr($application->reference_no, 0, 3) == $this->branch;
+            });
+
+            $this->rowCount = collect($this->rowCount)->push(COUNT($allApplication));
+
+            return $allApplication;
+        } else {
+            $branches = Branch::select('code')->orderBy('id', 'asc')->get();
+
+            $allApplication = collect();
+
+            for ($i=0; $i < COUNT($branches); $i++) {
+
+                $temp = collect($applications)->filter(function ($application) use($branches, $i){
+                    return substr($application->reference_no, 0, 3) == $branches[$i]->code;
+                });
+
+                $this->rowCount = collect($this->rowCount)->push(COUNT($temp));
+
+                if ($i != '0') {
+                    $allApplication = $allApplication->push(collect(['space1' => '']));
+                    $allApplication = $allApplication->push(collect(['space2' => '']));
+                    $allApplication = $allApplication->push(collect(['code' => $branches[$i]->code]));
+                }
+
+                $allApplication = $allApplication->push($temp);
+            }
+
+            return $allApplication;
+        }
+
+
     }
 
     public function headings(): array
@@ -93,6 +136,9 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                     ],
+                    'font' => [
+                        'bold' => true
+                    ]
                 ]);
 
                 $event->sheet->getStyle('A1:R1')->applyFromArray([
@@ -109,6 +155,30 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                         ],
                     ]
                 ]);
+
+                $currentRow = 2;
+                for ($i=0; $i < COUNT($this->rowCount); $i++) {
+                    $event->sheet->getStyle('A' .$currentRow .':R' .($this->rowCount[$i] + $currentRow - 1))->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                                'color' => ['argb' => '00000000'],
+                            ]
+                        ],
+                    ]);
+
+                    if ($i != '0') {
+                        $event->sheet->getStyle('A' .($currentRow - 1))->applyFromArray([
+                            'font' => [
+                                'bold' => true
+                            ]
+                        ]);
+                    }
+
+                    $currentRow = $currentRow + $this->rowCount[$i] + 3;
+                }
+
+
             }
         ];
     }

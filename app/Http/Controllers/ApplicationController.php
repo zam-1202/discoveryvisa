@@ -357,7 +357,8 @@ class ApplicationController extends Controller
     public function downloadReport(Request $request){
         if (Auth::user()) {
             $branch = Auth::user()->branch;
-            return Excel::download(new DailyReportExport($request->date, $branch), 'sample.xlsx', null, [\Maatwebsite\Excel\Excel::XLSX]);
+            $role = Auth::user()->role;
+            return Excel::download(new DailyReportExport($request->date, $branch, $role), 'sample.xlsx', null, [\Maatwebsite\Excel\Excel::XLSX]);
         }
 
     }
