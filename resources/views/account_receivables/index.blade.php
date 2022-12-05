@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @php
-	
+
 	$companies = App\PartnerCompany::all();
 	$company_lookup = array();
 	foreach($companies as $company)
@@ -44,7 +44,7 @@
 					<td>{{$row->application_date}}</td>
 					<td>{{$row->total_amount}}</td>
 					<td>{{$row->payment_status}}</td>
-					<td><a href="{{ route('account_receivables.edit', $row->id) }}" class="btn btn-primary">View</a></td>
+					<td><a href="{{ route('account_receivables.show', $row->id) }}" class="btn btn-primary">View</a></td>
 				</tr>
 				@endforeach
 			@else
@@ -54,7 +54,7 @@
 			@endif
 		</tbody>
 	</table>
-	
+
 	{!! $account_receivables->links() !!}
 </div>
 
@@ -74,3 +74,4 @@
 
 
 @endsection
+

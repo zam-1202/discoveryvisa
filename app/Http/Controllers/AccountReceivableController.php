@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use DB;
 
 use App\AccountReceivable;
+use App\Application;
 
 class AccountReceivableController extends Controller
 {
@@ -50,7 +51,15 @@ class AccountReceivableController extends Controller
      */
     public function show($id)
     {
-        //
+        $receivables = AccountReceivable::find($id);
+
+        $data = Application::where('batch_no', $receivables->batch_no)
+                ->where('payment_status', 'UNPAID')
+                ->where('customer_company', $receivables->company)
+                ->orderBy('id', 'asc')
+                ->paginate(20);
+
+        return view('account_receivables.show', compact('data'));
     }
 
     /**
@@ -86,10 +95,10 @@ class AccountReceivableController extends Controller
     {
         //
     }
-	
+
 	/**
 	 *  Generate Account Receivables for inputted batch
-	 */	 
+	 */
 	public static function generateAccountReceivables($batchno, $date)
 	{
 		$receivables = DB::table('applications')
@@ -98,10 +107,10 @@ class AccountReceivableController extends Controller
 							->where('customer_type', '<>', 'Walk-In')
 							->groupBy('customer_company')
 							->get();
-							
+
 		foreach($receivables as $account_receivable)
 		{
-			
+
 			$receivable = new AccountReceivable([
 				'company' => $account_receivable->customer_company,
 				'batch_no' => $batchno,
@@ -109,7 +118,7 @@ class AccountReceivableController extends Controller
 				'total_amount' => $account_receivable->total_amount,
 				'payment_status' => 'UNPAID'
 			]);
-			
+
 			$receivable->save();
 		}
 	}
