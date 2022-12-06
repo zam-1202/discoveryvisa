@@ -60,7 +60,7 @@
 
 <div class="row">
 	<div class="col-md-12 text-center">
-		<a href="{{url()->previous()}}" class="btn btn-danger">Back</a>
+		<a href="{{ route('home')}}" class="btn btn-danger">Back</a>
 	</div>
 </div>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AccountReceivable;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -295,6 +296,18 @@ class ApplicationController extends Controller
 								  'payment_date' => Carbon::now(),
 								  'payment_received_by' => $request->user()->username,
 								  'payment_status' => 'PAID']);
+
+        $data = Application::where('reference_no', $request->get('reference_no'))->first();
+        $account_receivables = AccountReceivable::where('batch_no', $data->batch_no)
+                                        ->where('company', $data->customer_company)
+                                        ->first();
+
+        if ($account_receivables->total_amount <= $data->visa_price) {
+            $account_receivables->delete();
+        } else {
+            $account_receivables->total_amount -= $data->visa_price;
+            $account_receivables->save();
+        }
 
 		return 'Payment for '. $request->get('reference_no') . ' received';
 	}

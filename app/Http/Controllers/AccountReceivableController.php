@@ -105,6 +105,7 @@ class AccountReceivableController extends Controller
 							->select(DB::raw('customer_company, sum(visa_price) as total_amount'))
 							->where('batch_no', '=', $batchno)
 							->where('customer_type', '<>', 'Walk-In')
+                            ->where('payment_status', '=', 'UNPAID')
 							->groupBy('customer_company')
 							->get();
 
