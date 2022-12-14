@@ -252,6 +252,9 @@
 		populate_partner_companies("{{$application->customer_type}}");
 		get_promo_code();
 
+        var visaType = $('#visa_type').find('option:selected').val();
+		on_change_visa_type(visaType,true);
+
 		function populate_partner_companies(filterType = '')
 		{
 			$('#customer_company').html('');

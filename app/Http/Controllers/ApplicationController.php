@@ -355,17 +355,20 @@ class ApplicationController extends Controller
 			$promo_code = DB::table('promo_codes')->where('code', $code)->first();
 			$quantity = DB::table('applications')->where('promo_code', $code)->count();
 
-			if($quantity+1 <= $promo_code->max_quantity)
-			{
-				//apply promo code
-				$application = Application::find($id);
-				$application->promo_code = $code;
-				$application->save();
 
-				return array($promo_code->discount, "success");
-			} else {
-				return array(0,"This Promo Code has reached its max limit");
-			}
+            if ($promo_code) {
+                if($quantity+1 <= $promo_code->max_quantity)
+                {
+                    //apply promo code
+                    $application = Application::find($id);
+                    $application->promo_code = $code;
+                    $application->save();
+
+                    return array($promo_code->discount, "success");
+                } else {
+                    return array(0,"This Promo Code has reached its max limit");
+                }
+            }
 		}
 	}
 
