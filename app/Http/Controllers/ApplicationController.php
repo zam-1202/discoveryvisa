@@ -302,13 +302,15 @@ class ApplicationController extends Controller
                                         ->where('company', $data->customer_company)
                                         ->first();
 
-        if ($account_receivables->total_amount <= $data->visa_price) {
-            $account_receivables->delete();
-        } else {
-            $account_receivables->total_amount -= $data->visa_price;
-            $account_receivables->save();
-        }
 
+		if ($account_receivables) {
+			if ($account_receivables->total_amount <= $data->visa_price) {
+				$account_receivables->delete();
+			} else {
+				$account_receivables->total_amount -= $data->visa_price;
+				$account_receivables->save();
+			}
+		}
 		return 'Payment for '. $request->get('reference_no') . ' received';
 	}
 
