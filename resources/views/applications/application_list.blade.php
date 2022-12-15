@@ -4,8 +4,8 @@
 	foreach($branches as $branch){
 		$branch_lookup[$branch->code] = $branch->description;
 	}
-	
-	$application_status_array = array('1' => 'NEW Application', '2' => 'Submitted to Embassy', '3' => 'Received from Embassy', '4' => 'Sent/Claimed by Client');
+
+	$application_status_array = array('1' => 'New Application', '2' => 'Incomplete');
 @endphp
 
 <div class="table-responsive">
@@ -15,7 +15,7 @@
 			  <th style="width:15%;">Reference Number</th>
 			  <th style="width:7.5%;">Status</th>
 			  <th style="width:7.5%;">Branch</th>
-			  <th style="width:40%;">Name</th>
+			  <th style="width:30%;">Name</th>
 			  <th style="width:10%;">Customer Type</th>
 			  <th style="width:10%;">Payment Status</th>
 			  <th style="width:10%;"></th>
@@ -26,7 +26,7 @@
 		  @foreach($data as $row)
 			<tr>
 				<td>{{ $row->reference_no }}</td>
-				<td>{{ $application_status_array[$row->application_status] }}</td>
+				<td>{{ $row->application_status == '3' ? 'Pending Approval' : $application_status_array[$row->application_status] }}</td>
 				<td>{{ $branch_lookup[$row->branch] }}</td>
 				<td>{{ $row->lastname }}, {{ $row->firstname }} {{ $row->middlename }}</td>
 				<td>{{ $row->customer_type }}</td>
@@ -41,6 +41,6 @@
 		@endif
 		</tbody>
 	</table>
-	
+
 	{!! $data->links() !!}
 </div>

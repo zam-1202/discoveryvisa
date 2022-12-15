@@ -6,7 +6,7 @@ use App\AccountReceivable;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
-
+use App\PendingApprovals;
 use App\Application;
 use App\VisaType;
 use App\RequiredDocument;
@@ -220,8 +220,27 @@ class ApplicationController extends Controller
 		]);
 
 		$application = Application::find($id);
+
+        if ($application->application_status != $request->get('application_status'))
+        {
+            if ($request->get('application_status') == '1'){
+                $request_type = 'Mark as New Application';
+            } else {
+                $request_type = 'Mark as Incomplete';
+            }
+
+            $approval_request = new PendingApprovals([
+                'application_id' => $id,
+                'request_type' => $request_type,
+                'requested_by' => $request->user()->username,
+                'request_date' => Carbon::now()
+            ]);
+            $approval_request->save();
+
+            $application->application_status = '3';
+        }
+
 		$application->reference_no = $request->get('reference_no');
-		$application->application_status = $request->get('application_status');
 		$application->customer_type = $request->get('customer_type');
 		$application->customer_company = $request->get('customer_company');
 		$application->branch = $request->get('branch');

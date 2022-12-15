@@ -7,7 +7,7 @@
 		$visatypearray[$type->id] = $type->name;
 	}
 
-	$application_status_array = array('1' => 'NEW Application', '2' => 'Incomplete', '3' => 'Submitted to Embassy', '4' => 'Received from Embassy', '5' => 'Sent to/Claimed by Client');
+	$application_status_array = array('1' => 'NEW Application', '2' => 'Incomplete');
 @endphp
 
 
@@ -39,8 +39,13 @@
 				<div class="col-md-4"></div>
 				<div class="col-md-4">
 				  <label for="application_status">Application Status</label>
-				  {{Form::text('application_status', $application_status_array[$application->application_status], ['class' => 'form-control text-center','disabled' => 'disabled'])}}
-				  {{Form::hidden('application_status', $application->application_status)}}
+                  @if ($application->application_status == '3')
+                    {{Form::text('application_status', 'Pending Approval', ['class' => 'form-control text-center','disabled' => 'disabled'])}}
+                    {{Form::hidden('application_status', $application->application_status)}}
+                  @else
+                    {{Form::select('application_status', $application_status_array, $application->application_status, ['class' => 'form-control text-center'])}}
+                  @endif
+
 				</div>
 			</div>
 
