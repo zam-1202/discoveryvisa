@@ -18,8 +18,6 @@ use Illuminate\Support\Facades\Auth;
 class ApplicationController extends Controller
 {
 	protected $customer_type_array = array("Walk-In" => "Walk-In",
-										   "Mobile Service" => "Mobile Service",
-										   "Via Courier" => "Via Courier",
 										   "PIATA" => "PIATA",
 										   "PTAA" => "PTAA",
 										   "Corporate" => "Corporate",
@@ -237,7 +235,7 @@ class ApplicationController extends Controller
             ]);
             $approval_request->save();
 
-            $application->application_status = '3';
+            $application->application_status = '0';
         }
 
 		$application->reference_no = $request->get('reference_no');

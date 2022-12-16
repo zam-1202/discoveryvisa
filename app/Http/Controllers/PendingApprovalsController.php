@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
 use App\Application;
 use App\PendingApprovals;
 
@@ -127,7 +126,7 @@ class PendingApprovalsController extends Controller
 						$approval_request->save();
 
 						$application = Application::find($application_id);
-						$application->application_status = 2;
+						$application->application_status = 9;
 						$application->save();
 
 						$request->session()->flash('status', 'Application# ' . $application->reference_no . ' is now marked as incomplete.');
@@ -135,7 +134,7 @@ class PendingApprovalsController extends Controller
 					else
 					{
                         $application = Application::find($application_id);
-                        $application->application_status = 3;
+                        $application->application_status = 0;
 						$application->save();
 
 						$approval_request = new PendingApprovals([
@@ -175,7 +174,7 @@ class PendingApprovalsController extends Controller
 					{
 						$application = Application::find($id);
                         if ($requestType == 'Mark as Incomplete') {
-                            $application->application_status = 2;
+                            $application->application_status = 9;
                         } else {
                             $application->application_status = 1;
                         }
@@ -189,7 +188,7 @@ class PendingApprovalsController extends Controller
                         if ($requestType == 'Mark as Incomplete') {
                             $application->application_status = 1;
                         } else {
-                            $application->application_status = 2;
+                            $application->application_status = 9;
                         }
 						$application ->save();
 

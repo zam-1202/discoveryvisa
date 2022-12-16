@@ -6,8 +6,8 @@
 	{
 		$visatypearray[$type->id] = $type->name;
 	}
-
-	$application_status_array = array('1' => 'NEW Application', '2' => 'Incomplete');
+    $application_status_array = array('0' =>'Pending Approval', '1' => 'NEW Application', '2' => 'Submitted to Embassy', '3' => 'Received from Embassy', '4' => 'Sent to/Claimed by Client');
+    $application_status_array_incomplete = array('1' => 'NEW Application', '9' => 'Incomplete');
 @endphp
 
 
@@ -39,12 +39,14 @@
 				<div class="col-md-4"></div>
 				<div class="col-md-4">
 				  <label for="application_status">Application Status</label>
-                  @if ($application->application_status == '3')
-                    {{Form::text('application_status', 'Pending Approval', ['class' => 'form-control text-center','disabled' => 'disabled'])}}
-                    {{Form::hidden('application_status', $application->application_status)}}
+                  @if ($application->application_status == '9')
+                    {{Form::select('application_status', $application_status_array_incomplete, $application->application_status, ['class' => 'form-control text-center'])}}
                   @else
-                    {{Form::select('application_status', $application_status_array, $application->application_status, ['class' => 'form-control text-center'])}}
+                    {{Form::text('application_status', $application_status_array[$application->application_status], ['class' => 'form-control text-center','disabled' => 'disabled'])}}
+                    {{Form::hidden('application_status', $application->application_status)}}
                   @endif
+
+
 
 				</div>
 			</div>
@@ -71,7 +73,7 @@
 				  <select class="form-control" name="customer_company" id="customer_company" disabled>
 				  </select>
 				</div>
-				</div>
+			</div>
 
 				<br>
 				<div class="row">
@@ -265,7 +267,7 @@
 			$('#customer_company').html('');
 			$('#customer_company').attr('disabled', true);
 
-			if(filterType == 'PIATA' || filterType == 'PTAA' && filterType == 'Corporate')
+			if(filterType != 'Walk-In')
 			{
 				$.ajax({
 					url: "../../partner_companies/getpartners",

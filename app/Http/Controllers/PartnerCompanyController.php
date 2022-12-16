@@ -41,9 +41,7 @@ class PartnerCompanyController extends Controller
 	public static function getPartnerCompanies(Request $request)
 	{
 		$filterType = $request->get('filterType');
-
 		$data = DB::table('partner_companies')->where('type','=', $filterType)->orderBy('name', 'asc')->get();
-
 		return $data;
 	}
 

@@ -44,9 +44,9 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$walkin->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($walkin->application_status == 3)
+                                                @elseif ($walkin->application_status == 0)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
-                                                @else
+                                                @elseif ($walkin->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
                                                 @endif
 											</td>
@@ -83,9 +83,9 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$piata->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($piata->application_status == 3)
+                                                @elseif ($piata->application_status == 0)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
-                                                @else
+                                                @elseif ($piata->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
                                                 @endif
 											</td>
@@ -122,9 +122,9 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$ptaa->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($ptaa->application_status == 3)
+                                                @elseif ($ptaa->application_status == 0)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
-                                                @else
+                                                @elseif ($ptaa->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
                                                 @endif
 											</td>
@@ -161,9 +161,9 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$corporate->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($corporate->application_status == 3)
+                                                @elseif ($corporate->application_status == 0)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
-                                                @else
+                                                @elseif ($corporate->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
                                                 @endif
 											</td>
@@ -200,9 +200,9 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$poea->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($poea->application_status == 3)
+                                                @elseif ($poea->application_status == 0)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
-                                                @else
+                                                @elseif ($poea->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
                                                 @endif
 											</td>
