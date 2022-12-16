@@ -15,6 +15,7 @@ use App\ApplicationBatchStatus;
 use App\Branch;
 use App\PartnerCompany;
 use App\User;
+use Auth;
 
 use App\Http\Controllers\AccountReceivableController;
 
@@ -29,7 +30,27 @@ class ApplicationBatchController extends Controller
      */
     public function index()
     {
-        $application_batches = DB::table('application_batches')->orderBy('batch_date', 'desc')->paginate(20);
+
+        if ( Auth::user()->branch == 'MNL') {
+            $application_batches = DB::table('application_batches')
+                ->leftJoin('applications', 'application_batches.batch_no', '=', 'applications.batch_no')
+                ->where('applications.branch', 'MNL')
+                ->orWhere('application_batches.status', '1')
+                ->select('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
+                ->groupBy('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
+                ->orderBy('application_batches.batch_date', 'desc')->paginate(20);
+        } else {
+            $application_batches = DB::table('application_batches')
+                ->leftJoin('applications', 'application_batches.batch_no', '=', 'applications.batch_no')
+                ->where('applications.branch', Auth::user()->branch)
+                ->select('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
+                ->groupBy('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
+                ->orderBy('application_batches.batch_date', 'desc')->paginate(20);
+        }
+
+
+
+
 
 		$status_array = ApplicationBatchStatus::all();
 		$status_list = array();
@@ -145,7 +166,6 @@ class ApplicationBatchController extends Controller
 											$query->orWhere('customer_type','=','Via Courier');
 										})
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('payment_status','=','PAID')
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
@@ -154,7 +174,6 @@ class ApplicationBatchController extends Controller
 		$piata_applications = DB::table('applications')
 								->where('customer_type','=','PIATA')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -162,7 +181,6 @@ class ApplicationBatchController extends Controller
 		$ptaa_applications = DB::table('applications')
 								->where('customer_type','=','PTAA')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -170,7 +188,6 @@ class ApplicationBatchController extends Controller
 		$corporate_applications = DB::table('applications')
 								->where('customer_type','=','Corporate')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -178,7 +195,6 @@ class ApplicationBatchController extends Controller
         $poea_applications = DB::table('applications')
 								->where('customer_type','=','POEA')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -198,7 +214,6 @@ class ApplicationBatchController extends Controller
 											$query->orWhere('customer_type','=','Via Courier');
 										})
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('payment_status','=','PAID')
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
@@ -207,7 +222,6 @@ class ApplicationBatchController extends Controller
 		$piata_applications = DB::table('applications')
 								->where('customer_type','=','PIATA')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -215,7 +229,6 @@ class ApplicationBatchController extends Controller
 		$ptaa_applications = DB::table('applications')
 								->where('customer_type','=','PTAA')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -223,7 +236,6 @@ class ApplicationBatchController extends Controller
 		$corporate_applications = DB::table('applications')
 								->where('customer_type','=','Corporate')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -231,7 +243,6 @@ class ApplicationBatchController extends Controller
         $poea_applications = DB::table('applications')
 								->where('customer_type','=','POEA')
 								->where('branch','=',$branch)
-								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();

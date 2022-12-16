@@ -40,9 +40,15 @@
 											<td>{{ $walkin->lastname }}, {{ $walkin->firstname }} {{ $walkin->middlename }}</td>
 											<td>{{ $walkin->reference_no }}</td>
 											<td>
-												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$walkin->id}}" name="incomplete_btn">
-													<span class="text-white small">Mark as Incomplete</span>
-												</button>
+												@if($walkin->application_status == 1)
+                                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$walkin->id}}" name="incomplete_btn">
+                                                        <span class="text-white small">Mark as Incomplete</span>
+                                                    </button>
+                                                @elseif ($walkin->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Pending Approval</span>
+                                                @else
+                                                    <span class="font-weight-bold text-danger">Incomplete</span>
+                                                @endif
 											</td>
 										</tr>
 										@php
@@ -73,9 +79,15 @@
 											<td>{{ $piata->lastname }}, {{ $piata->firstname }} {{ $piata->middlename }}</td>
 											<td>{{ $piata->reference_no }}</td>
 											<td>
-												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$piata->id}}" name="incomplete_btn">
-													<span class="text-white small">Mark as Incomplete</span>
-												</button>
+												@if($piata->application_status == 1)
+                                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$piata->id}}" name="incomplete_btn">
+                                                        <span class="text-white small">Mark as Incomplete</span>
+                                                    </button>
+                                                @elseif ($piata->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Pending Approval</span>
+                                                @else
+                                                    <span class="font-weight-bold text-danger">Incomplete</span>
+                                                @endif
 											</td>
 										</tr>
 										@php
@@ -106,9 +118,15 @@
 											<td>{{ $ptaa->lastname }}, {{ $ptaa->firstname }} {{ $ptaa->middlename }}</td>
 											<td>{{ $ptaa->reference_no }}</td>
 											<td>
-												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$ptaa->id}}" name="incomplete_btn">
-													<span class="text-white small">Mark as Incomplete</span>
-												</button>
+												@if($ptaa->application_status == 1)
+                                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$ptaa->id}}" name="incomplete_btn">
+                                                        <span class="text-white small">Mark as Incomplete</span>
+                                                    </button>
+                                                @elseif ($ptaa->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Pending Approval</span>
+                                                @else
+                                                    <span class="font-weight-bold text-danger">Incomplete</span>
+                                                @endif
 											</td>
 										</tr>
 										@php
@@ -139,9 +157,15 @@
 											<td>{{ $corporate->lastname }}, {{ $corporate->firstname }} {{ $corporate->middlename }}</td>
 											<td>{{ $corporate->reference_no }}</td>
 											<td>
-												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$corporate->id}}" name="incomplete_btn">
-													<span class="text-white small">Mark as Incomplete</span>
-												</button>
+                                                @if($corporate->application_status == 1)
+                                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$corporate->id}}" name="incomplete_btn">
+                                                        <span class="text-white small">Mark as Incomplete</span>
+                                                    </button>
+                                                @elseif ($corporate->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Pending Approval</span>
+                                                @else
+                                                    <span class="font-weight-bold text-danger">Incomplete</span>
+                                                @endif
 											</td>
 										</tr>
 										@php
@@ -172,9 +196,15 @@
 											<td>{{ $poea->lastname }}, {{ $poea->firstname }} {{ $poea->middlename }}</td>
 											<td>{{ $poea->reference_no }}</td>
 											<td>
-												<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$poea->id}}" name="incomplete_btn">
-													<span class="text-white small">Mark as Incomplete</span>
-												</button>
+												@if($poea->application_status == 1)
+                                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$poea->id}}" name="incomplete_btn">
+                                                        <span class="text-white small">Mark as Incomplete</span>
+                                                    </button>
+                                                @elseif ($poea->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Pending Approval</span>
+                                                @else
+                                                    <span class="font-weight-bold text-danger">Incomplete</span>
+                                                @endif
 											</td>
 										</tr>
 										@php
