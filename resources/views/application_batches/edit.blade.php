@@ -99,14 +99,14 @@
 									<td>{{$row->reference_no}}
 									<td><a href="{{route('applications.edit', $row->id)}}" class="btn btn-primary">Update</a></td>
 									<td>
-										@if($row->application_status == 1)
-										<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$row->id}}" name="incomplete_btn">
-											<span class="text-white small">Mark as Incomplete</span>
-										</button>
-                                        @elseif ($row->application_status == 3)
+										@if($row->application_status == 0)
                                             <span class="font-weight-bold text-danger">Pending Approval</span>
+                                        @elseif ($row->application_status == 9)
+                                            <span class="font-weight-bold text-danger">Incomplete</span>
 										@else
-											<span class="font-weight-bold text-danger">Incomplete</span>
+                                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$row->id}}" name="incomplete_btn">
+                                                <span class="text-white small">Mark as Incomplete</span>
+                                            </button>
 										@endif
 									</td>
 								</tr>
@@ -116,7 +116,7 @@
 							@endforeach
 						@else
 							<tr>
-								<td colspan="4" class="text-center font-weight-bold">No Data Found</td>
+								<td colspan="5" class="text-center font-weight-bold">No Data Found</td>
 							</tr>
 						@endif
 						</tbody>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\AccountReceivable;
 use App\Application;
+use App\ApplicationBatch;
 use App\PendingApprovals;
 
 use Illuminate\Http\Request;
@@ -127,6 +129,25 @@ class PendingApprovalsController extends Controller
 
 						$application = Application::find($application_id);
 						$application->application_status = 9;
+                        if ($application->batch_no) {
+                            $applicationBatch = ApplicationBatch::where('batch_no', $application->batch_no)->first();
+                            $applicationBatch->total_applications -= 1;
+                            $applicationBatch->save();
+
+                            $account_receivables = AccountReceivable::where('batch_no', $application->batch_no)
+                                        ->where('company', $application->customer_company)
+                                        ->first();
+
+                            if ($account_receivables) {
+                                if ($account_receivables->total_amount <= $application->visa_price) {
+                                    $account_receivables->delete();
+                                } else {
+                                    $account_receivables->total_amount -= $application->visa_price;
+                                    $account_receivables->save();
+                                }
+                            }
+                        }
+                        $application->batch_no = null;
 						$application->save();
 
 						$request->session()->flash('status', 'Application# ' . $application->reference_no . ' is now marked as incomplete.');
@@ -174,7 +195,26 @@ class PendingApprovalsController extends Controller
 					{
 						$application = Application::find($id);
                         if ($requestType == 'Mark as Incomplete') {
+                            if ($application->batch_no) {
+                                $applicationBatch = ApplicationBatch::where('batch_no', $application->batch_no)->first();
+                                $applicationBatch->total_applications -= 1;
+                                $applicationBatch->save();
+
+                                $account_receivables = AccountReceivable::where('batch_no', $application->batch_no)
+                                            ->where('company', $application->customer_company)
+                                            ->first();
+
+                                if ($account_receivables) {
+                                    if ($account_receivables->total_amount <= $application->visa_price) {
+                                        $account_receivables->delete();
+                                    } else {
+                                        $account_receivables->total_amount -= $application->visa_price;
+                                        $account_receivables->save();
+                                    }
+                                }
+                            }
                             $application->application_status = 9;
+                            $application->batch_no = null;
                         } else {
                             $application->application_status = 1;
                         }
@@ -188,7 +228,26 @@ class PendingApprovalsController extends Controller
                         if ($requestType == 'Mark as Incomplete') {
                             $application->application_status = 1;
                         } else {
+                            if ($application->batch_no) {
+                                $applicationBatch = ApplicationBatch::where('batch_no', $application->batch_no)->first();
+                                $applicationBatch->total_applications -= 1;
+                                $applicationBatch->save();
+
+                                $account_receivables = AccountReceivable::where('batch_no', $application->batch_no)
+                                            ->where('company', $application->customer_company)
+                                            ->first();
+
+                                if ($account_receivables) {
+                                    if ($account_receivables->total_amount <= $application->visa_price) {
+                                        $account_receivables->delete();
+                                    } else {
+                                        $account_receivables->total_amount -= $application->visa_price;
+                                        $account_receivables->save();
+                                    }
+                                }
+                            }
                             $application->application_status = 9;
+                            $application->batch_no = null;
                         }
 						$application ->save();
 

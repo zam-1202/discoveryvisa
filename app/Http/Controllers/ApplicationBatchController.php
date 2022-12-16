@@ -36,6 +36,7 @@ class ApplicationBatchController extends Controller
                 ->leftJoin('applications', 'application_batches.batch_no', '=', 'applications.batch_no')
                 ->where('applications.branch', 'MNL')
                 ->orWhere('application_batches.status', '1')
+                ->orWhere('application_batches.status', '2')
                 ->select('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
                 ->groupBy('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
                 ->orderBy('application_batches.batch_date', 'desc')->paginate(20);
