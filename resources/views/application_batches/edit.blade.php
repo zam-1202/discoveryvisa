@@ -1,13 +1,5 @@
 @extends('layouts.app')
 
-@php
-	$status_array = array();
-	foreach($status_list as $status)
-	{
-		$status_array[$status->id] = $status->description;
-	}
-@endphp
-
 @section('content')
 
 <div class="container">
@@ -57,7 +49,7 @@
 						</div>
 
 						<div class="col-md-4">
-							{{Form::select('status', $status_array, $batch->status, ['class' => 'form-control text-center']) }}
+							{{Form::select('status', $status_list, $batch->status, ['class' => 'form-control text-center']) }}
 						</div>
 					</div>
 
@@ -99,12 +91,12 @@
 									<td>{{$row->reference_no}}
 									<td><a href="{{route('applications.edit', $row->id)}}" class="btn btn-primary">Update</a></td>
 									<td>
-										@if($row->application_status == 0)
+										@if($row->application_status == 10)
                                             <span class="font-weight-bold text-danger">Pending Approval</span>
                                         @elseif ($row->application_status == 9)
                                             <span class="font-weight-bold text-danger">Incomplete</span>
 										@else
-                                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$row->id}}" name="incomplete_btn">
+                                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$row->id}}" name="incomplete_btn" {{ ($row->application_status == '6' || $row->application_status == '7' || $row->application_status == '8') ? 'disabled' : '' }}>
                                                 <span class="text-white small">Mark as Incomplete</span>
                                             </button>
 										@endif

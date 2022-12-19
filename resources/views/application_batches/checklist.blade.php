@@ -44,7 +44,7 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$walkin->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($walkin->application_status == 0)
+                                                @elseif ($walkin->application_status == 10)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($walkin->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
@@ -83,7 +83,7 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$piata->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($piata->application_status == 0)
+                                                @elseif ($piata->application_status == 10)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($piata->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
@@ -122,7 +122,7 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$ptaa->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($ptaa->application_status == 0)
+                                                @elseif ($ptaa->application_status == 10)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($ptaa->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
@@ -161,7 +161,7 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$corporate->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($corporate->application_status == 0)
+                                                @elseif ($corporate->application_status == 10)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($corporate->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
@@ -200,7 +200,7 @@
                                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#mark_as_incomplete" id="{{$poea->id}}" name="incomplete_btn">
                                                         <span class="text-white small">Mark as Incomplete</span>
                                                     </button>
-                                                @elseif ($poea->application_status == 0)
+                                                @elseif ($poea->application_status == 10)
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($poea->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>

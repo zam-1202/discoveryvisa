@@ -6,7 +6,14 @@
 	{
 		$visatypearray[$type->id] = $type->name;
 	}
-    $application_status_array = array('0' =>'Pending Approval', '1' => 'NEW Application', '2' => 'Submitted to Embassy', '3' => 'Received from Embassy', '4' => 'Sent to/Claimed by Client');
+    $application_status_array = array('1' => 'NEW Application',
+                                      '2' => 'Sent to Main Office',
+                                      '3' => 'Received by Main Office',
+                                      '4' => 'Sent to Original Branch',
+                                      '5' => 'Received by Original Branch',
+                                      '6' => 'Submitted to Embassy',
+                                      '7' => 'Received from Embassy',
+                                      '8' => 'Sent to/Claimed by Client');
     $application_status_array_incomplete = array('1' => 'NEW Application', '9' => 'Incomplete');
 @endphp
 

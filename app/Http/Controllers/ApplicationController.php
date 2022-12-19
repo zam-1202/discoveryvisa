@@ -235,7 +235,7 @@ class ApplicationController extends Controller
             ]);
             $approval_request->save();
 
-            $application->application_status = '0';
+            $application->application_status = '10';
         }
 
 		$application->reference_no = $request->get('reference_no');

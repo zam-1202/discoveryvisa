@@ -35,8 +35,11 @@ class ApplicationBatchController extends Controller
             $application_batches = DB::table('application_batches')
                 ->leftJoin('applications', 'application_batches.batch_no', '=', 'applications.batch_no')
                 ->where('applications.branch', 'MNL')
-                ->orWhere('application_batches.status', '1')
                 ->orWhere('application_batches.status', '2')
+                ->orWhere('application_batches.status', '3')
+                ->orWhere('application_batches.status', '6')
+                ->orWhere('application_batches.status', '7')
+                ->orWhere('application_batches.status', '8')
                 ->select('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
                 ->groupBy('application_batches.id', 'application_batches.batch_no', 'application_batches.batch_date', 'application_batches.status', 'application_batches.total_applications')
                 ->orderBy('application_batches.batch_date', 'desc')->paginate(20);
@@ -108,7 +111,26 @@ class ApplicationBatchController extends Controller
     public function edit($id)
     {
         $batch = ApplicationBatch::find($id);
-		$status_list = ApplicationBatchStatus::all();
+        $currentStatus = ApplicationBatchStatus::find($batch->status);
+        if ( Auth::user()->branch == 'MNL') {
+            $status_list = array(
+                '3' => 'Received by Main Office',
+                '4' => 'Sent to Original Branch',
+                '6' => 'Submitted to Embassy',
+                '7' => 'Received from Embassy',
+                '8' => 'Sent to/Claimed by Client'
+            );
+        } else {
+            $status_list = array(
+                '2' => 'Sent to Main Office',
+                '5' => 'Received by Original Branch',
+            );
+        }
+
+        $key = array_search($currentStatus->description, $status_list);
+        if (!$key) {
+            $status_list = collect($status_list)->prepend($currentStatus->description, $currentStatus->id);
+        }
 
 		$batch_contents = DB::table('applications')->where('batch_no', $batch->batch_no)->get();
 		return view('application_batches.edit', compact('batch', 'status_list', 'batch_contents'));
@@ -132,7 +154,10 @@ class ApplicationBatchController extends Controller
 
 	   $batch->save();
 
-	   if($request->get('status') == 2)
+       DB::table('applications')->where('batch_no', $batch->batch_no)
+                                ->update(['application_status' => $request->get('status')]);
+
+	   if($request->get('status') == 3)
 	   {
 		   //update field "date_received_by_main_office" for all applications of current batch
 		   DB::table('applications')->where('batch_no', $batch->batch_no)
@@ -262,8 +287,8 @@ class ApplicationBatchController extends Controller
 		$branch = Branch::where('code', $request->user()->branch)->first();
 		$batch_no_string = Carbon::now()->format('Ymd') . $branch->id;
 
-		$status = 1; //Sent to Main Office (Batch Status)
-		if($branch->id == 1) $status = 2; //if batch is for Main Office, go straight to Received by Main Office (Batch Status)
+		$status = 2; //Sent to Main Office (Batch Status)
+		if($branch->id == 1) $status = 3; //if batch is for Main Office, go straight to Received by Main Office (Batch Status)
 
 		if(ApplicationBatch::where('batch_no', $batch_no_string)->exists()){
 			return back()->with('status', "Batch for today's applications are already finalized.");
@@ -279,7 +304,7 @@ class ApplicationBatchController extends Controller
 								->where('payment_status','=','PAID')
 								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
-								->update(['batch_no' => $batch_no_string]);
+								->update(['batch_no' => $batch_no_string, 'application_status' => $status]);
 
 		$unpaid_applications = DB::table('applications')
 								->where('branch','=',$branch->code)
@@ -291,7 +316,7 @@ class ApplicationBatchController extends Controller
 										})
 								->where('application_status','=',1)
 								->where('batch_no','=',NULL)
-								->update(['batch_no' => $batch_no_string]);
+								->update(['batch_no' => $batch_no_string, 'application_status' => $status]);
 
 		$finalized_batch = new ApplicationBatch([
 			'batch_no' => $batch_no_string,

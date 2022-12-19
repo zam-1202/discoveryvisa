@@ -155,7 +155,7 @@ class PendingApprovalsController extends Controller
 					else
 					{
                         $application = Application::find($application_id);
-                        $application->application_status = 0;
+                        $application->application_status = 10;
 						$application->save();
 
 						$approval_request = new PendingApprovals([

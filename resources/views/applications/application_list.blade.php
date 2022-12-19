@@ -5,7 +5,16 @@
 		$branch_lookup[$branch->code] = $branch->description;
 	}
 
-	$application_status_array = array('1' => 'NEW Application', '2' => 'Submitted to Embassy', '3' => 'Received from Embassy', '4' => 'Sent/Claimed by Client', '9' => 'Incomplete');
+    $application_status_array = array('1' => 'NEW Application',
+                                      '2' => 'Sent to Main Office',
+                                      '3' => 'Received by Main Office',
+                                      '4' => 'Sent to Original Branch',
+                                      '5' => 'Received by Original Branch',
+                                      '6' => 'Submitted to Embassy',
+                                      '7' => 'Received from Embassy',
+                                      '8' => 'Sent to/Claimed by Client',
+                                      '9' => 'Incomplete',
+                                      '10' => 'Pending Approval');
 @endphp
 
 <div class="table-responsive">
@@ -26,7 +35,7 @@
 		  @foreach($data as $row)
 			<tr>
 				<td>{{ $row->reference_no }}</td>
-				<td>{{ $row->application_status == '0' ? 'Pending Approval' : $application_status_array[$row->application_status] }}</td>
+				<td>{{ $application_status_array[$row->application_status] }}</td>
 				<td>{{ $branch_lookup[$row->branch] }}</td>
 				<td>{{ $row->lastname }}, {{ $row->firstname }} {{ $row->middlename }}</td>
 				<td>{{ $row->customer_type }}</td>
