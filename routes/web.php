@@ -42,6 +42,15 @@ Route::get('admin/addbranch', 'AdminController@addBranch')->name('admin.addbranc
 Route::get('admin/updatebranch', 'AdminController@updateBranch')->name('admin.updatebranch')->middleware('CheckRole:Admin');
 Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name('admin.approvals')->middleware('CheckRole:Admin');
 
+//Mode of Payment
+Route::get('admin/mode_of_payment', 'OtherController@modeOfPaymentList')->name('admin.mode_of_payment')->middleware('CheckRole:Admin');
+Route::get('admin/add_mode_of_payment', 'OtherController@addModeOfPayment')->name('admin.add_mode_of_payment')->middleware('CheckRole:Admin');
+Route::get('admin/update_mode_of_payment', 'OtherController@updateModeOfPayment')->name('admin.update_mode_of_payment')->middleware('CheckRole:Admin');
+
+
+// Payment Request
+Route::get('admin/payment_request', 'OtherController@PaymentRequestList')->name('admin.payment_request')->middleware('CheckRole:Admin');
+
 Route::get('admin/promo_codes', 'PromoCodeController@index')->name('admin.promo_codes')->middleware('CheckRole:Admin');
 Route::post('admin/promo_codes', 'PromoCodeController@store')->name('admin.promo_codes.store')->middleware('CheckRole:Admin');
 Route::get('admin/promo_codes/create', 'PromoCodeController@create')->name('admin.create_promo_code')->middleware('CheckRole:Admin');
