@@ -41,7 +41,7 @@
 								@endforeach
 							@else
 								<tr>
-									<td colspan="6" class="font-weight-bold">No Data Found</td>
+									<td colspan="2" class="font-weight-bold">No Data Found</td>
 								</tr>
 							@endif
 						</tbody>
@@ -123,6 +123,7 @@
     $(document).ready(function(){
         $(document).on('shown.bs.modal', '#add_mode_of_payment_modal' , function (event) {
             $('#payment_name').val('');
+            $("#errorMsg").html('');
         });
 
         $(document).on('shown.bs.modal', '#update_mode_of_payment_modal' , function (event) {
@@ -132,6 +133,7 @@
 
             $('#update_mode_of_payment_id').val(id);
             $('#update_payment_name').val(name);
+            $("#update_errorMsg").html('');
         });
 
         $(document).on('click','#submit_mode_of_payment_btn', function()
@@ -171,7 +173,7 @@
                 {
                     var errors = jQuery.parseJSON(xhr.responseText)['errors'];
                     if (errors['name']){
-                        $("#errorMsg").html(errors['name'][0]);
+                        $("#update_errorMsg").html(errors['name'][0]);
                     }
                 }
             });

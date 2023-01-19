@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\RequiredDocument;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\Request;
 
 class RequiredDocumentController extends Controller
@@ -13,72 +15,43 @@ class RequiredDocumentController extends Controller
      */
     public function index()
     {
-        //
+        $result = RequiredDocument::orderBy('id', 'asc')->paginate(20);
+        return view('admin.required_documents', compact('result'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function addRequiredDocument(Request $request)
     {
-        //
+        $request->validate([
+			'name' => 'required',
+            'type' => ['required', Rule::in(['FILIPINO', 'JAPANESE', 'FOREIGN'])],
+		]);
+
+        RequiredDocument::create(
+            [
+                'name' => $request->name,
+                'type' => $request->type
+            ]);
+
+        $request->session()->flash('status', 'Required Document successfully added');
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function updateRequiredDocument(Request $request)
     {
-        //
+        $request->validate([
+            'id' => 'required|exists:required_documents,id',
+			'name' => 'required',
+            'type' => ['required', Rule::in(['FILIPINO', 'JAPANESE', 'FOREIGN'])],
+		]);
+
+        $result = RequiredDocument::find($request->id);
+        $result->name = $request->name;
+        $result->type = $request->type;
+        $result->save();
+
+        $request->session()->flash('status', 'Required Document successfully updated');
+
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

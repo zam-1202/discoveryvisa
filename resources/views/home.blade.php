@@ -32,10 +32,11 @@
 					@elseif(Auth::user()->role == 'Admin')
 						<a href="{{route('admin.users')}}" class="btn btn-primary col-md-6 mt-3">User List</a>
 						<a href="{{route('admin.branches')}}" class="btn btn-primary col-md-6 mt-3">Branch List</a>
-                        <a href="{{route('admin.mode_of_payment')}}" class="btn btn-primary col-md-6 mt-3">Mode of Payment List</a>
-                        <a href="{{route('admin.payment_request')}}" class="btn btn-primary col-md-6 mt-3">Payment Request List</a>
 						<a href="{{route('admin.approvals')}}" class="btn btn-primary col-md-6 mt-3">Pending Approvals</a>
                         <a href="{{route('admin.promo_codes')}}" class="btn btn-primary col-md-6 mt-3">Promo Codes</a>
+                        <a href="{{route('admin.required_documents')}}" class="btn btn-primary col-md-6 mt-3">Required Document List</a>
+                        <a href="{{route('admin.mode_of_payment')}}" class="btn btn-primary col-md-6 mt-3">Mode of Payment List</a>
+                        <a href="{{route('admin.payment_request')}}" class="btn btn-primary col-md-6 mt-3">Payment Request List</a>
 					@endif
                 </div>
             </div>
