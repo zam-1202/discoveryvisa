@@ -47,9 +47,10 @@ Route::get('admin/mode_of_payment', 'OtherController@modeOfPaymentList')->name('
 Route::get('admin/add_mode_of_payment', 'OtherController@addModeOfPayment')->name('admin.add_mode_of_payment')->middleware('CheckRole:Admin');
 Route::get('admin/update_mode_of_payment', 'OtherController@updateModeOfPayment')->name('admin.update_mode_of_payment')->middleware('CheckRole:Admin');
 
-
 // Payment Request
-Route::get('admin/payment_request', 'OtherController@PaymentRequestList')->name('admin.payment_request')->middleware('CheckRole:Admin');
+Route::get('admin/payment_request', 'OtherController@paymentRequestList')->name('admin.payment_request')->middleware('CheckRole:Admin');
+Route::get('admin/add_payment_request', 'OtherController@addPaymentRequest')->name('admin.add_payment_request')->middleware('CheckRole:Admin');
+Route::get('admin/update_payment_request', 'OtherController@updatePaymentRequest')->name('admin.update_payment_request')->middleware('CheckRole:Admin');
 
 Route::get('admin/promo_codes', 'PromoCodeController@index')->name('admin.promo_codes')->middleware('CheckRole:Admin');
 Route::post('admin/promo_codes', 'PromoCodeController@store')->name('admin.promo_codes.store')->middleware('CheckRole:Admin');

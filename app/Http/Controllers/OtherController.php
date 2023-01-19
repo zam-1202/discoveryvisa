@@ -26,7 +26,7 @@ class OtherController extends Controller
                 'type' => 'mop'
             ]);
 
-        $request->session()->flash('status', 'Mode of Payment successfully added');
+        $request->session()->flash('status', 'Mode of payment successfully added');
 
     }
 
@@ -41,12 +41,44 @@ class OtherController extends Controller
         $result->name = $request->name;
         $result->save();
 
-        $request->session()->flash('status', 'Mode of Payment successfully updated');
+        $request->session()->flash('status', 'Mode of payment successfully updated');
 
     }
 
-    public function PaymentRequestList()
+    public function paymentRequestList()
     {
+        $result = Other::where('type', 'pr')->orderBy('id', 'asc')->paginate(20);
+        return view('admin.payment_request', compact('result'));
+    }
+
+    public function addPaymentRequest(Request $request)
+    {
+        $request->validate([
+			'name' => 'required',
+		]);
+
+        Other::create(
+            [
+                'name' => $request->name,
+                'type' => 'pr'
+            ]);
+
+        $request->session()->flash('status', 'Payment request successfully added');
+
+    }
+
+    public function updatePaymentRequest(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:others,id',
+			'name' => 'required',
+		]);
+
+        $result = Other::find($request->id);
+        $result->name = $request->name;
+        $result->save();
+
+        $request->session()->flash('status', 'Payment request successfully updated');
 
     }
 

@@ -15,12 +15,12 @@
 			@endif
 			<div class="card">
 				<div class="card-header bg-primary text-white text-center font-weight-bold">
-					<h1>List of Mode of Payments</h1>
+					<h1>List of Payment Requests</h1>
 				</div>
 				<div class="card-body">
 					<div class="row p-1">
 						<div class="col-md-12 text-right">
-                            <a href="" class="btn btn-success" data-toggle="modal" data-target="#add_mode_of_payment_modal">Add</a>
+                            <a href="" class="btn btn-success" data-toggle="modal" data-target="#add_payment_request_modal">Add</a>
 						</div>
 					</div>
 
@@ -36,7 +36,7 @@
 								@foreach($result as $row)
 									<tr>
 										<td>{{$row->name}}</td>
-										<td><a href="" class="btn btn-primary" data-toggle="modal" data-target="#update_mode_of_payment_modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}">Update</a></td>
+										<td><a href="" class="btn btn-primary" data-toggle="modal" data-target="#update_payment_request_modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}">Update</a></td>
 									</tr>
 								@endforeach
 							@else
@@ -60,11 +60,11 @@
 	</div>
 </div>
 
-<div class="modal" id="add_mode_of_payment_modal">
+<div class="modal" id="add_payment_request_modal">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-success text-white">
-				<h4 class="modal-title">Add New Mode of Payment</h4>
+				<h4 class="modal-title">Add New Payment Request</h4>
 				<button type="button" class="close" data-dismiss="modal">x</button>
 			</div>
 			<div class="modal-body d-flex justify-content-center">
@@ -76,28 +76,28 @@
 					</div>
 					<div class="form-group row">
 						<div class="col-md-2 text-right"><label>Name</label></div>
-						<div class="col-md-10">{{Form::text('name', '', ['class' => 'form-control', 'id' => 'payment_name'])}}</div>
+						<div class="col-md-10">{{Form::text('name', '', ['class' => 'form-control', 'id' => 'payment_request_name'])}}</div>
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-success" id="submit_mode_of_payment_btn">Submit</button>
+				<button type="button" class="btn btn-success" id="submit_payment_request_btn">Submit</button>
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 		    </div>
 		</div>
 	</div>
 </div>
 
-<div class="modal" id="update_mode_of_payment_modal">
+<div class="modal" id="update_payment_request_modal">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-success text-white">
-				<h4 class="modal-title">Update Mode of Payment</h4>
+				<h4 class="modal-title">Update Payment Request</h4>
 				<button type="button" class="close" data-dismiss="modal">x</button>
 			</div>
 			<div class="modal-body d-flex justify-content-center">
 				<div class="container">
-                    <input type="hidden" id="update_mode_of_payment_id" value="" />
+                    <input type="hidden" id="update_payment_request_id" value="" />
 					<div class="form-group row">
 						<div class="col-md-12">
 							<label><small class="text-danger" id="update_errorMsg">&nbsp;</small></label>
@@ -105,12 +105,12 @@
 					</div>
 					<div class="form-group row">
 						<div class="col-md-2 text-right"><label>Name</label></div>
-						<div class="col-md-10">{{Form::text('name', '', ['class' => 'form-control', 'id' => 'update_payment_name'])}}</div>
+						<div class="col-md-10">{{Form::text('name', '', ['class' => 'form-control', 'id' => 'update_payment_request_name'])}}</div>
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-success" id="update_mode_of_payment_btn">Update</button>
+				<button type="button" class="btn btn-success" id="update_payment_request_btn">Update</button>
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 		    </div>
 		</div>
@@ -121,25 +121,25 @@
 @section('scripts')
 <script type="text/javascript">
     $(document).ready(function(){
-        $(document).on('shown.bs.modal', '#add_mode_of_payment_modal' , function (event) {
-            $('#payment_name').val('');
+        $(document).on('shown.bs.modal', '#add_payment_request_modal' , function (event) {
+            $('#payment_request_name').val('');
         });
 
-        $(document).on('shown.bs.modal', '#update_mode_of_payment_modal' , function (event) {
+        $(document).on('shown.bs.modal', '#update_payment_request_modal' , function (event) {
             let button = $(event.relatedTarget); // Button that triggered the modal
             let id = button.attr('data-id');
             let name = button.attr('data-name');
 
-            $('#update_mode_of_payment_id').val(id);
-            $('#update_payment_name').val(name);
+            $('#update_payment_request_id').val(id);
+            $('#update_payment_request_name').val(name);
         });
 
-        $(document).on('click','#submit_mode_of_payment_btn', function()
+        $(document).on('click','#submit_payment_request_btn', function()
 		{
-            var name = $("#payment_name").val();
+            var name = $("#payment_request_name").val();
 
             $.ajax({
-                url: "../admin/add_mode_of_payment",
+                url: "../admin/add_payment_request",
                 data: {name: name},
                 success: function()
                 {
@@ -155,13 +155,13 @@
             });
         });
 
-        $(document).on('click','#update_mode_of_payment_btn', function()
+        $(document).on('click','#update_payment_request_btn', function()
 		{
-            var id = $("#update_mode_of_payment_id").val();
-            var name = $("#update_payment_name").val();
+            var id = $("#update_payment_request_id").val();
+            var name = $("#update_payment_request_name").val();
 
             $.ajax({
-                url: "../admin/update_mode_of_payment",
+                url: "../admin/update_payment_request",
                 data: {id:id, name: name},
                 success: function()
                 {
