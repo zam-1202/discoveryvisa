@@ -57,6 +57,11 @@ Route::get('admin/required_documents', 'RequiredDocumentController@index')->name
 Route::get('admin/add_required_document', 'RequiredDocumentController@addRequiredDocument')->name('admin.add_required_document')->middleware('CheckRole:Admin');
 Route::get('admin/update_required_document', 'RequiredDocumentController@updateRequiredDocument')->name('admin.update_required_document')->middleware('CheckRole:Admin');
 
+//Visa Types
+Route::get('admin/visa_types', 'VisaTypeController@index')->name('admin.visa_types')->middleware('CheckRole:Admin');
+Route::post('admin/visa_types', 'VisaTypeController@store')->name('admin.visa_types.store')->middleware('CheckRole:Admin');
+Route::get('admin/visa_types/create', 'VisaTypeController@create')->name('admin.visa_types.create')->middleware('CheckRole:Admin');
+
 Route::get('admin/promo_codes', 'PromoCodeController@index')->name('admin.promo_codes')->middleware('CheckRole:Admin');
 Route::post('admin/promo_codes', 'PromoCodeController@store')->name('admin.promo_codes.store')->middleware('CheckRole:Admin');
 Route::get('admin/promo_codes/create', 'PromoCodeController@create')->name('admin.create_promo_code')->middleware('CheckRole:Admin');

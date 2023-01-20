@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\RequiredDocument;
+use App\VisaType;
 use Illuminate\Http\Request;
 
 class VisaTypeController extends Controller
@@ -13,7 +15,8 @@ class VisaTypeController extends Controller
      */
     public function index()
     {
-        //
+        $result = VisaType::with('documents')->orderBy('id', 'asc')->paginate(20);
+        return view('admin.visa.index', compact('result', 'types'));
     }
 
     /**
@@ -23,7 +26,13 @@ class VisaTypeController extends Controller
      */
     public function create()
     {
-        //
+        $docs = RequiredDocument::all();
+
+        $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
+        $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
+        $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
+
+        return view('admin.visa.create', compact('docs_filipino', 'docs_japanese', 'docs_foreign'));
     }
 
     /**
@@ -34,7 +43,25 @@ class VisaTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+			'name' => 'required|unique:visa_types',
+            'handling_fee' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
+            'visa_fee' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+		]);
+
+        $visa = VisaType::create(
+            [
+                'name' => $request->name,
+                'handling_fee' => $request->handling_fee,
+                'visa_fee' => $request->visa_fee
+            ]);
+
+        if ($request->documents_submitted) {
+            $docs = explode(',', $request->documents_submitted);
+            $visa->documents()->sync($docs);
+        }
+
+        return redirect('/admin/visa_types');
     }
 
     /**

@@ -16,10 +16,8 @@ class CreateVisaTypesTable extends Migration
         Schema::create('visa_types', function (Blueprint $table) {
             $table->bigIncrements('id');
 			$table->string('name');
-			$table->decimal('price');
-			$table->string('filipino_documents');
-			$table->string('japanese_documents');
-			$table->string('foreign_documents');
+			$table->decimal('handling_fee');
+			$table->decimal('visa_fee')->nullable();
             $table->timestamps();
         });
     }
