@@ -61,6 +61,8 @@ Route::get('admin/update_required_document', 'RequiredDocumentController@updateR
 Route::get('admin/visa_types', 'VisaTypeController@index')->name('admin.visa_types')->middleware('CheckRole:Admin');
 Route::post('admin/visa_types', 'VisaTypeController@store')->name('admin.visa_types.store')->middleware('CheckRole:Admin');
 Route::get('admin/visa_types/create', 'VisaTypeController@create')->name('admin.visa_types.create')->middleware('CheckRole:Admin');
+Route::get('admin/visa_types/{id}/edit', 'VisaTypeController@edit')->name('admin.visa_types.edit')->middleware('CheckRole:Admin');
+Route::post('admin/visa_types/{id}', 'VisaTypeController@update')->name('admin.visa_types.update')->middleware('CheckRole:Admin');
 
 Route::get('admin/promo_codes', 'PromoCodeController@index')->name('admin.promo_codes')->middleware('CheckRole:Admin');
 Route::post('admin/promo_codes', 'PromoCodeController@store')->name('admin.promo_codes.store')->middleware('CheckRole:Admin');

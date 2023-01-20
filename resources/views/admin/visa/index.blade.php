@@ -2,12 +2,6 @@
 
 @section('content')
 
-@php
-    $x = 0;
-    $y = 0;
-    $z = 0;
-@endphp
-
 <div class="container">
 	<div class="row justify-content-center">
 		<div class="col-md-10">
@@ -42,43 +36,35 @@
 						</thead>
 						<tbody>
 							@if($result->count() > 0)
-								@foreach($result as $row)
-                                @php $x = 0; $y = 0; $z = 0; @endphp
+								@foreach($result as $key => $row)
 									<tr>
 										<td>{{$row->name}}</td>
                                         <td>{{number_format($row->handling_fee, 2, '.', ',')}}</td>
                                         <td>{{number_format($row->visa_fee, 2, '.', ',')}}</td>
                                         <td>
-                                            @foreach ($row->documents as $document)
-                                                @if($document->type == 'FILIPINO')
-                                                    @if ($x == 0)
-                                                        <h6 class="text-left pl-2 font-weight-bold mb-0 mt-2">FILIPINO</h6>
-                                                        @php
-                                                            $x = 1;
-                                                        @endphp
-                                                    @endif
-                                                    <li class="text-left pl-5">{{$document->name}}</li>
-                                                @elseif ($document->type == 'JAPANESE')
-                                                    @if ($y == 0)
-                                                        <h6 class="text-left pl-2 font-weight-bold mb-0 mt-2">JAPANESE</h6>
-                                                        @php
-                                                            $y = 1;
-                                                        @endphp
-                                                    @endif
-                                                    <li class="text-left pl-5">{{$document->name}}</li>
-                                                @else
-                                                    @if ($y == 0)
-                                                        <h6 class="text-left pl-2 font-weight-bold mb-0 mt-2">FOREIGN</h6>
-                                                        @php
-                                                            $y = 1;
-                                                        @endphp
-                                                    @endif
-                                                    <li class="text-left pl-5">{{$document->name}}</li>
-                                                @endif
-                                            @endforeach
+                                            @if ($documents[$key]['filipino'])
+                                                <h6 class="text-left pl-2 font-weight-bold mb-0 mt-2">FILIPINO</h6>
+                                                @foreach ($documents[$key]['filipino'] as $docs_fil)
+                                                    <li class="text-left pl-5">{{$docs_fil->name}}</li>
+                                                @endforeach
+                                            @endif
+
+                                            @if ($documents[$key]['japanese'])
+                                                <h6 class="text-left pl-2 font-weight-bold mb-0 mt-2">JAPANESE</h6>
+                                                @foreach ($documents[$key]['japanese'] as $docs_jap)
+                                                    <li class="text-left pl-5">{{$docs_jap->name}}</li>
+                                                @endforeach
+                                            @endif
+
+                                            @if ($documents[$key]['foreign'])
+                                                <h6 class="text-left pl-2 font-weight-bold mb-0 mt-2">FOREIGN</h6>
+                                                @foreach ($documents[$key]['foreign'] as $docs_foreign)
+                                                    <li class="text-left pl-5">{{$docs_foreign->name}}</li>
+                                                @endforeach
+                                            @endif
                                         </td>
 
-										<td><a href="" class="btn btn-primary" data-toggle="modal" data-target="#update_required_document_modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}" data-type="{{ $row->type }}">Update</a></td>
+										<td><a class="btn btn-primary text-white" href="{{route('admin.visa_types.edit', $row->id)}}">Update</a></td>
 									</tr>
 								@endforeach
 							@else
