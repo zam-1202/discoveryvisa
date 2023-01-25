@@ -9,7 +9,7 @@ class OtherController extends Controller
 {
     public function modeOfPaymentList()
     {
-        $result = Other::where('type', 'mop')->orderBy('id', 'asc')->paginate(20);
+        $result = Other::where('type', 'mop')->orderBy('name', 'asc')->paginate(10);
         return view('admin.mode_of_payment', compact('result'));
 
     }
@@ -47,7 +47,7 @@ class OtherController extends Controller
 
     public function paymentRequestList()
     {
-        $result = Other::where('type', 'pr')->orderBy('id', 'asc')->paginate(20);
+        $result = Other::where('type', 'pr')->orderBy('name', 'asc')->paginate(10);
         return view('admin.payment_request', compact('result'));
     }
 

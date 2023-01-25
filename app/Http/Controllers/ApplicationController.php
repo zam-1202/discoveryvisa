@@ -13,7 +13,9 @@ use App\RequiredDocument;
 use App\Branch;
 use Excel;
 use App\Exports\DailyReportExport;
+use App\Other;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 
 class ApplicationController extends Controller
 {
@@ -298,8 +300,13 @@ class ApplicationController extends Controller
 		{
 			$searchString = $request->get('searchString');
 			$application = Application::where('reference_no','=',$searchString)->first();
+            $modeOfPayment = Arr::pluck(collect(Other::where('type', 'mop')->get()), 'name', 'name');
+            $modeOfPayment = Arr::prepend($modeOfPayment, '', '');
+            $paymentRequest = Arr::pluck(collect(Other::where('type', 'pr')->get()), 'name', 'name');
+            $paymentRequest = Arr::prepend($paymentRequest, '', '');
+            $visaType = VisaType::where('name', $application->visa_type)->first();
 
-			return view('cashier.confirm_payment', compact('searchString', 'application'));
+			return view('cashier.confirm_payment', compact('searchString', 'application', 'modeOfPayment', 'paymentRequest', 'visaType'));
 		}
 	}
 
@@ -308,8 +315,8 @@ class ApplicationController extends Controller
 		$application = DB::table('applications')
 						->where('reference_no', '=', $request->get('reference_no'))
 						->update(['or_number' => $request->get('or_number'),
-								  'vpr_number' => $request->get('vpr_number'),
                                   'payment_mode' => $request->get('payment_mode'),
+                                  'payment_request' => $request->get('payment_request'),
 								  'payment_date' => Carbon::now(),
 								  'payment_received_by' => $request->user()->username,
 								  'payment_status' => 'PAID']);
