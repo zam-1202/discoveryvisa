@@ -16,6 +16,7 @@ use App\Exports\DailyReportExport;
 use App\Other;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
+use PDF;
 
 class ApplicationController extends Controller
 {
@@ -403,5 +404,14 @@ class ApplicationController extends Controller
             return Excel::download(new DailyReportExport($request->date, $branch, $role), 'sample.xlsx', null, [\Maatwebsite\Excel\Excel::XLSX]);
         }
 
+    }
+
+    public function downloadAcknowledgementReceipt(Request $request){
+        $application = Application::where('reference_no', $request->ref_no)->first();
+        $submittedDocs = explode(",",$application->documents_submitted);
+        $documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
+
+        $pdf = PDF::loadView('cashier.acknowledgement_receipt', ['application' => $application, 'docs' => $documents]);
+        return $pdf->download('Checklist.pdf');
     }
 }

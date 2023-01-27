@@ -90,7 +90,7 @@
             @endif
         </table>
 
-        <button class="btn btn-primary w-100" id="acknowledgement_receipt">ACKNOWLEDGEMENT RECEIPT</button>
+        <a href="{{ route('cashier.download_acknowledgement_receipt_pdf', ['ref_no' => $application->reference_no]) }}" class="btn btn-primary w-100">ACKNOWLEDGEMENT RECEIPT<span style="font-size:20px;" class="material-icons align-bottom"></span></a>
     </div>
 </div>
 

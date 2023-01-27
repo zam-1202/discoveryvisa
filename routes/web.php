@@ -14,6 +14,10 @@ Auth::routes();
 Route::get('/', function () { return view('/home'); })->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home')->middleware('auth');
 
+Route::get('/sample', function(){
+    return view('cashier.acknowledgement_receipt');
+});
+
 Route::get('applications/application_list', 'ApplicationController@fetch_data');
 Route::get('applications/past_applications', 'ApplicationController@past_applications');
 Route::get('applications/mark_as_incomplete', 'PendingApprovalsController@mark_as_incomplete');
@@ -24,6 +28,7 @@ Route::get('cashier/receive_payment','ApplicationController@showPaymentForm')->n
 Route::get('cashier/confirm_payment','ApplicationController@retrievePaymentForm');
 Route::get('cashier/customer_payment','ApplicationController@markCustomerAsPaid')->name('cashier.customer_payment');
 Route::get('cashier/download_report','ApplicationController@downloadReport')->name('cashier.download_report')->middleware('CheckRole:Cashier,Accounting');
+Route::get('cashier/download_acknowledgement_receipt_pdf', 'ApplicationController@downloadAcknowledgementReceipt')->name('cashier.download_acknowledgement_receipt_pdf')->middleware('CheckRole:Cashier');
 
 Route::get('partner_companies/getpartners', 'PartnerCompanyController@getPartnerCompanies');
 Route::resource('partner_companies', 'PartnerCompanyController')->middleware('CheckRole:Admin');
