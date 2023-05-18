@@ -86,24 +86,36 @@ class PromoCodeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function updatepartnerCompanies(Request $request)
     {
-        $request->validate([
-            'code' => 'required|unique:promo_codes,code,' .$id,
-            'discount' => 'required',
-            'expiration_date' => 'required|date',
-            'quantity' => 'required|numeric'
-        ]);
-
-        $promo = PromoCode::find($id);
-        $promo->discount = $request->get('discount');
-        $promo->expiration_date = $request->get('expiration_date');
-        $promo->max_quantity = $request->get('quantity');
-        $promo->save();
-
-        $request->session()->flash('status', 'Promo code successfully updated');
-        return redirect('/admin/promo_codes');
+        if ($request->ajax()) {
+            $request->validate([
+                'partnerComp_id' => 'required|exists:partner_companies,id',
+                'type' => 'required',
+                'name' => 'required',
+            ]);
+    
+            $partnerComp_id = $request->input('partnerComp_id');
+            $type = $request->input('type');
+            $name = $request->input('name');
+    
+            $partnerComp = PartnerCompany::find($partnerComp_id);
+    
+            // Check if the $partnerComp object exists
+            if ($partnerComp) {
+                $partnerComp->type = $type;
+                $partnerComp->name = $name;
+    
+                $partnerComp->save();
+    
+                $request->session()->flash('status', 'Partner Company successfully updated');
+            } else {
+                // Handle the case where the partner company is not found
+                $request->session()->flash('status', 'Partner Company not found');
+            }
+        }
     }
+    
 
     /**
      * Remove the specified resource from storage.

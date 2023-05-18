@@ -54,6 +54,8 @@ Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name(
 //Partner Companies
 Route::get('admin/partner_companies', 'PartnerCompanyController@index')->name('admin.partner_companies')->middleware('CheckRole:Admin');
 Route::get('admin/create_partnerCompanies', 'PartnerCompanyController@createpartnerCompanies')->name('admin.createpartnerCompanies')->middleware('CheckRole:Admin');
+Route::get('admin/update_partnerCompanies', 'PartnerCompanyController@updatepartnerCompanies')->name('admin.updatepartnerCompanies')->middleware('CheckRole:Admin');
+
 
 //Mode of Payment
 Route::get('admin/mode_of_payment', 'OtherController@modeOfPaymentList')->name('admin.mode_of_payment')->middleware('CheckRole:Admin');

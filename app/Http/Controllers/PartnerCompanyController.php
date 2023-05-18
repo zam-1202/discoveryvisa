@@ -55,9 +55,17 @@ class PartnerCompanyController extends Controller
     public function create()
     {
         $result = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
-        $types = PartnerCompany::distinct()->get(['type']);
-        $types = collect($types)->pluck('type')->push('Other');
+        // $types = PartnerCompany::distinct()->pluck('type')->toArray();
+        // $types['Other'] = 'Other';
         $names = PartnerCompany::distinct()->get(['name']);
+        $types = [
+            'PIATA' => 'PIATA',
+            'PTAA' => 'PTAA',
+            'Corporate' => 'Corporate',
+            'POEA' => 'POEA',
+            'Other' => 'Other',
+        ];
+        
 
         return view('partner_companies.create', compact('result', 'types', 'names'));
 
@@ -153,14 +161,26 @@ class PartnerCompanyController extends Controller
             return response()->json(['success' => true]); // Send a success response
 		}
 	}
+
+    public function updatepartnerCompanies(Request $request)
+    {
+        if ($request->ajax()) {
+            
+            $id = $request->get('id');
+            $type = $request->get('type');
+            $name = $request->get('name');
+    
+            $partnerComp = PartnerCompany::find($id);
+    
+            $partnerComp->type = $type;
+            $partnerComp->name = $name;
+    
+            $partnerComp->save();
+    
+            $request->session()->flash('status', 'Partner Company successfully updated');
+            } else {
+                // Handle the case where the partner company is not found
+                $request->session()->flash('status', 'Partner Company not found');
+            }
+        }
 }
-
-// {
-//     $result = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
-//     $types = PartnerCompany::distinct()->get(['type']);
-//     $types = collect($types)->pluck('type')->push('Other');
-//     $names = PartnerCompany::distinct()->get(['name']);
-
-//     return view('partner_companies.create', compact('result', 'types', 'name'));
-
-// }
