@@ -25,16 +25,6 @@
 			<h1>Update an Application</h1>
 		</div>
 
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-        <br />
-        @endif
         <form method="post" action="{{ route('applications.update', $application->id) }}">
             @method('PATCH')
             @csrf
@@ -46,15 +36,17 @@
 				<div class="col-md-4"></div>
 				<div class="col-md-4">
 				  <label for="application_status">Application Status</label>
-                  @if ($application->application_status == '9')
-                    {{Form::select('application_status', $application_status_array_incomplete, $application->application_status, ['class' => 'form-control text-center'])}}
-                  @else
-                    {{Form::text('application_status', $application_status_array[$application->application_status], ['class' => 'form-control text-center','disabled' => 'disabled'])}}
-                    {{Form::hidden('application_status', $application->application_status)}}
-                  @endif
-
-
-
+				  @if ($application->application_status == '1')
+					@if(isset($application_status_array_incomplete[$application->application_status]))
+						{{ Form::select('application_status', $application_status_array_incomplete, old('application_status', $application->application_status), ['class' => 'form-control text-center']) }}
+					@else
+						{{ Form::text('application_status', $application_status_array[$application->application_status], ['class' => 'form-control text-center','disabled' => 'disabled']) }}
+						{{ Form::hidden('application_status', $application->application_status) }}
+					@endif
+				@else
+					{{ Form::text('application_status', $application_status_array[$application->application_status] ?? '', ['class' => 'form-control text-center','disabled' => 'disabled']) }}
+					{{ Form::hidden('application_status', $application->application_status) }}
+				@endif
 				</div>
 			</div>
 
@@ -81,6 +73,12 @@
 				  </select>
 				</div>
 			</div>
+			<div class="form-group row">
+		  <div class="col-md-12">
+			  <label for="group_name">Group Name</label>
+			  {{ Form::textarea('group_name', $application->group_name, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'group_name']) }}
+			</div>
+          </div>
 
 				<br>
 				<div class="row">
@@ -93,21 +91,21 @@
 				<div class="form-group row">
 					<div class="col-md-9">
 					  <label for="lastname">Last Name</label>
-					  {{Form::text('lastname', $application->lastname, ['class' => 'form-control text-center text-uppercase'])}}
+					  {{ Form::textarea('lastname', $application->lastname, ['class' => 'form-control text-center text-uppercase', 'rows' => '3', 'id' => 'editApplication_lastname']) }}
 					</div>
 				</div>
 
 				<div class="form-group row">
 					<div class="col-md-9">
 					  <label for="first_name">First Name</label>
-					  {{Form::text('firstname', $application->firstname, ['class' => 'form-control text-center text-uppercase'])}}
+					  {{Form::textarea('firstname', $application->firstname, ['class' => 'form-control text-center text-uppercase', 'rows' => '3', 'id' => 'editApplication_firstname']) }}
 					</div>
 				</div>
 
 				<div class="form-group row">
 					<div class="col-md-9">
 					  <label for="middlename">Middle Name</label>
-					  {{Form::text('middlename', $application->middlename, ['class' => 'form-control text-center text-uppercase'])}}
+					  {{Form::textarea('middlename', $application->middlename, ['class' => 'form-control text-center text-uppercase', 'rows' => '3', 'id' => 'middlename']) }}
 					</div>
 				</div>
 
@@ -179,23 +177,34 @@
 				<br>
 
 				<div class="form-group row">
-					<div class="col-md-3"></div>
-					<div class="col-md-6">
-					  <label for="visa_type">Visa Type:</label>
-					  {{Form::select('visa_type', $visatypearray, $application->visa_type, ['class' => 'form-control', 'id' => 'visa_type'])}}
-					</div>
-					<div class="col-md-3"></div>
+		    <div class="col-md-3"></div>
+		    <div class="col-md-6">
+              <label for="visa_type">Visa Type:</label>
+			  <select class="form-control" name="visa_type" id="visa_type">
+			  <option value="">--- Select a visa type ---</option>
+				@foreach($visatypes as $visaType)
+				<option value="{{ $visaType->name }}"
+                data-visa-fee="{{ $visaType->visa_fee }}"
+                data-handling-fee="{{ $visaType->handling_fee }}">
+            {{ $visaType->name }}
+        	</option>
+				@endforeach
+			</select>
+			</div>
+			<div class="col-md-3"></div>
+          </div>
+		  <div class="form-group row">
+				<div class="col-md-6">
+					<label for="visa_price">Visa Price:</label>
+					<input type="text" class="form-control text-center" name="visa_price" id="visa_price" readonly/>
 				</div>
 
-				<div class="form-group row">
-					<div class="col-md-3"></div>
-					<div class="col-md-6">
-					  <label for="visa_price">Visa Price:</label>
-					  {{Form::text('visa_price', $application->visa_price, ['class' => 'form-control text-center', 'id' => 'visa_price', 'readonly' => 'readonly'])}}
-					  <span id="discount-text" class="text-success"></span>
-					</div>
-					<div class="col-md-3"></div>
+				<div class="col-md-6">
+					<label for="handling_fee">Handling Fee:</label>
+					<input type="text" class="form-control text-center" name="handling_price" id="handling_price" readonly/>
 				</div>
+				<div class="col-md-3"></div>
+          </div>
 				<div class="form-group row">
 					<div class="col-md-3"></div>
 					<div class="col-md-6">
@@ -221,21 +230,39 @@
 								  <th style="width:33.33%;" class="bg-dark text-white">FOREIGNER DOCUMENTS</th>
 							  </thead>
 							  <tbody>
-								  <tr>
-									<td class="bg-success text-left">
-										<ul class="list-group" id="filipino_documents">
-										</ul>
-									</td>
-									<td class="bg-info text-left">
-										<ul class="list-group" id="japanese_documents">
-										</ul>
-									</td>
-									<td class="bg-dark text-left">
-										<ul class="list-group" id="foreign_documents">
-										</ul>
-									</td>
-								  </tr>
-							  </tbody>
+                                          <tr>
+                                            <td class="bg-success text-left">
+                                                <ul class="list-group" id="filipino_documents">
+                                                    @foreach ($docs_filipino as $value)
+													@php
+														$isChecked = in_array($value->id, explode(',', $application->documents_submitted));
+													@endphp
+                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id="{{ $value->id }}" {{ $isChecked ? 'checked' : '' }}/> {{ $value->name }} </li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                            <td class="bg-info text-left">
+                                                <ul class="list-group" id="japanese_documents">
+                                                    @foreach ($docs_japanese as $value)
+													@php
+														$isChecked = in_array($value->id, explode(',', $application->documents_submitted));
+													@endphp
+                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}' {{ $isChecked ? 'checked' : '' }}/> {{ $value->name }} </li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                            <td class="bg-dark text-left">
+                                                <ul class="list-group" id="foreign_documents">
+                                                    @foreach ($docs_foreign as $value)
+													@php
+														$isChecked = in_array($value->id, explode(',', $application->documents_submitted));
+													@endphp
+                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'{{ $isChecked ? 'checked' : '' }}/> {{ $value->name }} </li>
+                                                    @endforeach
+                                                </ul>
+                                            </td>
+                                          </tr>
+                                      </tbody>
 						  </table>
 					  </div>
 					</div>
@@ -244,7 +271,7 @@
 				{{Form::hidden('payment_status', $application->payment_status)}}
 				<div class="row">
 					<div class="col-md-2 offset-md-4">
-						<button type="submit" class="btn btn-primary">Update</button>
+						<button type="submit" id="updateApplication" class="btn btn-primary">Update</button>
 					</div>
         </form>
 					<div class="col-md-2">
@@ -258,7 +285,77 @@
 @section('scripts')
 <script type="text/javascript">
 
-	$(document).ready(function(){
+	// $(document).ready(function(){
+
+		// $(document).ready(function() {
+		// 	restore_checkboxes();
+		// });
+
+	$(document).on('keypress', '#editApplication_lastname, #editApplication_firstname, #middlename', function(event){
+	var regex = new RegExp("^[a-zA-Z'-]+$");
+    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+    if (!regex.test(key)) {
+       event.preventDefault();
+       return false;
+		}
+	});
+
+	document.getElementById('click',"#updateApplication").addEventListener(function(event){
+		// event.preventDefault(); // Prevent the form from submitting
+		validatefield(); // Call the validation function
+		});
+
+	function validatefield() {
+			const lastname = $('#createApplication_lastname').val();
+			const firstname = $('#createApplication_firstname').val();
+			const bday = $('#birthdate').val();
+			const home_address = $('#address').val();
+			const passport_num = $('#passport_no').val();
+			const departure = $('#departure_date').val();
+			const rmk = $('#remarks').val();
+			const v_type = $('#visa_type').val();
+			const docs_sub = $('#documents_submitted').val();
+			
+		{
+			if (lastname == '' || firstname == '' || bday == '' || home_address == '' || passport_num == '' || departure == '' || 
+			rmk == '' || docs_sub == '') {
+				console.log("Not all fields are filled out.");
+				Swal.fire({
+					position: 'center',
+					icon: 'warning',
+					title: 'Please fill out all required fields.',
+					showConfirmButton: true,
+                    timer: 6000	
+				});
+			} 
+			else {
+				console.log("Fields are filled out");
+			}
+		}
+	}
+
+
+	$('visa_type').addEventListener('change', function(event) {
+        const selectedVisaType = event.target.value;
+        const selectedOption = event.target.selectedOptions[0];
+        const visaFee = selectedOption.dataset.visaFee;
+        const handlingFee = selectedOption.dataset.handlingFee;
+
+        const visaTypeField = document.getElementById('visa_type');
+        const visaPriceField = document.getElementById('visa_price');
+        const visaHandlingfeeField = document.getElementById('handling_price');
+
+        if(selectedVisaType) {
+            visaTypeField.value = selectedVisaType;
+            visaPriceField.value = visaFee;
+            visaHandlingfeeField.value = handlingFee;
+        } else {
+            visaTypeField.value = '';
+            visaPriceField.value = '';
+            visaHandlingfeeField.value = '';
+        }
+    });
+
 
 
 		var visaTypeArray = {!! $visatypes->toJson() !!};
@@ -301,7 +398,7 @@
 		{
 			var selectedVisaType = $.grep(visaTypeArray, function(obj){return obj.id == visaType;})[0];
 			get_required_documents(selectedVisaType);
-			restore_checkboxes();
+			// restore_checkboxes();
 			$('#visa_price').val(selectedVisaType.price);
 			get_promo_code();
 		}
@@ -330,16 +427,16 @@
 			return outputString;
 		}
 
-		function restore_checkboxes()
-		{
-			var submitted_documents = "{{$application->documents_submitted}}".split(",");
-			$('input[name="submitted_documents"]').each(function(){
-				if(submitted_documents.includes($(this).val()))
-				{
-					$(this).attr("checked", true);
-				}
-			});
-		}
+		// function restore_checkboxes()
+		// {
+		// 	var submitted_documents = "{{$application->documents_submitted}}".split(",");
+		// 	$('input[name="submitted_documents"]').each(function(){
+		// 		if(submitted_documents.includes($(this).val()))
+		// 		{
+		// 			$(this).attr("checked", true);
+		// 		}
+		// 	});
+		// }
 
 		function update_visa_price()
 		{
@@ -436,7 +533,9 @@
 			get_promo_code();
 		});
 
-	});
 
 </script>
 @endsection
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

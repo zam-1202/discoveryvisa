@@ -27,6 +27,9 @@
 			  <th style="width:30%;">Name</th>
 			  <th style="width:10%;">Customer Type</th>
 			  <th style="width:10%;">Payment Status</th>
+			  <th style="width:10%;">Application Date</th>
+			  <th style="width:10%;">Passport No.</th>
+			  <th style="width:10%;">Group name</th>
 			  <th style="width:10%;"></th>
 			</tr>
 		</thead>
@@ -40,12 +43,15 @@
 				<td>{{ $row->lastname }}, {{ $row->firstname }} {{ $row->middlename }}</td>
 				<td>{{ $row->customer_type }}</td>
 				<td>{{ $row->payment_status }}</td>
+				<td>{{ date('Y-m-d', strtotime($row->application_date)) }}</td>
+				<td>{{ $row->passport_no }}</td>
+				<td>{{ $row->group_name }}</td>
 				<td><a href="{{route('applications.edit', $row->id)}}" class="btn btn-primary">Update</a></td>
 			</tr>
 		  @endforeach
 		@else
 			<tr>
-				<td colspan='7'> No Data Found </td>
+				<td colspan='10'> No Data Found </td>
 			</tr>
 		@endif
 		</tbody>

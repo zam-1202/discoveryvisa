@@ -9,6 +9,7 @@ use PDF;
 use Storage;
 use Illuminate\Support\Facades\Mail;
 
+// use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Application;
 use App\ApplicationBatch;
 use App\ApplicationBatchStatus;
@@ -20,6 +21,21 @@ use Auth;
 use App\Http\Controllers\AccountReceivableController;
 
 use App\Mail\SubmissionListGenerated;
+
+// class ChecklistController extends Controller
+// {
+//     public function show()
+//     {
+//         $branch = 'Branch Name'; // Replace with the actual branch name
+//         $date = date('Y-m-d'); // Get the current date
+//         $walkin_applications = WalkinApplication::all(); // Retrieve all walk-in applications
+//         $piata_applications = PiataApplication::all(); // Retrieve all PIATA applications
+//         $ptaa_applications = PtaaApplication::all(); // Retrieve all PTAA applications
+//         $corporate_applications = CorporateApplication::all(); // Retrieve all corporate applications
+
+//         return view('checklist', compact('branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications'));
+//     }
+// }
 
 class ApplicationBatchController extends Controller
 {
@@ -185,15 +201,19 @@ class ApplicationBatchController extends Controller
 		$date = Carbon::now()->toFormattedDateString();
 		$branch = $request->user()->branch;
 
+
 		$walkin_applications = DB::table('applications')
 								->where(function($query){
-											$query->where('customer_type','=','Walk-In');
-											$query->orWhere('customer_type','=','Mobile Service');
-											$query->orWhere('customer_type','=','Via Courier');
+											$query->where('customer_type','=','Walk-In')
+											->orWhere('customer_type','=','Mobile Service')
+											->orWhere('customer_type','=','Via Courier');
 										})
 								->where('branch','=',$branch)
-								->where('payment_status','=','PAID')
+								// ->where('payment_status','=','PAID')
+								// ->orWhere('payment_status','=','UNPAID')
 								->where('batch_no','=',NULL)
+								// ->whereDate('created_at', Carbon::today())
+								// ->where('application_status','=',1) // add this line to filter by application_status
 								->orderBy('lastname','asc')
 								->get();
 
@@ -201,6 +221,7 @@ class ApplicationBatchController extends Controller
 								->where('customer_type','=','PIATA')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
+								// ->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
@@ -208,6 +229,7 @@ class ApplicationBatchController extends Controller
 								->where('customer_type','=','PTAA')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
+								// ->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
@@ -215,6 +237,7 @@ class ApplicationBatchController extends Controller
 								->where('customer_type','=','Corporate')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
+								// ->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
@@ -222,11 +245,12 @@ class ApplicationBatchController extends Controller
 								->where('customer_type','=','POEA')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
+								// ->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
-		return view('application_batches.checklist', compact('branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
-	}
+			return view('application_batches.checklist', compact('branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
+							}
 
 	public function downloadChecklist(Request $request)
 	{
@@ -240,7 +264,8 @@ class ApplicationBatchController extends Controller
 											$query->orWhere('customer_type','=','Via Courier');
 										})
 								->where('branch','=',$branch)
-								->where('payment_status','=','PAID')
+								// ->where('payment_status','=','PAID')
+								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -248,6 +273,7 @@ class ApplicationBatchController extends Controller
 		$piata_applications = DB::table('applications')
 								->where('customer_type','=','PIATA')
 								->where('branch','=',$branch)
+								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -255,6 +281,7 @@ class ApplicationBatchController extends Controller
 		$ptaa_applications = DB::table('applications')
 								->where('customer_type','=','PTAA')
 								->where('branch','=',$branch)
+								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -262,6 +289,7 @@ class ApplicationBatchController extends Controller
 		$corporate_applications = DB::table('applications')
 								->where('customer_type','=','Corporate')
 								->where('branch','=',$branch)
+								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
@@ -269,12 +297,14 @@ class ApplicationBatchController extends Controller
         $poea_applications = DB::table('applications')
 								->where('customer_type','=','POEA')
 								->where('branch','=',$branch)
+								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
 
-		$pdf = PDF::loadView('application_batches.checklist_pdf', compact('branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
-		return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
+		$pdf = PDF::loadView('application_batches.checklist_pdf', compact('qrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
+		return $pdf->stream($branch . ' Checklist for ' . $date . '.pdf');
+		// return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
 	}
 
 	public function showFinalizeBatchPage()

@@ -13,13 +13,17 @@
 Auth::routes();
 Route::get('/', function () { return view('/home'); })->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home')->middleware('auth');
+use App\Http\Controllers\ApplicationController;
 
 Route::get('/sample', function(){
     return view('cashier.acknowledgement_receipt');
 });
 
+Route::post('/submit-application', [ApplicationController::class, 'submitApplication'])->name('submit-application');
+// Route::get('applications/create', 'ApplicationController@showVisaType');
 Route::get('applications/application_list', 'ApplicationController@fetch_data');
-Route::get('applications/past_applications', 'ApplicationController@past_applications');
+Route::get('applications/application_list', 'ApplicationController@fetch_data_forAdmin');
+Route::get('applications/past_applications', 'ApplicationController@past_applications')->name('past_applications');
 Route::get('applications/mark_as_incomplete', 'PendingApprovalsController@mark_as_incomplete');
 Route::get('applications/redeem_promo_code', 'ApplicationController@redeemPromoCode');
 Route::resource('applications','ApplicationController')->middleware('CheckRole:Encoder,Admin');
@@ -27,11 +31,10 @@ Route::resource('applications','ApplicationController')->middleware('CheckRole:E
 Route::get('cashier/receive_payment','ApplicationController@showPaymentForm')->name('cashier.receive_payment')->middleware('CheckRole:Cashier');
 Route::get('cashier/confirm_payment','ApplicationController@retrievePaymentForm');
 Route::get('cashier/customer_payment','ApplicationController@markCustomerAsPaid')->name('cashier.customer_payment');
+Route::get('cashier/customer_payment_unpaid','ApplicationController@markCustomerAsUnpaid')->name('cashier.customer_payment');
 Route::get('cashier/download_report','ApplicationController@downloadReport')->name('cashier.download_report')->middleware('CheckRole:Cashier,Accounting');
 Route::get('cashier/download_acknowledgement_receipt_pdf', 'ApplicationController@downloadAcknowledgementReceipt')->name('cashier.download_acknowledgement_receipt_pdf')->middleware('CheckRole:Cashier');
-
-Route::get('partner_companies/getpartners', 'PartnerCompanyController@getPartnerCompanies');
-Route::resource('partner_companies', 'PartnerCompanyController')->middleware('CheckRole:Admin');
+Route::get('cashier/check_approval_code', 'ApplicationController@checkApprovalCode')->name('cashier.check_approval_code');
 
 Route::get('application_batches/checklist', 'ApplicationBatchController@showChecklist')->name('application_batches.checklist')->middleware('CheckRole:Encoder');
 Route::get('application_batches/checklist_pdf', 'ApplicationBatchController@downloadChecklist')->name('download_checklist_pdf');
@@ -46,6 +49,11 @@ Route::get('admin/branches', 'AdminController@branchList')->name('admin.branches
 Route::get('admin/addbranch', 'AdminController@addBranch')->name('admin.addbranch')->middleware('CheckRole:Admin');
 Route::get('admin/updatebranch', 'AdminController@updateBranch')->name('admin.updatebranch')->middleware('CheckRole:Admin');
 Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name('admin.approvals')->middleware('CheckRole:Admin');
+
+
+//Partner Companies
+Route::get('admin/partner_companies', 'PartnerCompanyController@index')->name('admin.partner_companies')->middleware('CheckRole:Admin');
+Route::get('admin/create_partnerCompanies', 'PartnerCompanyController@createpartnerCompanies')->name('admin.createpartnerCompanies')->middleware('CheckRole:Admin');
 
 //Mode of Payment
 Route::get('admin/mode_of_payment', 'OtherController@modeOfPaymentList')->name('admin.mode_of_payment')->middleware('CheckRole:Admin');

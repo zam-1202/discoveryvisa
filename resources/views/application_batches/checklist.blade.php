@@ -4,7 +4,7 @@
 
 <div class="container">
 	<div class="row justify-content-center">
-		<div class="col-md-8">
+		<div class="col-md-15">
 			@if (session('status'))
 				<div class="alert alert-primary alert-dismissible fade show text-center" role="alert">
 					<strong>{{ session('status') }}</strong>
@@ -26,7 +26,7 @@
 							<table class="table table-striped table-bordered text-center">
 								<tr class="bg-dark text-white">
 									<td style="width:10%;" class="font-weight-bold">No.</td>
-									<td style="width:40%;" class="font-weight-bold">Applicant</td>
+									<td style="width:20%;" class="font-weight-bold">Walk-in</td>
 									<td style="width:25%;" class="font-weight-bold">Reference No</td>
 									<td style="width:25%;"> </td>
 								</tr>
@@ -252,6 +252,8 @@
 <script type="text/javascript">
 $(document).ready(function(){
 
+	console.log(@json($walkin_applications));
+	
 	function submit_incomplete_form(){
 		$.ajax({
 			url: "../applications/mark_as_incomplete",

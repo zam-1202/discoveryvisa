@@ -120,8 +120,14 @@ class AdminController extends Controller
 	 */
 	public function pendingApprovals()
 	{
-		$approval_requests = DB::table('pending_approvals')->where('action', null)->orderby('request_date', 'asc')->get();
-
+		$approval_requests = DB::table('pending_approvals')
+		->where(function ($query) {
+            $query->whereNull('action')
+                  ->orWhere('action', '<>', 'APPROVED')
+                  ->orWhere('action', '<>', 'REJECTED');
+        })
+		->orderby('request_date', 'asc')
+		->get();
 		return view('admin.approvals', compact('approval_requests'));
 	}
 

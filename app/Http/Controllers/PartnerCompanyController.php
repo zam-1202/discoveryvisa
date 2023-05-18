@@ -15,8 +15,10 @@ class PartnerCompanyController extends Controller
      */
     public function index()
     {
-        $data = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
-		return view('partner_companies.index', compact('data'));
+        $result = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
+        $types = PartnerCompany::distinct()->get(['type']);
+        $types = collect($types)->pluck('type')->push('Other');
+		return view('admin.partner_companies', compact('result', 'types'));
     }
 
 	public function filterList(Request $request)
@@ -52,7 +54,13 @@ class PartnerCompanyController extends Controller
      */
     public function create()
     {
-        return view('partner_companies.create');
+        $result = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
+        $types = PartnerCompany::distinct()->get(['type']);
+        $types = collect($types)->pluck('type')->push('Other');
+        $names = PartnerCompany::distinct()->get(['name']);
+
+        return view('partner_companies.create', compact('result', 'types', 'names'));
+
     }
 
     /**
@@ -64,13 +72,14 @@ class PartnerCompanyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-			'name' => 'required',
-			'type' => 'required'
+            'type' => 'required',
+			'name' => 'required'
+
 		]);
 
 		$partnerCompany = new PartnerCompany([
-			'name' => $request->get('name'),
-			'type' => $request->get('type')
+			'type' => $request->get('type'),
+            'name' => $request->get('name')
 		]);
 
 		$partnerCompany->save();
@@ -121,4 +130,37 @@ class PartnerCompanyController extends Controller
     {
         //
     }
+
+    	/**
+	 *
+	 * Add Partner Company to database
+	 *
+	 */
+	public function createpartnerCompanies(Request $request)
+	{
+		if($request->ajax()){
+			$type = $request->get('type');
+			$name = $request->get('name');
+
+			$partnerComp = new PartnerCompany([
+				'type' => $type,
+				'name' => $name
+			]);
+
+			$partnerComp->save();
+
+			$request->session()->flash('status', 'Partner Company successfully added');
+            return response()->json(['success' => true]); // Send a success response
+		}
+	}
 }
+
+// {
+//     $result = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
+//     $types = PartnerCompany::distinct()->get(['type']);
+//     $types = collect($types)->pluck('type')->push('Other');
+//     $names = PartnerCompany::distinct()->get(['name']);
+
+//     return view('partner_companies.create', compact('result', 'types', 'name'));
+
+// }

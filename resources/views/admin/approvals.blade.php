@@ -28,16 +28,18 @@
 						<tbody>
 							@if($approval_requests->count() > 0)
 								@foreach($approval_requests as $req)
-									<tr>
-										<td><a href="{{route('applications.edit', $req->application_id)}}">Application#{{$req->application_id}}</a></td>
-										<td>{{$req->request_type}}</td>
-										<td>{{$req->requested_by}}</td>
-										<td>{{$req->request_date}}</td>
-										<td>
-											<a reqid="{{$req->id}}" title="Approval" class="btn btn-success text-white">Approve</a>
-											<a reqid="{{$req->id}}" title="Rejection" class="btn btn-danger text-white">Reject</a>
-										</td>
-									</tr>
+									@if ($req->action !== 'APPROVED' && $req->action !== 'REJECTED')
+										<tr>
+											<td><a href="{{route('applications.edit', $req	->application_id)}}">Application#{{$req->application_id}}</a></td>
+											<td>{{$req->request_type}}</td>
+											<td>{{$req->requested_by}}</td>
+											<td>{{$req->request_date}}</td>
+											<td>
+												<a reqid="{{$req->id}}" title="Approval" class="btn btn-success text-white">Approve</a>
+												<a reqid="{{$req->id}}" title="Rejection" class="btn btn-danger text-white">Reject</a>
+											</td>
+										</tr>
+									@endif
 								@endforeach
 							@else
 								<tr>
@@ -93,7 +95,7 @@
 				$("#confirm_modal").modal("show");
 			}
 		});
-
+		
 		$(document).on('click', '#submit_btn', function()
 		{
 			$.ajax({
@@ -107,6 +109,36 @@
 		});
 
 	});
+
+	$(document).ready(function(){
+    $(document).on('click','.btn', function(){
+        if($(this).attr('reqid') != null)
+        {
+            $action = $(this).attr('title');
+            $id = $(this).attr('reqid');
+            $("#submit_btn").attr('data-action', $action);
+            $("#submit_btn").attr('data-id', $id);
+            $("#confirm_msg").html('Confirm '.concat($action, '?'));
+            $("#confirm_modal").modal("show");
+        }
+    });
+
+    // $(document).on('click', '#submit_btn', function()
+    // {
+    //     $.ajax({
+    //         url: "../applications/mark_as_completed",
+    //         data: {
+    //             request_type: 'Mark as Completed',
+    //             application_id: $(this).attr("data-id"),
+    //             approval_code: $(this).attr("data-action")
+    //         },
+    //         success: function() {
+    //             location.reload(true);
+    //         }
+    //     });
+    // });
+});
+
 </script>
 
 @endsection

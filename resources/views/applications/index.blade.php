@@ -71,5 +71,35 @@
 		});
 
 	});
+
+	$(document).ready(function()
+	{
+		fetch_data_forAdmin(1);
+
+		function fetch_data_forAdmin(page)
+		{
+			$.ajax({
+				url: "applications/application_list?page=" + page,
+				data: {searchString:$('#applicantSearch').val()},
+				success: function(data)
+				{
+					$('#application_list').html(data);
+				}
+			});
+		}
+
+		$(document).on('click','.pagination a', function(event)
+		{
+			event.preventDefault();
+			var page = $(this).attr('href').split('page=')[1];
+			fetch_data_forAdmin(page);
+		});
+
+
+		$(document).on('keyup', '#applicantSearch', function(){
+			fetch_data_forAdmin(1);
+		});
+
+	});
 </script>
 @endsection

@@ -41,7 +41,6 @@
 <script type="text/javascript">
 
 	$(document).ready(function(){
-
 		$('[data-toggle="tooltip"]').tooltip();
 
 		$(document).on('click','#receive_payment_btn', function(){
@@ -73,6 +72,7 @@
 				success: function(message){
 					$('#confirm_payment_message').html(message);
 					$('#confirm_payment_modal').modal();
+					$('#btn_receipt').removeClass('disabled');
 				}
 			});
 		});
@@ -80,6 +80,7 @@
 		$('#confirm_payment_modal').on('hidden.bs.modal', function(){
 			$('#receive_payment_btn').click();
 		});
+
 	});
 
 </script>

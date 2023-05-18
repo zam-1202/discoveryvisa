@@ -67,23 +67,23 @@
                                       <tbody>
                                           <tr>
                                             <td class="bg-success text-left">
-                                                <ul class="list-group" id="filipino_documents">
+                                            <ul class="list-group" id="filipino_documents">
                                                     @foreach ($docs_filipino as $value)
-                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}'/> {{ $value->name }} </li>
+													    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
                                                     @endforeach
                                                 </ul>
                                             </td>
                                             <td class="bg-info text-left">
                                                 <ul class="list-group" id="japanese_documents">
                                                     @foreach ($docs_japanese as $value)
-                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}'/> {{ $value->name }} </li>
+													    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
                                                     @endforeach
                                                 </ul>
                                             </td>
                                             <td class="bg-dark text-left">
                                                 <ul class="list-group" id="foreign_documents">
                                                     @foreach ($docs_foreign as $value)
-                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}'/> {{ $value->name }} </li>
+													    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
                                                     @endforeach
                                                 </ul>
                                             </td>
@@ -116,7 +116,6 @@
     $(document).ready(function(){
         $(document).on('change', 'input[name="submitted_documents"]', function(){
 			var checkboxes = $('input[name="submitted_documents"]:checked');
-
 			var output = [];
 
 			checkboxes.each(function(){

@@ -19,6 +19,7 @@ class CreateApplicationsTable extends Migration
 			$table->string('application_status');
 			$table->enum('customer_type',['Walk-In','PIATA','PTAA','Corporate']);
 			$table->string('customer_company');
+			$table->string('group_name');
 			$table->enum('branch',['Manila','Cebu','Davao']);
 			$table->string('lastname');
 			$table->string('firstname');
@@ -34,6 +35,7 @@ class CreateApplicationsTable extends Migration
 			$table->string('remarks');
 			$table->string('visa_type');
 			$table->decimal('visa_price');
+			$table->decimal('handling_price');
 			$table->string('promo_code');
 			$table->string('documents_submitted');
 			$table->string('payment_status');

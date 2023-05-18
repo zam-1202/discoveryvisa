@@ -22,19 +22,23 @@ class RequiredDocumentController extends Controller
     public function addRequiredDocument(Request $request)
     {
         $request->validate([
-			'name' => 'required',
+            'name' => 'required',
             'type' => ['required', Rule::in(['FILIPINO', 'JAPANESE', 'FOREIGN'])],
-		]);
-
+        ]);
+    
         RequiredDocument::create(
             [
                 'name' => $request->name,
                 'type' => $request->type
             ]);
-
+    
         $request->session()->flash('status', 'Required Document successfully added');
-
+        
+        // get the updated data and pass it to the view
+        $result = RequiredDocument::orderBy('id', 'asc')->paginate(20);
+        return view('admin.required_documents', compact('result'));
     }
+    
 
     public function updateRequiredDocument(Request $request)
     {

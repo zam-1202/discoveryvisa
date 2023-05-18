@@ -34,7 +34,7 @@ class VisaTypeController extends Controller
             array_push($documents, ['filipino' => $docs_filipino, 'japanese' => $docs_japanese, 'foreign' => $docs_foreign]);
         }
 
-        return view('admin.visa.index', compact('result', 'documents'));
+        return view('admin.visa.index', compact('result', 'documents', 'docs_filipino', 'docs_japanese', 'docs_foreign'));
     }
 
     /**
@@ -52,6 +52,7 @@ class VisaTypeController extends Controller
 
         return view('admin.visa.create', compact('docs_filipino', 'docs_japanese', 'docs_foreign'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -129,7 +130,7 @@ class VisaTypeController extends Controller
         $request->validate([
 			'name' => 'required|unique:visa_types,name,' .$id,
             'handling_fee' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'visa_fee' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+            'visa_fee' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
 		]);
 
         $visa = VisaType::findOrFail($id);

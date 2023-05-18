@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+
+// use App\User;
 use App\AccountReceivable;
 use Illuminate\Http\Request;
 use DB;
@@ -17,6 +19,7 @@ use App\Other;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
 use PDF;
+$visaTypes = VisaType::all();
 
 class ApplicationController extends Controller
 {
@@ -31,11 +34,11 @@ class ApplicationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
-    {
-        $data = DB::table('applications')->where('branch', '=', $request->user()->branch)->orderBy('id','desc')->paginate(20);
-		return view('applications.index',compact('data'));
-    }
+		public function index(Request $request)
+		{
+			$data = DB::table('applications')->where('branch', '=', $request->user()->branch)->orderBy('id','desc')->paginate(20);
+			return view('applications.index',compact('data'));
+		}
 
 	/**
 	 * AJAX function for Application Search
@@ -54,7 +57,8 @@ class ApplicationController extends Controller
 							$query->where('reference_no','LIKE','%'.$searchString.'%')
 								  ->orWhere('firstname','LIKE','%'.$searchString.'%')
 								  ->orWhere('middlename','LIKE','%'.$searchString.'%')
-								  ->orWhere('lastname','LIKE','%'.$searchString.'%');
+								  ->orWhere('lastname','LIKE','%'.$searchString.'%')
+								  ->orWhere('group_name','LIKE','%'.$searchString.'%');
 						})
 				 ->orderBy('id','desc')
 				 ->paginate(20);
@@ -68,6 +72,37 @@ class ApplicationController extends Controller
 	}
 
 	/**
+	 * AJAX function for Application Search FOR ADMIN ONLY
+	 */
+	public function fetch_data_forAdmin(Request $request)
+	{
+		if($request->ajax())
+		{
+			$searchString = $request->get('searchString');
+
+			if($searchString != '')
+			{
+				$data = DB::table('applications')
+				 ->where(function($query) use ($searchString){
+							$query->where('reference_no','LIKE','%'.$searchString.'%')
+								  ->orWhere('firstname','LIKE','%'.$searchString.'%')
+								  ->orWhere('middlename','LIKE','%'.$searchString.'%')
+								  ->orWhere('lastname','LIKE','%'.$searchString.'%')
+								  ->orWhere('group_name','LIKE','%'.$searchString.'%');
+						})
+				 ->orderBy('application_date','desc')
+				 ->paginate(20);
+			}
+			else {
+				$data = DB::table('applications')->orderBy('id','desc')->paginate(20);
+			}
+
+			return view('applications.application_list', compact('data'))->render();
+		}
+	}
+	
+
+	/**
 	 * For Past Applications pop-up window
 	 */
 	public function past_applications(Request $request)
@@ -78,6 +113,7 @@ class ApplicationController extends Controller
 			$firstname = $request->get('firstname');
 
 			$pastApplications = DB::table('applications')
+				->select('visa_type', 'application_date', 'application_status')
 				->where('lastname', 'LIKE', '%'.$lastname.'%')
 				->where('firstname', 'LIKE', '%'.$firstname.'%')
 				->orderBy('id', 'desc')
@@ -98,8 +134,36 @@ class ApplicationController extends Controller
 		$visatypes = VisaType::orderBy('id', 'asc')->get();
 		$documentlist = RequiredDocument::orderBy('id', 'asc')->get();
 		$customer_type_array = $this->customer_type_array;
-        return view('applications.create', compact('visatypes', 'documentlist', 'customer_type_array'));
+        
+		
+		$result = VisaType::with('documents')->orderBy('id', 'asc')->paginate(20);
+
+		$docs = RequiredDocument::all();
+
+        $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
+        $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
+        $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
+		
+        // $documents = [];
+        // foreach ($result as $value) {
+        //     $docs_filipino = [];
+        //     $docs_japanese = [];
+        //     $docs_foreign = [];
+        //     foreach ($value->documents as $key => $document) {
+        //         if ($document->type == 'FILIPINO') {
+        //             array_push($docs_filipino, $document);
+        //         } elseif ($document->type == 'JAPANESE') {
+        //             array_push($docs_japanese, $document);
+		// 		} elseif ($document->type == 'FOREIGN') {
+		// 			array_push($docs_foreign, $document);
+		// 		}
+		// 	}
+			
+        //     array_push($documents, ['filipino' => $docs_filipino, 'japanese' => $docs_japanese, 'foreign' => $docs_foreign]);
+        // }
+		return view('applications.create', compact('visatypes', 'documentlist', 'documents', 'result', 'selected_docs', 'docs_filipino', 'docs_japanese', 'docs_foreign'));
     }
+	
 
     /**
      * Store a newly created resource in storage.
@@ -112,20 +176,22 @@ class ApplicationController extends Controller
 
         $request->validate([
 			'customer_type' => 'required',
+			'group_name' => 'nullable',
 			'lastname' => 'required',
 			'firstname' => 'required',
-			'middlename' => 'required',
+			'middlename' => 'nullable',
 			'birthdate' => 'required|date',
 			'gender' => 'required',
 			'marital_status' => 'required',
 			'address' => 'required',
-			'email' => 'required',
-			'mobile_no' => 'required',
+			'email' => 'nullable|email',
+			'mobile_no' => 'nullable',
 			'passport_no' => 'required',
 			'passport_expiry' => 'required|date',
 			'departure_date' => 'required|date',
 			'visa_type' => 'required',
-			'visa_price' => 'required',
+			'visa_price' => 'nullable',
+			'handling_price' => 'required',
 			'promo_code' => 'required',
 			'documents_submitted' => 'required'
 		]);
@@ -135,6 +201,7 @@ class ApplicationController extends Controller
 			'application_status' => 1,
 			'customer_type' => $request->get('customer_type'),
 			'customer_company'  => $request->get('customer_company'),
+			'group_name' => strtoupper($request->get('group_name')),
 			'branch' => $request->user()->branch,
 			'lastname' => strtoupper($request->get('lastname')),
 			'firstname' => strtoupper($request->get('firstname')),
@@ -152,6 +219,7 @@ class ApplicationController extends Controller
 			'remarks' => $request->get('remarks'),
 			'visa_type' => $request->get('visa_type'),
 			'visa_price' => $request->get('visa_price'),
+			'handling_price' => $request->get('handling_price'),
 			'promo_code' => $request->get('promo_code'),
 			'documents_submitted' => $request->get('documents_submitted'),
 			'payment_status' => 'UNPAID',
@@ -184,10 +252,39 @@ class ApplicationController extends Controller
     public function edit($id)
     {
         $application = Application::find($id);
+		// $application = Application::where('reference_no', $request->ref_no)->first();
 		$visatypes = VisaType::orderBy('id', 'asc')->get();
 		$documentlist = RequiredDocument::orderBy('id', 'asc')->get();
 		$customer_type_array = $this->customer_type_array;
-		return view('applications.edit', compact('application','visatypes','documentlist', 'customer_type_array'));
+        $submittedDocs = explode(",",$application->documents_submitted);
+        $documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
+        
+		
+		$result = VisaType::with('documents')->orderBy('id', 'asc')->paginate(20);
+
+		$docs = RequiredDocument::all();
+
+        $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
+        $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
+        $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
+
+        // $documents = [];
+        // foreach ($result as $value) {
+        //     $docs_filipino = [];
+        //     $docs_japanese = [];
+        //     $docs_foreign = [];
+        //     foreach ($value->documents as $key => $document) {
+        //         if ($document->type == 'FILIPINO') {
+        //             array_push($docs_filipino, $document);
+        //         } elseif ($document->type == 'JAPANESE') {
+        //             array_push($docs_japanese, $document);
+        //         } else {
+        //             array_push($docs_foreign, $document);
+        //         }
+        //     }
+        //     array_push($documents, ['filipino' => $docs_filipino, 'japanese' => $docs_japanese, 'foreign' => $docs_foreign]);
+        // }
+		return view('applications.edit', compact('submittedDocs', 'application', 'visatypes', 'documentlist', 'customer_type_array', 'documents', 'result', 'selected_docs', 'docs_filipino', 'docs_japanese', 'docs_foreign'));
     }
 
     /**
@@ -203,19 +300,21 @@ class ApplicationController extends Controller
 			'reference_no' => 'required',
 			'application_status' => 'required',
 			'customer_type' => 'required',
+			'group_name' => 'nullable',
 			'branch' => 'required',
 			'lastname' => 'required',
 			'firstname' => 'required',
-			'middlename' => 'required',
+			'middlename' => 'nullable',
 			'birthdate' => 'required|date',
 			'address' => 'required',
-			'email' => 'required',
-			'mobile_no' => 'required',
+			'email' => 'nullable|email',
+			'mobile_no' => 'nullable',
 			'passport_no' => 'required',
 			'passport_expiry' => 'required|date',
 			'departure_date' => 'required|date',
 			'visa_type' => 'required',
-			'visa_price' => 'required',
+			'visa_price' => 'nullable',
+			'handling_price' => 'required',
 			'documents_submitted' => 'required',
 			'payment_status' => 'required'
 		]);
@@ -244,6 +343,7 @@ class ApplicationController extends Controller
 		$application->reference_no = $request->get('reference_no');
 		$application->customer_type = $request->get('customer_type');
 		$application->customer_company = $request->get('customer_company');
+		$application->group_name = $request->get('group_name');
 		$application->branch = $request->get('branch');
 		$application->lastname = strtoupper($request->get('lastname'));
 		$application->firstname = strtoupper($request->get('firstname'));
@@ -259,6 +359,7 @@ class ApplicationController extends Controller
 		$application->remarks = $request->get('remarks');
 		$application->visa_type = $request->get('visa_type');
 		$application->visa_price = $request->get('visa_price');
+		$application->handling_price = $request->get('handling_price');
 		$application->promo_code = $request->get('promo_code');
 		$application->discount_amount = $request->get('discount_amount');
 		$application->documents_submitted = $request->get('documents_submitted');
@@ -291,7 +392,7 @@ class ApplicationController extends Controller
 	 * Payment Form for Cashier's use
 	 */
 	public function showPaymentForm(Request $request)
-	{
+	{	
 		return view('cashier.receive_payment');
 	}
 
@@ -305,7 +406,10 @@ class ApplicationController extends Controller
             $modeOfPayment = Arr::prepend($modeOfPayment, '', '');
             $paymentRequest = Arr::pluck(collect(Other::where('type', 'pr')->get()), 'name', 'name');
             $paymentRequest = Arr::prepend($paymentRequest, '', '');
-            $visaType = VisaType::where('name', $application->visa_type)->first();
+			$visaType = null;
+			if ($application) {
+			$visaType = VisaType::where('name', $application->visa_type)->first();
+			}
 
 			return view('cashier.confirm_payment', compact('searchString', 'application', 'modeOfPayment', 'paymentRequest', 'visaType'));
 		}
@@ -338,6 +442,21 @@ class ApplicationController extends Controller
 		}
 		return 'Payment for '. $request->get('reference_no') . ' received';
 	}
+
+	public function markCustomerAsUnpaid(Request $request)
+{
+	$application = DB::table('applications')
+                ->where('reference_no', '=', $request->get('reference_no'))
+                ->update(['or_number' => null,
+                          'payment_mode' => null,
+                          'payment_request' => null,
+                          'payment_date' => null,
+                          'payment_received_by' => null,
+                          'payment_status' => 'UNPAID']);
+
+    return 'Payment for ' . $request->get('reference_no') . ' marked as UNPAID';
+}
+
 
 	/**
 	 * Generate unique Reference_No
@@ -410,8 +529,48 @@ class ApplicationController extends Controller
         $application = Application::where('reference_no', $request->ref_no)->first();
         $submittedDocs = explode(",",$application->documents_submitted);
         $documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
-
         $pdf = PDF::loadView('cashier.acknowledgement_receipt', ['application' => $application, 'docs' => $documents]);
         return $pdf->download('Checklist.pdf');
     }
+	
+	public function showVisaType($visaID){
+		$visaPrice = 0;
+		$handlingFee = 0;
+		 $result = VisaType::where('id', $visaID)->with('documents')->orderBy('id', 'asc')->first();
+
+        $selected_docs = [];
+        foreach ($result->documents as $key => $value) {
+            array_push($selected_docs, $value->id);
+        }
+
+        $docs = RequiredDocument::all();
+
+        $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
+        $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
+        $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
+		
+	}
+
+	public function checkApprovalCode(Request $request)
+	{
+		if($request->ajax())
+		{
+			$approval_code = $request->get('approval_code');
+			$user_type = $request->user()->role;
+
+			$code_is_valid = false;
+
+			$approver;
+			$approval_request;
+
+					if($approval_code != '') {
+						$approver = DB::table('users')->where('approval_code', $approval_code);
+						
+						if($approver->count() > 0){
+							$code_is_valid = true;
+							return response()->json(['status' => 'success']);
+						}
+					} return response()->json(['status' => 'Request has been rejected'], 400);
+		}
+	}
 }

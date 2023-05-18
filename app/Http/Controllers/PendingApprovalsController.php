@@ -20,6 +20,7 @@ class PendingApprovalsController extends Controller
      */
     public function index()
     {
+        
         //
     }
 
@@ -52,7 +53,9 @@ class PendingApprovalsController extends Controller
      */
     public function show($id)
     {
+        
         //
+
     }
 
     /**
@@ -123,7 +126,7 @@ class PendingApprovalsController extends Controller
 							'request_date' => Carbon::now(),
 							'officer_in_charge' => $request->user()->username . " using approval code of " . $approver->first()->username,
 							'action_date' => Carbon::now(),
-							'action' => 'APPROVED'
+							// 'action' => 'APPROVED'
 						]);
 						$approval_request->save();
 
@@ -257,4 +260,6 @@ class PendingApprovalsController extends Controller
 			}
 		}
 	}
+
+    
 }
