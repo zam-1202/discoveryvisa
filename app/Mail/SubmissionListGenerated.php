@@ -33,7 +33,9 @@ class SubmissionListGenerated extends Mailable
      */
     public function build()
     {
-        $mail = $this->from('swarley002@gmail.com', 'Discovery Visa System')->subject('Submission Lists for ' . $this->current_date)->view('emails.submission_list');
+        $mail = $this->from('nortesam6@gmail.com', 'Discovery Visa System')
+        ->subject('Submission Lists for ' . $this->current_date)
+        ->view('emails.submission_list');
 		
 		foreach($this->pdf_files as $key => $value)
 		{
@@ -42,4 +44,5 @@ class SubmissionListGenerated extends Mailable
 		
 		return $mail;
     }
+
 }

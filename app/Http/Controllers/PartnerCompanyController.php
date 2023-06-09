@@ -59,6 +59,7 @@ class PartnerCompanyController extends Controller
         // $types['Other'] = 'Other';
         $names = PartnerCompany::distinct()->get(['name']);
         $types = [
+            'Walk-In' => 'Walk-In',
             'PIATA' => 'PIATA',
             'PTAA' => 'PTAA',
             'Corporate' => 'Corporate',
@@ -139,7 +140,7 @@ class PartnerCompanyController extends Controller
         //
     }
 
-    	/**
+    /**
 	 *
 	 * Add Partner Company to database
 	 *
@@ -162,25 +163,41 @@ class PartnerCompanyController extends Controller
 		}
 	}
 
+    /**
+	 *
+	 * Edit Partner Company to database
+	 *
+	 */
+
+     public function editPartnerCompanies(Request $request)
+     {
+		$partnerComp = PartnerCompany::find($id);
+        $company_array = array("Walk-In" => "Walk-In", "PIATA" => "PIATA", "PTAA" => "PTAA", "Corporate" => "Corporate", "POEA" => "POEA", "Other" => "Other");
+        return view('admin.partner_companies', compact('partnerComp', 'company_array'));
+    
+     }
+ 
+    /**
+	 *
+	 * Update Partner Company to database
+	 *
+	 */
+    
     public function updatepartnerCompanies(Request $request)
     {
-        if ($request->ajax()) {
-            
-            $id = $request->get('id');
-            $type = $request->get('type');
-            $name = $request->get('name');
-    
-            $partnerComp = PartnerCompany::find($id);
-    
-            $partnerComp->type = $type;
-            $partnerComp->name = $name;
-    
+		if($request->ajax()){
+
+			$name = $request->get('name');
+			$type = $request->get('type');
+
+
+            $partnerComp->name = $request->get('name');
+            $partnerComp->type = $request->get('type');
             $partnerComp->save();
-    
+
             $request->session()->flash('status', 'Partner Company successfully updated');
-            } else {
-                // Handle the case where the partner company is not found
-                $request->session()->flash('status', 'Partner Company not found');
-            }
-        }
+		}
+	}
+
+    
 }

@@ -25,7 +25,8 @@
 					<table class="table table-hover table-bordered text-center">
 						<thead class="thead-dark">
 							<th style="width: 30%;">Branch Code</th>
-							<th style="width: 60%;">Branch Description</th>
+							<th style="width: 40%;">Branch Description</th>
+							<th style="width: 60%;">Pick-Up Fee</th>
 							<th style="width: 10%;"> </th>
 						</thead>
 						<tbody>
@@ -34,7 +35,8 @@
 									<tr>
 										<td>{{$branch->code}}</td>
 										<td>{{$branch->description}}</td>
-										<td><a href="" class="btn btn-primary" data-toggle="modal" data-target="#update_branch_modal" data-id="{{ $branch->id }}" data-code="{{ $branch->code }}" data-description="{{ $branch->description }}">Update</a></td>
+										<td>{{$branch->pickup_price}}</td>
+										<td><a href="" class="btn btn-primary" data-toggle="modal" data-target="#update_branch_modal" data-id="{{ $branch->id }}" data-code="{{ $branch->code }}" data-description="{{ $branch->description }}" data-pickup_price="{{ $branch->pickup_price }}">Update</a></td>
 									</tr>
 								@endforeach
 							@else
@@ -76,6 +78,10 @@
 						<div class="col-md-5 text-right"><label>Branch Description</label></div>
 						<div class="col-md-7">{{Form::text('description', '', ['class' => 'form-control', 'id' => 'branch_desc'])}}</div>
 					</div>
+					<div class="form-group row">
+						<div class="col-md-5 text-right"><label>Pick-Up Fee</label></div>
+						<div class="col-md-7">{{Form::text('pickup_price', '', ['class' => 'form-control', 'id' => 'branch_pickup_price'])}}</div>
+					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -109,6 +115,10 @@
 						<div class="col-md-5 text-right"><label>Branch Description</label></div>
 						<div class="col-md-7">{{Form::text('description', '', ['class' => 'form-control', 'id' => 'update_branch_desc'])}}</div>
 					</div>
+					<div class="form-group row">
+						<div class="col-md-5 text-right"><label>Pick-Up Fee</label></div>
+						<div class="col-md-7">{{Form::text('pickup_price', '', ['class' => 'form-control', 'id' => 'update_branch_pickup_price'])}}</div>
+					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -130,11 +140,13 @@
 		{
 			var branch_code = $("#branch_code").val().toUpperCase();
 			var branch_desc = $("#branch_desc").val();
+			var branch_pickup_price = $("#branch_pickup_price").val();
 
-			if(branch_code == '' || branch_desc == ''){
+
+			if(branch_code == '' || branch_desc == '' || branch_pickup_price == ''){
 				$("#errorMsg").html('Branch Code or Branch Description cannot be empty.');
 			} else if(branch_code.length != 3){
-				$("#errorMsg").html('Branch Code should be exactly three characters');
+				$("#errorMsg").html('Branch Code should be exactly three characters');	
 			} else {
 				var branch_array = {!! $branches->toJson() !!};
 				var branchCheck = $.grep(branch_array, function(obj){ return obj.code == branch_code;});
@@ -144,7 +156,7 @@
 				} else {
 					$.ajax({
 						url: "../admin/addbranch",
-						data: {branch_code:branch_code,branch_desc:branch_desc},
+						data: {branch_code:branch_code,branch_desc:branch_desc,branch_pickup_price:branch_pickup_price},
 						success: function()
 						{
 							location.reload(true);
@@ -159,10 +171,12 @@
             let id = button.attr('data-id');
             let code = button.attr('data-code');
             let description = button.attr('data-description');
+			let pickup_price = button.attr('data-pickup_price');
 
             $('#update_branch_id').val(id);
             $('#update_branch_code').val(code);
             $('#update_branch_desc').val(description);
+			$('#update_branch_pickup_price').val(pickup_price);
         });
 
 
@@ -171,6 +185,7 @@
             var barnch_id = $("#update_branch_id").val();
 			var branch_code = $("#update_branch_code").val().toUpperCase();
 			var branch_desc = $("#update_branch_desc").val();
+			var branch_pickup_price = $("#update_branch_pickup_price").val();
 
 			if(branch_code == '' || branch_desc == ''){
 				$("#update_errorMsg").html('Branch Code or Branch Description cannot be empty.');
@@ -187,7 +202,7 @@
 				} else {
 					$.ajax({
 						url: "../admin/updatebranch",
-						data: {branch_id:barnch_id,branch_code:branch_code,branch_desc:branch_desc},
+						data: {branch_id:barnch_id,branch_code:branch_code,branch_desc:branch_desc,branch_pickup_price:branch_pickup_price},
 						success: function()
 						{
 							location.reload(true);

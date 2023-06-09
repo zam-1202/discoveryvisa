@@ -46,7 +46,10 @@ h6 {
             <div class="text-left">
                 <h6 style="font-size: 11px;">REFERENCE #: {{ $application->reference_no }}</h6>
                 <h6 style="font-size: 11px;">APPLICANT NAME: {{ $application->lastname }}, {{ $application->firstname }} {{ $application->middlename }}</h6>
-                <h6 style="font-size: 11px;">AMOUNT OF: {{ number_format($application->visa_price + $application->handling_fee, 2, '.', ',') }}PHP</h6>                
+                <h6 style="font-size: 11px;">VISA FEE: {{ number_format($application->visa_price, 2, '.', ',') }}PHP</h6>      
+                <h6 style="font-size: 11px;">HANDLING FEE: {{ number_format($application->handling_price, 2, '.', ',') }}PHP</h6>
+                <h6 style="font-size: 11px;">PICK UP FEE: {{ number_format($application->pickup_fee, 2, '.', ',') }}PHP</h6>      
+                <h6 style="font-size: 11px;">TOTAL AMOUNT OF: {{ number_format($application->visa_price + $application->handling_price + $application->pickup_fee, 2, '.', ',') }}PHP</h6>                
                 <h6 style="font-size: 11px;">VISA TYPE: {{ $application->visa_type }}</h6>
             </div>
         </div>

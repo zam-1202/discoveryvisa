@@ -29,7 +29,7 @@
                             <label for="discount" class="col-md-4 col-form-label text-md-right">{{ __('Discount') }}</label>
 
                             <div class="col-md-6">
-                                <input id="discount" type="text" class="form-control text-center @error('discount') is-invalid @enderror" name="discount" value="{{ old('discount') }}" required>
+                                <input id="discount" type="text" class="form-control text-center @error('discount') is-invalid @enderror" name="discount" value="{{ old('discount') }}" pattern="[1-9]\d*%?" title="Please enter valid discount value"  required>
 
                                 @error('discount')
                                     <span class="invalid-feedback" role="alert">
@@ -83,3 +83,19 @@
     </div>
 </div>
 @endsection
+
+<!-- @section('scripts')
+<script>
+
+document.getElementById('discount').addEventListener('input', function(event) {
+    var inputValue = event.target.value;
+    var validCharacters = /^[\d.%]*$/; // Regular expression to allow digits, dot, and percent character
+
+    if (!validCharacters.test(inputValue)) {
+        event.target.value = inputValue.replace(/[^0-9.%]/g, ''); // Remove invalid characters
+    }
+});
+
+
+</script>
+@endsection -->

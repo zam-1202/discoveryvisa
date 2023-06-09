@@ -2,37 +2,52 @@
     <div class="col-md-8">
         <table class="table">
             <thead class="thead-dark">
-                <th class="text-right align-top" style="width:30%;">Reference No: </th>
-                <th class="text-break align-top" style="width:70%;">{{ $searchString }}</th>
+                <tr>
+                    <th class="text-right align-top" style="width:30%;">Reference No:</th>
+                    <th class="text-break align-top" style="width:70%;">{{ $searchString }}</th>
+                </tr>
             </thead>
             <tbody>
-            @if(!is_null($application))
+                @if (!is_null($application))
                 {{Form::hidden('reference_no', $application->reference_no, ['id' => 'reference_no'])}}
                 <tr class="border bg-white">
-                    <td class="text-right">Name of Applicant: </td>
-                    <td>{{ $application->lastname}}, {{ $application->firstname }} {{ $application->middlename }}</td>
+                    <td class="text-right">Name of Applicant:</td>
+                    <td>{{ $application->lastname }}, {{ $application->firstname }} {{ $application->middlename }}</td>
                 </tr>
                 <tr class="border bg-white">
-                    <td class="text-right">Visa Price: </td>
+                    <td class="text-right">Visa Price:</td>
                     <td>{{ $application->visa_price }} ({{ $application->promo_code }})</td>
                 </tr>
                 <tr class="border bg-white">
-                    <td class="text-right">Handling Price: </td>
+                    <td class="text-right">Handling Price:</td>
                     <td>{{ $application->handling_price }}</td>
                 </tr>
                 <tr class="border bg-white">
-                    <td class="text-right">OR/ SI/ PR No.: </td>
-                    <td>{{Form::text('or_number', $application->or_number, ['class' => 'form-control', 'id' => 'or_number', 'placeholder' => '(optional)', 'autocomplete' => 'off', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}</td>
+                    <td class="text-right">Pick Up Fee:</td>
+                    <td>{{ $application->pickup_fee }}</td>
+                </tr>
+                @if ($application->customer_type != 'Corporate')
+                <tr class="border bg-white">
+                    <td class="text-right">OR/ SI/ PR No.:</td>
+                    <td>
+                        {{Form::text('or_number', $application->or_number, ['class' => 'form-control', 'id' => 'or_number', 'placeholder' => '(optional)', 'autocomplete' => 'off', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}
+                    </td>
                 </tr>
                 <tr class="border bg-white">
-                    <td class="text-right">Mode of Payment: </td>
-                    <td>{{Form::select('payment_mode',$modeOfPayment, $application->payment_mode, ['class' => 'form-control text-center', 'id' => 'payment_mode', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}</td>
+                    <td class="text-right">Mode of Payment:</td>
+                    <td>
+                        {{Form::select('payment_mode', $modeOfPayment, $application->payment_mode, ['class' => 'form-control text-center', 'id' => 'payment_mode', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}
+                    </td>
                 </tr>
                 <tr class="border bg-white">
-                    <td class="text-right">Payment Request: </td>
-                    <td>{{Form::select('payment_request',$paymentRequest, $application->payment_request, ['class' => 'form-control text-center', 'id' => 'payment_request', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}</td>
+                    <td class="text-right">Payment Request:</td>
+                    <td>
+                        {{Form::select('payment_request', $paymentRequest, $application->payment_request, ['class' => 'form-control text-center', 'id' => 'payment_request', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}
+                    </td>
                 </tr>
-                @if($application->payment_status == 'UNPAID')
+                @endif
+
+                @if ($application->payment_status == 'UNPAID')
                 <tr class="border bg-white">
                     <td colspan="2" class="text-center">
                         <button class="btn btn-success" id="confirm_btn">Confirm Payment</button>
@@ -41,34 +56,37 @@
                 </tr>
                 @else
                 <tr class="border bg-white">
-                    <td class="text-right">Payment Status: </td>
+                    <td class="text-right">Payment Status:</td>
                     <td>
-                        {{ Form::select('payment_status', ['PAID' => 'PAID', 'UNPAID' => 'UNPAID'], $application->payment_status, ['class' => 'form-control', 'id' => 'payment_status', 'disabled' => ($application->payment_status == 'PAID')]) }}
+                        {{Form::select('payment_status', ['PAID' => 'PAID', 'UNPAID' => 'UNPAID'], $application->payment_status, ['class' => 'form-control', 'id' => 'payment_status', 'disabled' => ($application->payment_status == 'PAID')])}}
                     </td>
                 </tr>
                 <tr class="border bg-white">
                     <td colspan="3" class="text-center">
-                        <button data-toggle="modal" data-target="#modify_payment" name = "edit_btn" class="btn btn-warning" id="edit_btn">Modify Payment</button>
+                        <button data-toggle="modal" data-target="#modify_payment" name="edit_btn" class="btn btn-warning" id="edit_btn">Modify Payment</button>
                         <button class="btn btn-dark" id="confirm_btn_modify">Confirm Payment</button>
                         <button class="btn btn-danger" id="close_btn">Close</button>
                     </td>
                 </tr>
                 @endif
-            @else
+                @else
                 <tr>
                     <td colspan="2" class="text-center border bg-white text-danger"><h1>No Data Found</h1></td>
                 </tr>
                 <tr class="border bg-white">
                     <td colspan="2" class="text-center"><button class="btn btn-danger" id="close_btn">Close</button></td>
                 </tr>
-            @endif
+                @endif
             </tbody>
         </table>
     </div>
-    <a href="{{ $application ? route('cashier.download_acknowledgement_receipt_pdf', ['ref_no' => $application->reference_no]) : '#' }}" id="btn_receipt" class="btn btn-primary w-100">ACKNOWLEDGEMENT RECEIPT<span style="font-size:20px;" class="material-icons align-bottom"></span></a>
+    @if ($application && $application->customer_type != 'Corporate')
+    <a href="{{ route('cashier.download_acknowledgement_receipt_pdf', ['ref_no' => $application->reference_no]) }}" id="btn_receipt" class="btn btn-primary w-100">ACKNOWLEDGEMENT RECEIPT<span style="font-size:20px;" class="material-icons align-bottom"></span></a>
+
+    @endif
 </div>
 
-<div class="modal" id="modify_payment">
+<div class="modal fade" id="modify_payment">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-secondary text-white">
@@ -79,16 +97,14 @@
 				<div class="spinner-border text-info"></div>
 			</div>
 			<div class="modal-footer">
-                <button type="button" class="btn btn-info" id="modify_payment_btns">Modify Payment</button>
+                <button type="button" class="btn btn-success" id="modify_payment_btns">Modify Payment</button>
 				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 		    </div>
 		</div>
 	</div>
 
-
 <script type="text/javascript">
     
-
 
 $(document).ready(function() {
     $('#confirm_btn').prop('disabled', true);
@@ -169,15 +185,37 @@ function modify_payment_btn() {
                 });
             } else {
                 // If the approval code is invalid, show an error message
-                $('#modify_payment div.modal-dialog').addClass('shake');
-                setTimeout(function() {
-                    $('#modify_payment div.modal-dialog').removeClass('shake');
-                    $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>" + response.message + "</div>");
-                }, 500);
+                $('#approval_code').addClass('invalid-field'); // Add the CSS class to make the field red
+                if (response.status === 'Request has been rejected') {
+                    $('#modify_payment div.modal-dialog').addClass('shake');
+                    setTimeout(function() {
+                        $('#modify_payment div.modal-dialog').removeClass('shake');
+                        $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>Request has been rejected</div>");
+                    }, 500);
+                } else {
+                    $('#modify_payment div.modal-dialog').addClass('shake');
+                    setTimeout(function() {
+                        $('#modify_payment div.modal-dialog').removeClass('shake');
+                        $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>Incorrect Password</div>");
+                    }, 500);
+                }
             }
+        },
+        error: function() {
+            // Handle the error condition
+            console.log('Error occurred during AJAX request');
+            // Show a generic error message to the user
+            $('#modify_payment div.modal-dialog').addClass('shake');
+            setTimeout(function() {
+                $('#modify_payment div.modal-dialog').removeClass('shake');
+                $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>An error occurred. Please try again later.</div>");
+            }, 500);
         }
     });
 }
+
+
+
 
 
 $('#modify_payment').on('hidden.bs.modal', function(){

@@ -8,6 +8,9 @@ use DB;
 
 use App\AccountReceivable;
 use App\Application;
+use Carbon\Carbon;
+
+
 
 class AccountReceivableController extends Controller
 {
@@ -123,4 +126,52 @@ class AccountReceivableController extends Controller
 			$receivable->save();
 		}
 	}
+public function markCustomerAsPaid(Request $request)
+{
+    $application = DB::table('applications')
+        ->where('reference_no', '=', $request->get('reference_no'))
+        ->update([
+            'or_number' => $request->get('or_number'),
+            'payment_mode' => $request->get('payment_mode'),
+            'payment_request' => $request->get('payment_request'),
+            'payment_date' => Carbon::now(),
+            'payment_received_by' => $request->user()->username,
+            'payment_status' => 'PAID',
+            'reference_no' => $request->get('reference_no')
+        ]);
+
+    $data = Application::where('reference_no', $request->get('reference_no'))->first();
+    $account_receivables = null;
+    if ($data) {
+        $account_receivables = AccountReceivable::where('batch_no', $data->batch_no)
+            ->where('company', $data->customer_company)
+            ->first();
+    }
+
+    if ($account_receivables) {
+        if ($account_receivables->total_amount <= $data->visa_price) {
+            $account_receivables->delete();
+        } else {
+            $account_receivables->total_amount -= $data->visa_price;
+            $account_receivables->save();
+        }
+    }
+    return 'Payment for ' . $request->get('reference_no') . ' received';
+}
+
+
+	public function markCustomerAsUnpaid(Request $request)
+{
+	$application = DB::table('applications')
+                ->where('reference_no', '=', $request->get('reference_no'))
+                ->update(['or_number' => null,
+                          'payment_mode' => null,
+                          'payment_request' => null,
+                          'payment_date' => null,
+                          'payment_received_by' => null,
+                          'payment_status' => 'UNPAID']);
+
+    return 'Payment for ' . $request->get('reference_no') . ' marked as UNPAID';
+}
+
 }

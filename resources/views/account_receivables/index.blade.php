@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @php
-
-	$companies = App\PartnerCompany::all();
-	$company_lookup = array();
-	foreach($companies as $company)
-	{
-		$company_lookup[$company->id] = $company->name;
-	}
+		use App\PartnerCompany;
+		$partner_companies = PartnerCompany::all();
+		$company_lookup = [];
+		foreach($partner_companies as $company)
+		{
+			$partner_companies_array[$company->id] = $company->name;
+		}
 @endphp
 
 @section('content')
@@ -28,7 +28,7 @@
 <div class="table-responsive">
 	<table class="table table-striped text-center">
 		<thead class="thead-dark">
-			<th style="width:40%;">Company</th>
+			<th style="width:30%;">Company</th>
 			<th style="width:10%;">Batch No</th>
 			<th style="width:15%;">Application Date</th>
 			<th style="width:10%;">Total Amount</th>
@@ -39,7 +39,7 @@
 			@if($account_receivables->count() > 0)
 				@foreach($account_receivables as $row)
 				<tr>
-					<td>{{$company_lookup[$row->company]}}</td>
+					<td>{{$row->company}}</td>
 					<td>{{$row->batch_no}}</td>
 					<td>{{$row->application_date}}</td>
 					<td>{{$row->total_amount}}</td>

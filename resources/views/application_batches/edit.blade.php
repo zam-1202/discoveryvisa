@@ -2,6 +2,25 @@
 
 @section('content')
 
+@php
+    $branches = App\Branch::all();
+	$branch_lookup = array();
+	foreach($branches as $branch){
+		$branch_lookup[$branch->code] = $branch->description;
+	}
+
+    $application_status_array = array('1' => 'NEW Application',
+                                      '2' => 'Sent to Main Office',
+                                      '3' => 'Received by Main Office',
+                                      '4' => 'Sent to Original Branch',
+                                      '5' => 'Received by Original Branch',
+                                      '6' => 'Submitted to Embassy',
+                                      '7' => 'Received from Embassy',
+                                      '8' => 'Sent to/Claimed by Client',
+                                      '9' => 'Incomplete',
+                                      '10' => 'Pending Approval');
+@endphp
+
 <div class="container">
 	<div class="row justify-content-center">
 		<div class="col-md-8">
@@ -73,6 +92,7 @@
 						<thead class="thead-dark">
 							<tr>
 								<th style="width:10%;">No.</th>
+								<th style="width:10%;">Application Status</th>
 								<th style="width:35%;">Applicant</th>
 								<th style="width:20%;">Reference No</th>
 								<th style="width:10%;">Action</th>
@@ -87,6 +107,7 @@
 							@foreach($batch_contents as $row)
 								<tr>
 									<td>{{$i}}</td>
+									<td>{{$application_status_array[$row->application_status]}}</td>
 									<td>{{$row->lastname}}, {{$row->firstname}} {{$row->middlename}}</td>
 									<td>{{$row->reference_no}}
 									<td><a href="{{route('applications.edit', $row->id)}}" class="btn btn-primary">Update</a></td>

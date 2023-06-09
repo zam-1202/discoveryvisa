@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use PDF;
 use Storage;
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Http\JsonResponse;
 // use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Application;
 use App\ApplicationBatch;
@@ -16,7 +16,10 @@ use App\ApplicationBatchStatus;
 use App\Branch;
 use App\PartnerCompany;
 use App\User;
+use App\VisaType;
 use Auth;
+use TCPDF;
+$visaTypes = VisaType::all();
 
 use App\Http\Controllers\AccountReceivableController;
 
@@ -68,10 +71,6 @@ class ApplicationBatchController extends Controller
                 ->orderBy('application_batches.batch_date', 'desc')->paginate(20);
         }
 
-
-
-
-
 		$status_array = ApplicationBatchStatus::all();
 		$status_list = array();
 		foreach($status_array as $status) $status_list[$status->id] = $status->description;
@@ -85,6 +84,28 @@ class ApplicationBatchController extends Controller
 		}
 		return view('application_batches.index', compact('application_batches'));
     }
+
+	public function searchBatchNum(Request $request)
+	{
+		if ($request->ajax()) {
+			$searchString = $request->get('searchString');
+	
+			if ($searchString != '') {
+				$data = DB::table('application_batches')
+				->where(function($query) use ($searchString){
+					$query->where('batch_no', 'LIKE', '%' . $searchString . '%');
+                })
+					->orderBy('id', 'desc')
+					->paginate(20);
+			} else {
+				$data = DB::table('application_batches')->orderBy('id', 'desc')->paginate(20);
+			}
+
+			return view('application_batches.applicationBatch_list', compact('data', 'searchString'))->render();
+			
+		}
+	}
+	
 
     /**
      * Show the form for creating a new resource.
@@ -130,8 +151,6 @@ class ApplicationBatchController extends Controller
         $currentStatus = ApplicationBatchStatus::find($batch->status);
         if ( Auth::user()->branch == 'MNL') {
             $status_list = array(
-                '3' => 'Received by Main Office',
-                '4' => 'Sent to Original Branch',
                 '6' => 'Submitted to Embassy',
                 '7' => 'Received from Embassy',
                 '8' => 'Sent to/Claimed by Client'
@@ -139,7 +158,8 @@ class ApplicationBatchController extends Controller
         } else {
             $status_list = array(
                 '2' => 'Sent to Main Office',
-                '5' => 'Received by Original Branch',
+				'3' => 'Received by Main Office',
+                '4' => 'Sent to Original Branch',
             );
         }
 
@@ -173,12 +193,18 @@ class ApplicationBatchController extends Controller
        DB::table('applications')->where('batch_no', $batch->batch_no)
                                 ->update(['application_status' => $request->get('status')]);
 
-	   if($request->get('status') == 3)
-	   {
-		   //update field "date_received_by_main_office" for all applications of current batch
-		   DB::table('applications')->where('batch_no', $batch->batch_no)
-									->update(['date_received_by_main_office' => Carbon::today()]);
-	   }
+								if ($request->get('status') == 3) {
+									$dateField = 'date_received_by_main_office';
+								} elseif ($request->get('status') == 7) {
+									$dateField = 'date_received_from_embassy';
+								}
+								
+								if (isset($dateField)) {
+									DB::table('applications')
+										->where('batch_no', $batch->batch_no)
+										->update([$dateField => Carbon::today()]);
+								}
+								
 
 
 	   return redirect()->back()->with('status','Batch ' . $batch->batch_no . ' has been updated');
@@ -209,43 +235,49 @@ class ApplicationBatchController extends Controller
 											->orWhere('customer_type','=','Via Courier');
 										})
 								->where('branch','=',$branch)
-								// ->where('payment_status','=','PAID')
+								->where('application_status','!=','9')
+								->where('payment_status','=','PAID')
 								// ->orWhere('payment_status','=','UNPAID')
 								->where('batch_no','=',NULL)
-								// ->whereDate('created_at', Carbon::today())
+								->whereDate('created_at', Carbon::today())
 								// ->where('application_status','=',1) // add this line to filter by application_status
 								->orderBy('lastname','asc')
 								->get();
 
 		$piata_applications = DB::table('applications')
 								->where('customer_type','=','PIATA')
+								->where('payment_status','=','PAID')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
-								// ->whereDate('created_at', Carbon::today())
+								->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
 		$ptaa_applications = DB::table('applications')
 								->where('customer_type','=','PTAA')
+								->where('payment_status','=','PAID')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
-								// ->whereDate('created_at', Carbon::today())
+								->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
 		$corporate_applications = DB::table('applications')
 								->where('customer_type','=','Corporate')
+								->where('payment_status','=','PAID')
+								->orWhere('payment_status','=','UNPAID')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
-								// ->whereDate('created_at', Carbon::today())
+								->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
         $poea_applications = DB::table('applications')
 								->where('customer_type','=','POEA')
+								->where('payment_status','=','PAID')
 								->where('branch','=',$branch)
 								->where('batch_no','=',NULL)
-								// ->whereDate('created_at', Carbon::today())
+								->whereDate('created_at', Carbon::today())
 								->orderBy('lastname','asc')
 								->get();
 
@@ -254,8 +286,10 @@ class ApplicationBatchController extends Controller
 
 	public function downloadChecklist(Request $request)
 	{
-
+		
 		$date = Carbon::now()->toFormattedDateString();
+		$current_date = $date;
+		$visatypes = VisaType::orderBy('id', 'asc')->get();
 		$branch = $request->user()->branch;
 		$walkin_applications = DB::table('applications')
 								->where(function($query){
@@ -264,6 +298,8 @@ class ApplicationBatchController extends Controller
 											$query->orWhere('customer_type','=','Via Courier');
 										})
 								->where('branch','=',$branch)
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
 								// ->where('payment_status','=','PAID')
 								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
@@ -271,7 +307,10 @@ class ApplicationBatchController extends Controller
 								->get();
 
 		$piata_applications = DB::table('applications')
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
 								->where('customer_type','=','PIATA')
+								// ->where('payment_status','=','PAID')
 								->where('branch','=',$branch)
 								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
@@ -279,7 +318,10 @@ class ApplicationBatchController extends Controller
 								->get();
 
 		$ptaa_applications = DB::table('applications')
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
 								->where('customer_type','=','PTAA')
+								// ->where('payment_status','=','PAID')
 								->where('branch','=',$branch)
 								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
@@ -287,7 +329,11 @@ class ApplicationBatchController extends Controller
 								->get();
 
 		$corporate_applications = DB::table('applications')
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
 								->where('customer_type','=','Corporate')
+								->where('payment_status','=','PAID')
+								->orWhere('payment_status','=','UNPAID')
 								->where('branch','=',$branch)
 								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
@@ -295,16 +341,89 @@ class ApplicationBatchController extends Controller
 								->get();
 
         $poea_applications = DB::table('applications')
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
 								->where('customer_type','=','POEA')
+								// ->where('payment_status','=','PAID')
 								->where('branch','=',$branch)
 								// ->whereDate('created_at', Carbon::today())
 								->where('batch_no','=',NULL)
 								->orderBy('lastname','asc')
 								->get();
+								
+								
+	$pdf = PDF::loadView('application_batches.checklist_pdf', compact('qrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
+	return $pdf->stream($branch . ' Checklist for ' . $date . '.pdf');
+	// return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
+	}
 
-		$pdf = PDF::loadView('application_batches.checklist_pdf', compact('qrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
-		return $pdf->stream($branch . ' Checklist for ' . $date . '.pdf');
-		// return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
+	public function finalPDFChecklist(Request $request)
+	{
+		
+		$date = Carbon::now()->toFormattedDateString();
+		$current_date = $date;
+		$visatypes = VisaType::orderBy('id', 'asc')->get();
+		$branch = $request->user()->branch;
+		$walkin_applications = DB::table('applications')
+								->where(function($query){
+											$query->where('customer_type','=','Walk-In');
+											$query->orWhere('customer_type','=','Mobile Service');
+											$query->orWhere('customer_type','=','Via Courier');
+										})
+								->where('branch','=',$branch)
+								->where('payment_status','=','PAID')
+								->whereDate('created_at', Carbon::today())
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+
+		$piata_applications = DB::table('applications')
+								->where('customer_type','=','PIATA')
+								->where('payment_status','=','PAID')
+								->where('branch','=',$branch)
+								->whereDate('created_at', Carbon::today())
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+
+		$ptaa_applications = DB::table('applications')
+								->where('customer_type','=','PTAA')
+								->where('payment_status','=','PAID')
+								->where('branch','=',$branch)
+								->whereDate('created_at', Carbon::today())
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+
+		$corporate_applications = DB::table('applications')
+								->where('customer_type','=','Corporate')
+								->where('payment_status','=','PAID')
+								->where('branch','=',$branch)
+								->whereDate('created_at', Carbon::today())
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+
+        $poea_applications = DB::table('applications')
+								->where('customer_type','=','POEA')
+								->where('payment_status','=','PAID')
+								->where('branch','=',$branch)
+								->whereDate('created_at', Carbon::today())
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+
+								$pdf = new TCPDF();
+								
+								// $pdf->SetMargins(10, 10, 10); // Set the page margins
+								$pdf->SetAutoPageBreak(true, 10); // Enable auto page breaks
+								$pdf->AddPage(); // Add a new page
+							
+								$html = view('application_batches.pdf', compact('visatypes','qrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications', 'current_date'))->render();
+							
+								$pdf->writeHTML($html, true, false, true, false, '');
+							
+								$pdf->Output($branch . ' Checklist for ' . $date . '.pdf', 'I');
 	}
 
 	public function showFinalizeBatchPage()
@@ -318,7 +437,7 @@ class ApplicationBatchController extends Controller
 		$batch_no_string = Carbon::now()->format('Ymd') . $branch->id;
 
 		$status = 2; //Sent to Main Office (Batch Status)
-		if($branch->id == 1) $status = 3; //if batch is for Main Office, go straight to Received by Main Office (Batch Status)
+		if($branch->id == 1) $status = 6; //if batch is for Main Office, go straight to Received by Main Office (Batch Status)
 
 		if(ApplicationBatch::where('batch_no', $batch_no_string)->exists()){
 			return back()->with('status', "Batch for today's applications are already finalized.");
@@ -372,6 +491,7 @@ class ApplicationBatchController extends Controller
 		return redirect('/application_batches/finalize_batch_page')->with('status', $batch_no_string . ' has been finalized.');
 	}
 
+
 	public static function generateSubmissionList()
 	{
 		$sub_batch_no = "S" . Carbon::now()->format('Ymd');
@@ -390,9 +510,9 @@ class ApplicationBatchController extends Controller
 
 		DB::table('applications')
 		  ->where('application_status','=',1)
-		  ->where('batch_no','<>',NULL)
-		  ->where('date_received_by_main_office','<>',NULL)
-		  ->where('submission_batch_no','=',NULL)
+		  ->whereNotNull('batch_no','<>',NULL)
+		  ->whereNotNull('date_received_by_main_office','<>',NULL)
+		  ->whereNull('submission_batch_no','=',NULL)
 		  ->update(['submission_batch_no' => $sub_batch_no, 'application_status' => 3]);
 
 		$walkin_applications = DB::table('applications')
@@ -432,4 +552,25 @@ class ApplicationBatchController extends Controller
 		//send email to admins
 		Mail::to($mailing_list)->send(new SubmissionListGenerated($pdf_array, $current_date));
 	}
+
+
+
+		public function generatePDF()
+		{
+			$pdf = new TCPDF();
+
+			$pdf->SetMargins(10, 10, 10); // Set the page margins
+			$pdf->SetAutoPageBreak(true, 10); // Enable auto page breaks
+			$pdf->AddPage(); // Add a new page
+
+			// Generate your PDF content using TCPDF methods
+			$pdf->SetFont('Helvetica', 'B', 12);
+			$pdf->Cell(0, 10, 'Hello, World!', 0, 1, 'C');
+
+			// Output the PDF as a stream
+			$pdf->Output('filename.pdf', 'I');
+		}
+
+
+
 }

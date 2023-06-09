@@ -86,10 +86,12 @@ class AdminController extends Controller
 		if($request->ajax()){
 			$branch_code = $request->get('branch_code');
 			$branch_desc = $request->get('branch_desc');
+			$branch_pickup_price = $request->get('branch_pickup_price');
 
 			$branch = new Branch([
 				'code' => $branch_code,
-				'description' => $branch_desc
+				'description' => $branch_desc,
+				'pickup_price' => $branch_pickup_price
 			]);
 
 			$branch->save();
@@ -104,10 +106,12 @@ class AdminController extends Controller
             $branch_id = $request->get('branch_id');
 			$branch_code = $request->get('branch_code');
 			$branch_desc = $request->get('branch_desc');
+			$branch_pickup_price = $request->get('branch_pickup_price');
 
             $branch = Branch::find($branch_id);
             $branch->code = $branch_code;
             $branch->description = $branch_desc;
+			$branch->pickup_price = $branch_pickup_price;
             $branch->save();
 
 			$request->session()->flash('status', 'Branch successfully updated');

@@ -12,6 +12,8 @@ class Application extends Model
 		'customer_type',
 		'customer_company',
 		'group_name',
+		'pickupMethod',
+		'pickup_fee',
 		'branch',
 		'lastname',
 		'firstname',
@@ -30,13 +32,13 @@ class Application extends Model
 		'visa_type',
 		'visa_price',
 		'handling_price',
-		// 'handling_fee',
 		'promo_code',
 		'documents_submitted',
 		'payment_status',
 		'or_number',
 		'vpr_number',
 		'tracking_no',
+		'verification_no',
 		'application_date',
 		'encoded_by',
 		'last_update_by',
@@ -44,6 +46,7 @@ class Application extends Model
 		'payment_date',
 		'batch_no',
 		'date_received_by_main_office',
+		'date_received_from_embassy',
 		'submission_batch_no'
 	];
 }

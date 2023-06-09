@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-13">
+        <div class="col-md-8">
 			@if (session('status'))
 				<div class="alert alert-primary alert-dismissible fade show text-center" role="alert">
 					<strong>{{ session('status') }}</strong>
@@ -24,9 +24,8 @@
 						<a href="{{route('application_batches.checklist')}}" class="btn btn-warning col-md-6 mt-3 font-weight-bold">GENERATE Checklist</a>
 						<a href="{{route('show_finalize_batch_page')}}" class="btn btn-danger col-md-6 mt-3">FINALIZE Application Batch</a>
 					@elseif(Auth::user()->role == 'Cashier')
-						<a href="{{route('cashier.receive_payment')}}" class="btn btn-primary col-md-9 mt-3">Receive Payment</a>
-                        <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-9 mt-3">Daily Report</a>
-						<a href="{{route('cashier.unpaidList')}}" class="btn btn-primary col-md-9 mt-3">Unpaid Applicants</a>
+						<a href="{{route('cashier.receive_payment')}}" class="btn btn-primary col-md-6 mt-3">Receive Payment</a>
+                        <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
 					@elseif(Auth::user()->role == 'Accounting')
 						<a href="{{route('account_receivables.index')}}" class="btn btn-primary col-md-6 mt-3">Account Receivables</a>
                         <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
@@ -37,10 +36,9 @@
                         <a href="{{route('admin.partner_companies')}}" class="btn btn-primary col-md-6 mt-3">Partner Companies</a>
 						<a href="{{route('admin.approvals')}}" class="btn btn-primary col-md-6 mt-3">Pending Approvals</a>
                         <a href="{{route('admin.promo_codes')}}" class="btn btn-primary col-md-6 mt-3">Promo Codes</a>
-
                         <a href="{{route('admin.visa_types')}}" class="btn btn-primary col-md-6 mt-3">Visa Types</a>
                         <a href="{{route('admin.required_documents')}}" class="btn btn-primary col-md-6 mt-3">Required Document List</a>
-						<a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
+                        <a href="" data-toggle="modal" data-target="#daily_reports" class="btn btn-primary col-md-6 mt-3">Daily Report</a>
                         <a href="{{route('admin.mode_of_payment')}}" class="btn btn-primary col-md-6 mt-3">Mode of Payment List</a>
                         <a href="{{route('admin.payment_request')}}" class="btn btn-primary col-md-6 mt-3">Payment Request List</a>
 					@endif

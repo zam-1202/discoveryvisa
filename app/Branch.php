@@ -8,6 +8,7 @@ class Branch extends Model
 {
     protected $fillable = [
 		'code',
-		'description'
+		'description',
+		'pickup_price'
 	];
 }

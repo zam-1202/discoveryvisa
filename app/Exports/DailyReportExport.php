@@ -44,21 +44,22 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                             ->orderBy('applications.application_date', 'ASC')
                             ->select('applications.reference_no',
                                       DB::raw("CONCAT(applications.lastname, ', ', applications.firstname, ' ', applications.middlename) AS fullname"),
-                                      'partner_companies.name',
+                                      DB::raw("applications.group_name"),
                                       DB::raw("users.name as username"),
                                       DB::raw("MONTHNAME(applications.application_date)"),
                                       DB::raw("DATE_FORMAT(applications.application_date, '%Y')"),
                                       DB::raw("DATE_FORMAT(applications.application_date, '%d-%m-%Y %H:%i:%s')"),
                                       'branches.description',
-                                      DB::raw("visa_types.name as visaname"),
+                                      DB::raw("applications.visa_type"),
                                       'applications.customer_type',
                                       'applications.passport_no',
                                       'applications.payment_mode',
                                       DB::raw("IF(IFNULL(applications.or_number, 'ACKNOWLEDGEMENT') = 'ACKNOWLEDGEMENT', 'ACKNOWLEDGEMENT', 'OR')"),
-                                      'visa_types.price',
-                                      DB::raw("visa_types.price - applications.visa_price"),
-                                      DB::raw('visa_types.price * 0'),
-                                      DB::raw('(visa_types.price / 1.12) * 0.12'),
+                                      'applications.visa_price',
+                                      DB::raw("visa_types.visa_fee - applications.visa_price"), //discount
+                                      DB::raw('applications.handling_price'),
+                                      DB::raw('(COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0)) - ((COALESCE(applications.handling_price, 0) + COALESCE(applications.visa_price, 0)) / 1.12)'), // VAT
+                                      DB::raw('(COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0))'),
                                       'applications.visa_price'
                                     )
                             ->get();

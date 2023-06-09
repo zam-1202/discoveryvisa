@@ -5,7 +5,11 @@
     <title></title>
 
 	<style>
-	td {
+	table {
+    border-collapse: collapse;
+  	}
+	
+	td, th {
 		padding: 8px;
 		text-align: left;
 		word-wrap: break-word;
@@ -30,24 +34,18 @@
 		clear: both;
 	}
 
-	.table-container:first-child {
-	float: left;
-	}
-
-	.table-container:last-child {
-	float: right;
-	}
-
 	.table-container {
-	justify-content: space-between;
-	width: 50%;
+		column-count: 2;
+		column-gap: 20px;
+	/* justify-content: space-between;
+	width: 50%; */
 	}
 
 	.page-break {
     page-break-before: always;
 	}
+	
 
-		
 	</style>
   </head>
 
@@ -61,119 +59,43 @@
 	</div>
 
 
-	<?php
-    $walkin_applications_array = $walkin_applications->toArray();
-    $walkinSplit = array_chunk($walkin_applications_array, ceil(count($walkin_applications_array) / 2));
-	?>
-
-<div style="display: flex; justify-content: space-between; overflow-x: auto;">
-    <table class="table-container" style="margin-top: 20px;">
-        <tr>
-            <td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-            <td class="customer_type" style="font-size: 11px;">Walk-in Applicants</td>
-        </tr>
-        <?php $i = 1; ?>
-        @foreach($walkinSplit[0] as $walkin)
-            @if(in_array($walkin->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-                <tr>
-                    <td style="font-size: 10px; padding: 5px; font-weight: bold; color: maroon;">{{$i}}</td>
-                    <td style="font-size: 10px; padding: 5px;">{{$walkin->lastname}}, {{$walkin->firstname}} {{$walkin->middlename}}</td>
-                </tr>
-                <?php $i++; ?>
-            @endif
-        @endforeach
-    </table>
-
-    <table class="table-container" style="margin-top: 20px;">
-        <tr>
-            <td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-            <td class="customer_type" style="font-size: 11px;">Walk-in</td>
-        </tr>
-        <?php $i = count($walkinSplit[0]) + 1; ?>
-        @foreach($walkinSplit[1] as $walkin)
-            @if(in_array($walkin->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-                <tr>
-                    <td style="font-size: 10px; padding: 5px; font-weight: bold; color: maroon;">{{$i}}</td>
-                    <td style="font-size: 10px; padding: 5px;">{{$walkin->lastname}}, {{$walkin->firstname}} {{$walkin->middlename}}</td>
-                </tr>
-                <?php $i++; ?>
-            @endif
-        @endforeach
-    </table>
-</div>
-
-
-<div class="page-break">
-<?php
-    $piata_applications_array = $piata_applications->toArray();
-
-    // check if the array has any elements before using array_chunk()
-    $piataSplit = count($piata_applications_array) > 0 ? array_chunk($piata_applications_array, ceil(count($piata_applications_array) / 2)) : [[]];
-?>
-
+<div class="class-container">
 <div style="margin-top: 20px;">
-	<table class="table-container piata-table" style="margin-top: 20px;">
+	<table class= "table-container">
 		<tr>
-			<td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-			<td class="customer_type" style="font-size: 11px;">PIATA</td>
+			<th class="table-secondary" style="text-align:center; font-size:10px; " colspan="2"  >Walk-in</th>
 		</tr>
-        <?php $i = 1; ?>
-        @foreach($piataSplit[0] as $piata)
-            @if(in_array($piata->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-						<tr>
-							<td style="font-size: 10px; padding: 5px;">{{$i}}</td>
-							<td style="font-size: 10px; padding: 5px;">{{$piata->lastname}}, {{$piata->firstname}} {{$piata->middlename}}</td>
-							</tr>
-                <?php $i++; ?>
-            @endif
-        @endforeach
-    </table>
-
-	<table class="table-container" style="margin-top: 20px;">
         <tr>
-            <td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-            <td class="customer_type" style="font-size: 11px;">PIATA</td>
-        </tr>
-        @foreach($piataSplit[1] as $piata)
-			@if(in_array($piata->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-                <tr>
-                    <td style="font-size: 10px; padding: 5px; font-weight: bold; color: maroon;">{{$i}}</td>
-                    <td style="font-size: 10px; padding: 5px;">{{$piata->lastname}}, {{$piata->firstname}} {{$piata->middlename}}</td>
-					</tr>
-                <?php $i++; ?>
-            @endif
-        @endforeach
-    </table>
-</div>
-</div>
-
-<!-- <div style="margin-top: 20px;">
-	<table style= "table-container">
-		<tr>
-			<td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-			<td class="customer_type" style="font-size: 11px;">PTAA</td>
+			<td class="customer_type" style="font-size: 11px; width: 15px;">No.</td>
+			<td class="customer_type" style="font-size: 11px; width: 200px;">Applicant</td>
 		</tr>
-		@if($ptaa_applications->count() > 0)
+        @if($walkin_applications->count() > 0)
 			@php $i = 1; @endphp
-				@foreach($ptaa_applications as $ptaa)
-					@if(in_array($ptaa->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+				@foreach($walkin_applications as $walkin)
+					@if(in_array($walkin->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
 						<tr>
 							<td style="font-size: 10px; padding: 5px;">{{$i}}</td>
-							<td style="font-size: 10px; padding: 5px;">{{$ptaa->lastname}}, {{$ptaa->firstname}} {{$ptaa->middlename}}</td>
+							<td style="font-size: 10px; padding: 5px;">{{$walkin->lastname}}, {{$walkin->firstname}} {{$walkin->middlename}}</td>
 						</tr>
 					@endif
 					@php $i++; @endphp
 				@endforeach
 			@else
 		@endif
-	</table>
+    </table>
 </div>
 
+
+<!-- <div class="page-break"> -->
+
 <div style="margin-top: 20px;">
-	<table style= "table-container">	
+	<table style= "table-container">
+		<tr>
+			<th class="table-secondary" style="text-align:center; font-size:10px; " colspan="2"  >Corporate</th>
+		</tr>	
 		<tr>
 			<td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-			<td class="customer_type" style="font-size: 11px;">Corporate</td>
+			<td class="customer_type" style="font-size: 11px; width: 200px;">Applicant</td>
 		</tr>
 		@if($corporate_applications->count() > 0)
 			@php $i = 1; @endphp
@@ -191,11 +113,16 @@
 	</table>
 </div>
 
+<!-- <div class="page-break"> -->
+
 <div style="margin-top: 20px;">
 	<table style= "table-container">
+		<tr>
+			<th class="table-secondary" style="text-align:center; font-size:10px; " colspan="2"  >POEA</th>
+		</tr>	
         <tr>
 			<td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
-			<td class="customer_type" style="font-size: 11px;">POEA</td>
+			<td class="customer_type" style="font-size: 11px; width: 200px;">Applicant</td>
 		</tr>
         @if($poea_applications->count() > 0)
 			@php $i = 1; @endphp
@@ -211,7 +138,62 @@
 			@else
 		@endif
     </table>
-</div> -->
+</div>
+
+<!-- <div class="page-break"> -->
+
+<div style="margin-top: 20px;">
+	<table class= "table-container">
+		<tr>
+			<th class="table-secondary" style="text-align:center; font-size:10px; " colspan="2"  >PIATA</th>
+		</tr>
+        <tr>
+			<td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
+			<td class="customer_type" style="font-size: 11px; width: 200px;">Applicant</td>
+		</tr>
+        @if($piata_applications->count() > 0)
+			@php $i = 1; @endphp
+				@foreach($piata_applications as $piata)
+					@if(in_array($piata->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+						<tr>
+							<td style="font-size: 10px; padding: 5px;">{{$i}}</td>
+							<td style="font-size: 10px; padding: 5px;">{{$piata->lastname}}, {{$piata->firstname}} {{$piata->middlename}}</td>
+						</tr>
+					@endif
+					@php $i++; @endphp
+				@endforeach
+			@else
+		@endif
+    </table>
+</div>
+
+<!-- <div class="page-break"> -->
+
+<div style="margin-top: 20px;">
+	<table style= "table-container" style="margin-top: 20px;">
+		<tr>
+			<th class="table-secondary" style="text-align:center; font-size:10px; " colspan="2"  >PTAA</th>
+		</tr>
+		<tr>
+			<td class="customer_type" style="font-size: 11px; width: 5px;">No.</td>
+			<td class="customer_type" style="font-size: 11px; width: 200px;">Applicant</td>
+		</tr>
+		@if($ptaa_applications->count() > 0)
+			@php $i = 1; @endphp
+				@foreach($ptaa_applications as $ptaa)
+					@if(in_array($ptaa->application_status, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
+						<tr>
+							<td style="font-size: 10px; padding: 5px;">{{$i}}</td>
+							<td style="font-size: 10px; padding: 5px;">{{$ptaa->lastname}}, {{$ptaa->firstname}} {{$ptaa->middlename}}</td>
+						</tr>
+					@endif
+					@php $i++; @endphp
+				@endforeach
+			@else
+		@endif
+	</table>
+</div>
+</div>
 
   </body>
 </html>

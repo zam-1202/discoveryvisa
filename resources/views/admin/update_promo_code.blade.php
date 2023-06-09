@@ -29,7 +29,7 @@
                             <label for="discount" class="col-md-4 col-form-label text-md-right">{{ __('Discount') }}</label>
 
                             <div class="col-md-6">
-                                <input id="discount" type="text" class="form-control text-center @error('discount') is-invalid @enderror" name="discount" value="{{ old('discount') ?? $promo->discount }}" required autofocus>
+                                <input id="discount" type="text" class="form-control text-center @error('discount') is-invalid @enderror" name="discount" value="{{ old('discount') ?? $promo->discount }}" pattern="[1-9]\d*%?" title="Please enter valid discount value" required autofocus>
 
                                 @error('discount')
                                     <span class="invalid-feedback" role="alert">
@@ -43,7 +43,7 @@
                             <label for="expiration_date" class="col-md-4 col-form-label text-md-right">{{ __('Expiration Date') }}</label>
 
                             <div class="col-md-6">
-                                <input id="expiration_date" type="date" class="form-control text-center @error('expiration_date') is-invalid @enderror" name="expiration_date" value="{{ old('expiration_date') ?? $promo->expiration_date }}" required>
+                                <input id="expiration_date" type="date" class="form-control text-center @error('expiration_date') is-invalid @enderror" name="expiration_date" min="{{ date('Y-m-d', strtotime('+1 day')) }}" value="{{ old('expiration_date') ?? $promo->expiration_date }}" required>
 
                                 @error('expiration_date')
                                     <span class="invalid-feedback" role="alert">
@@ -57,8 +57,7 @@
                             <label for="quantity" class="col-md-4 col-form-label text-md-right">{{ __('Quantity') }}</label>
 
                             <div class="col-md-6">
-                                <input id="quantity" type="text" class="form-control text-center @error('quantity') is-invalid @enderror" name="quantity" value="{{ old('quantity') ?? $promo->max_quantity }}" required>
-
+                                <input id="quantity" type="text" class="form-control text-center @error('quantity') is-invalid @enderror" name="quantity" value="{{ old('quantity') ?? $promo->max_quantity }}" pattern="[1-9]\d*%?" title="Please enter valid discount value" required>
                                 @error('quantity')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>

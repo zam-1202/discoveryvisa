@@ -4,7 +4,7 @@
 
 <div class="container">
 	<div class="row justify-content-center">
-		<div class="col-md-15">
+		<div class="col-md-12">
 			@if (session('status'))
 				<div class="alert alert-primary alert-dismissible fade show text-center" role="alert">
 					<strong>{{ session('status') }}</strong>
@@ -48,6 +48,8 @@
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($walkin->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
+												@elseif ($walkin->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Received by Main Office</span>
                                                 @endif
 											</td>
 										</tr>
@@ -87,6 +89,8 @@
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($piata->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
+												@elseif ($piata->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Received by Main Office</span>
                                                 @endif
 											</td>
 										</tr>
@@ -126,6 +130,8 @@
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($ptaa->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
+												@elseif ($ptaa->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Received by Main Office</span>
                                                 @endif
 											</td>
 										</tr>
@@ -165,6 +171,8 @@
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($corporate->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
+												@elseif ($corporate->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Received by Main Office</span>
                                                 @endif
 											</td>
 										</tr>
@@ -204,6 +212,8 @@
                                                     <span class="font-weight-bold text-danger">Pending Approval</span>
                                                 @elseif ($poea->application_status == 9)
                                                     <span class="font-weight-bold text-danger">Incomplete</span>
+												@elseif ($poea->application_status == 3)
+                                                    <span class="font-weight-bold text-danger">Received by Main Office</span>
                                                 @endif
 											</td>
 										</tr>

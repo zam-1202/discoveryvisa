@@ -17,6 +17,7 @@
                                       '10' => 'Pending Approval');
 @endphp
 
+
 <div class="table-responsive">
 	<table class="table table-striped table-hover text-center" id="applicantIndex">
 		<thead class="thead-dark">

@@ -14,33 +14,42 @@ Auth::routes();
 Route::get('/', function () { return view('/home'); })->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home')->middleware('auth');
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\MailController;
+use App\Mail\SubmissionListGenerated;
 
 Route::get('/sample', function(){
     return view('cashier.acknowledgement_receipt');
 });
 
 Route::post('/submit-application', [ApplicationController::class, 'submitApplication'])->name('submit-application');
-// Route::get('applications/create', 'ApplicationController@showVisaType');
 Route::get('applications/application_list', 'ApplicationController@fetch_data');
-Route::get('applications/application_list', 'ApplicationController@fetch_data_forAdmin');
+Route::get('applications/application_list/admin', 'ApplicationController@fetch_data_forAdmin');
 Route::get('applications/past_applications', 'ApplicationController@past_applications')->name('past_applications');
 Route::get('applications/mark_as_incomplete', 'PendingApprovalsController@mark_as_incomplete');
 Route::get('applications/redeem_promo_code', 'ApplicationController@redeemPromoCode');
 Route::resource('applications','ApplicationController')->middleware('CheckRole:Encoder,Admin');
+Route::post('applications/application_list', 'ApplicationController@filter')->name('applications.application_list');
+// Route::get('applications/application_list', 'ApplicationController@searchStatus');
+// Route::get('applications/application_list/fetch', 'ApplicationController@fetchFilteredData');
 
-Route::get('cashier/receive_payment','ApplicationController@showPaymentForm')->name('cashier.receive_payment')->middleware('CheckRole:Cashier');
+Route::get('cashier/receive_payment','ApplicationController@showPaymentForm')->name('cashier.receive_payment')->middleware('CheckRole:Cashier, Admin');
 Route::get('cashier/confirm_payment','ApplicationController@retrievePaymentForm');
 Route::get('cashier/customer_payment','ApplicationController@markCustomerAsPaid')->name('cashier.customer_payment');
 Route::get('cashier/customer_payment_unpaid','ApplicationController@markCustomerAsUnpaid')->name('cashier.customer_payment');
-Route::get('cashier/download_report','ApplicationController@downloadReport')->name('cashier.download_report')->middleware('CheckRole:Cashier,Accounting');
+Route::get('cashier/download_report','ApplicationController@downloadReport')->name('cashier.download_report');
 Route::get('cashier/download_acknowledgement_receipt_pdf', 'ApplicationController@downloadAcknowledgementReceipt')->name('cashier.download_acknowledgement_receipt_pdf')->middleware('CheckRole:Cashier');
 Route::get('cashier/check_approval_code', 'ApplicationController@checkApprovalCode')->name('cashier.check_approval_code');
+Route::get('cashier/unpaidList','ApplicationController@showUnpaidApplicants')->name('cashier.unpaidList');
 
 Route::get('application_batches/checklist', 'ApplicationBatchController@showChecklist')->name('application_batches.checklist')->middleware('CheckRole:Encoder');
 Route::get('application_batches/checklist_pdf', 'ApplicationBatchController@downloadChecklist')->name('download_checklist_pdf');
+Route::get('application_batches/pdf', 'ApplicationBatchController@finalPDFChecklist')->name('pdf');
 Route::get('application_batches/finalize_batch_page', 'ApplicationBatchController@showFinalizeBatchPage')->name('show_finalize_batch_page')->middleware('CheckRole:Encoder');
 Route::get('application_batches/finalize_batch', 'ApplicationBatchController@finalizeBatchContents')->name('finalize_batch');
 Route::resource('application_batches', 'ApplicationBatchController')->middleware('CheckRole:Encoder,Admin');
+Route::get('application_batches/generate_submission_list', 'ApplicationBatchController@generateSubmissionList')->name('generate_submission_list');
+Route::get('application_batches/applicationBatch_list', 'ApplicationBatchController@searchBatchNum');
+
 
 Route::get('admin/users', 'AdminController@userList')->name('admin.users')->middleware('CheckRole:Admin');
 Route::get('admin/users/{id}/edit', 'AdminController@editUser')->name('admin.edit')->middleware('CheckRole:Admin');
@@ -49,13 +58,16 @@ Route::get('admin/branches', 'AdminController@branchList')->name('admin.branches
 Route::get('admin/addbranch', 'AdminController@addBranch')->name('admin.addbranch')->middleware('CheckRole:Admin');
 Route::get('admin/updatebranch', 'AdminController@updateBranch')->name('admin.updatebranch')->middleware('CheckRole:Admin');
 Route::get('admin/pending_approvals', 'AdminController@pendingApprovals')->name('admin.approvals')->middleware('CheckRole:Admin');
+// Route::get('cashier/receive_payment','ApplicationController@showPaymentForm')->name('cashier.receive_payment');
+
 
 
 //Partner Companies
 Route::get('admin/partner_companies', 'PartnerCompanyController@index')->name('admin.partner_companies')->middleware('CheckRole:Admin');
 Route::get('admin/create_partnerCompanies', 'PartnerCompanyController@createpartnerCompanies')->name('admin.createpartnerCompanies')->middleware('CheckRole:Admin');
-Route::get('admin/update_partnerCompanies', 'PartnerCompanyController@updatepartnerCompanies')->name('admin.updatepartnerCompanies')->middleware('CheckRole:Admin');
-
+// Route::get('admin/update_partnerCompanies/{id}/edit', 'PartnerCompanyController@edit')->name('admin.updatepartnerCompanies.edit')->middleware('CheckRole:Admin');
+Route::post('admin/update_partnerCompanies/{id}', 'PartnerCompanyController@updatepartnerCompanies')->name('admin.updatepartnerCompanies')->middleware('CheckRole:Admin');
+// Route::post('admin/users/{id}', 'AdminController@updateUser')->name('admin.update')->middleware('CheckRole:Admin');
 
 //Mode of Payment
 Route::get('admin/mode_of_payment', 'OtherController@modeOfPaymentList')->name('admin.mode_of_payment')->middleware('CheckRole:Admin');
@@ -85,4 +97,7 @@ Route::get('admin/promo_codes/create', 'PromoCodeController@create')->name('admi
 Route::get('admin/promo_codes/{id}/edit', 'PromoCodeController@edit')->name('admin.promo_codes.edit')->middleware('CheckRole:Admin');
 Route::post('admin/promo_codes/{id}', 'PromoCodeController@update')->name('admin.promo_codes.update')->middleware('CheckRole:Admin');
 
+Route::get('account_receivables/show','AccountReceivableController@markCustomerAsPaid')->name('account_receivables.customer_payment');
 Route::resource('account_receivables', 'AccountReceivableController');
+
+// Route::get('/',[MailController::class, 'sendMail']);
