@@ -1,4 +1,13 @@
 @extends('layouts.app')
+@if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
 @php
 $branches = App\Branch::all();
@@ -24,7 +33,11 @@ $branch_lookup = [];
                                       '7' => 'Received from Embassy',
                                       '8' => 'Sent to/Claimed by Client',
 									  '9' => 'Incomplete',
-									  '10' => 'Pending Approval');
+									  '10' => 'Pending Approval',
+									  '11' => 'Additional Documents Required',
+									  '12' => 'Released by Embassy',
+									'13' => 'Resubmitted to JPN',
+                        						'14' => 'Passport Return from JPN Embassy');
 
 	$application_status = $application->application_status;
 @endphp
@@ -54,15 +67,96 @@ $branch_lookup = [];
 <body>
 
 @section('content')
-<div class="row">
+<div class="row justify-content-center">
 	<div class="col-sm-20 text-center">
 	<div class="jumbotron bg-dark text-white" style="padding: 10px">
-			<h1>Update an Application</h1>
-			<div class="col-sm-20 text-left">
-				<strong>Filer:</strong> {{$application->encoded_by}}
-				<br>
-				<strong>Last Encoded by:</strong> {{$application->last_update_by}} 
+			<h1>Update an Application</h1>	
+			<div class="col-sm-20">
+			<div class="form-group row">
+			<table class="text-center">
+    <tr>
+		<td style="padding: 10px;">
+			<strong>Filer</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+				{{$application->encoded_by}} &#9679; {{date('Y-m-d', strtotime($application->created_at))}}
+			</span>
+		</td>
+
+		<td style="padding: 10px;">
+            <strong>Last Encoded by</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+            {{$application->last_update_by}} &#9679; {{date('Y-m-d', strtotime($application->updated_at))}}
+        </td>
+
+		
+		<td style="padding: 10px;">
+            <strong>Submitted to Embassy by</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+			{{$application->submitted_to_embassy}} &#9679; 
+			@if ($application->submitted_to_embassy)
+				{{date('Y-m-d', strtotime($application->date_submitted_to_embassy))}}
+			@endif
+        </td>
+
+		<td style="padding: 10px;">
+            <strong>Submission to EMB</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+            {{$application->receiver_from_embassy}} &#9679; 
+			@if ($application->receiver_from_embassy)
+				({{date('Y-m-d', strtotime($application->date_received_from_embassy))}})
+			@endif
+        </td>
+
+		<td style="padding: 10px;">
+            <strong>Released by Embassy</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+			{{$application->released_by_embassy}} &#9679; 
+		@if ($application->released_by_embassy)
+			{{date('Y-m-d', strtotime($application->date_released_by_embassy))}}
+		@endif
+        </td>
+
+    </tr>
+</table>
+<div class="form-group row">
+			<table class="text-center">
+
+    <tr>
+
+	<td style="padding: 10px;">
+            <strong>Sent to Client by</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+			{{$application->distributed_by}} &#9679; 
+			@if ($application->date_distributed)
+				({{date('Y-m-d', strtotime($application->date_distributed))}})
+			@endif
+        </td>
+
+	<td style="padding: 10px;">
+            <strong>Additional Docs - JPN</strong><br>
+			<span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+			{{$application->additional_docs}} &#9679; 
+			@if ($application->date_docsRequired)
+				({{date('Y-m-d', strtotime($application->date_docsRequired))}})
+			@endif
+        </td>
+
+                <td style="padding: 10px;">
+            <strong>Resubmitted to JPN</strong><br>
+                        <span style="background-color: darkgray; color: #383C44; border-radius: 4px; padding: 5px; font-size: 11px;">
+            {{$application->return_to_jpn_emb}} &#9679;
+                        @if ($application->date_return_to_jpn)
+                                ({{date('Y-m-d', strtotime($application->date_return_to_jpn))}})
+                        @endif
+                        </span>
+        </td>
+    </tr>
+</table>
+
+</div>
+
 			</div>
+		</div>
 		</div>
 
         <form method="post" action="{{ route('applications.update', $application->id) }}">
@@ -78,23 +172,88 @@ $branch_lookup = [];
 				  {{Form::text('reference_no', $application->reference_no, ['readonly' => 'readonly', 'class' => 'form-control text-center'])}}
 				</div>
 
-				<div class="col-md-3">
-				  <label for="application_status">Application Status</label>
-                  @if ($application->application_status == '9')
-                    {{Form::select('application_status', $application_status_array_incomplete, $application->application_status, ['class' => 'form-control text-center'])}}
-                  @else
-                    {{Form::text('application_status', $application_status_array[$application->application_status], ['class' => 'form-control text-center','disabled' => 'disabled'])}}
-                    {{Form::hidden('application_status', $application->application_status)}}
-                  @endif
-				</div>
+                                <div class="col-md-3">
+                                <label for="application_status">Application Status</label>
+                                        @if ($application->application_status == 9 && $application->branch === $user->branch)
+                                                {{Form::select('application_status', [
+                                                        9 => 'Incomplete',
+                                                        1 => 'New Application',
+                                                        4 => 'Sent to Original Branch',
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 2 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        2 => 'Sent to Main Office',
+                                                        9 => 'Incomplete',
+                                                        4 => 'Sent to Original Branch',
+                                                        5 => 'Received by Original Branch'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 4 && $application->branch === $user->branch)
+                                                {{Form::select('application_status', [
+                                                        4 => 'Sent to Original Branch',
+                                                        5 => 'Received by Original Branch'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 5 && $application->branch === $user->branch)
+                                                {{Form::select('application_status', [
+                                                        5 => 'Received by Original Branch',
+                                                        1 => 'New Application'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 6 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        6 => 'Submitted to Embassy',
+                                                        7 => 'Received from Embassy',
+                                                        8 => 'Sent to/Claimed by Client',
+                                                        11 => 'Additional Documents Required'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 7 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        7 => 'Received from Embassy',
+                                                        12 => 'Released by Embassy',
+                                                        8 => 'Sent to/Claimed by Client',
+                                                        11 => 'Additional Documents Required'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 12 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        12 => 'Released by Embassy',
+                                                        8 => 'Sent to/Claimed by Client',
+                                                        11 => 'Additional Documents Required'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 11 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        11 => 'Additional Documents Required',
+                                                        13 => 'Resubmitted to JPN'
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 13 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        13 => 'Resubmitted to JPN',
+                                                        14 => 'Passport Return from JPN Embassy',
+                                                        12 => 'Released by Embassy',
+                                                        8 => 'Sent to/Claimed by Client',
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @elseif ($application->application_status == 14 && $user->branch === 'MNL')
+                                                {{Form::select('application_status', [
+                                                        14 => 'Passport Return from JPN Embassy',
+                                                        12 => 'Released by Embassy',
+                                                        8 => 'Sent to/Claimed by Client',
+                                                ], $application->application_status, ['class' => 'form-control text-center', 'id' => 'application_status_select'])}}
+                                        @else
+                                                {{Form::text('application_status', $application_status_array[$application->application_status], ['class' => 'form-control text-center', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;', 'id' => 'application_status_select'])}}
+                                                {{Form::hidden('application_status', $application->application_status)}}
+                                        @endif
+                                </div>
+
+
+
 				<div class="col-md-2">
-				<label for="date_received_from_embassy">Embassy Filing</label>
-				@if ($application->application_status == '7')
-					{{Form::text('date_received_from_embassy', $application->date_received_from_embassy, ['class' => 'form-control text-center', 'disabled' => 'disabled']) }}
-				@else
-					{{Form::text('date_received_from_embassy', ($application->application_status == $application->date_received_from_embassy) ? $application->date_received_from_embassy : '', ['class' => 'form-control text-center', 'disabled' => 'disabled']) }}
-				@endif
+					<label for="date_received_from_embassy">Submission to EMB</label>
+					@if ($application->application_status == '7')
+						{{ Form::text('date_received_from_embassy', $application->date_received_from_embassy, ['class' => 'form-control text-center', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;']) }}
+					@elseif ($application->date_received_from_embassy)
+						{{ Form::text('date_received_from_embassy', $application->date_received_from_embassy, ['class' => 'form-control text-center', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;']) }}
+					@else
+						{{ Form::text('date_received_from_embassy', '', ['class' => 'form-control text-center', 'readonly' => 'readonly']) }}
+					@endif
 				</div>
+
 
 
 				<div class="col-md-2">
@@ -102,8 +261,12 @@ $branch_lookup = [];
 				  {{Form::text('tracking_no', $application->tracking_no, ['class' => 'form-control text-center', 'oninput' => 'validateInput(event)']) }}
 				</div>
 				<div class="col-md-2">
-				  <label for="tracking_no">Verification No.</label>
-				  {{Form::text('verification_no', $application->verification_no, ['class' => 'form-control text-center', 'oninput' => 'validateInput(event)']) }}
+				  <label for="verification_no">Verification No.</label>
+				  @if ($application->application_status == '7')
+						{{Form::text('verification_no', $application->verification_no, ['class' => 'form-control text-center', 'id' => 'verification_no', 'oninput' => 'validateInput(event)']) }}
+				  @else
+					{{Form::text('verification_no', $application->verification_no, ['readonly' => 'readonly', 'class' => 'form-control text-center','id' => 'verification_no','readonly' => 'readonly'])}}
+					@endif
 				</div>
 			</div>
 
@@ -114,37 +277,79 @@ $branch_lookup = [];
 			</div>
 
 			<div class="form-group row">
-				<div class="col-md-3">
-				<label for="customer_type">Customer Type<span class="required-field">*</span></label>
-				  {{Form::select('customer_type', $customer_type_array, $application->customer_type, ['class' => 'form-control', 'id' => 'customer_type'])}}
-				</div>
+			<div class="col-md-3">
+			<label for="customer_type">Customer Type<span class="required-field">*</span></label>
+			@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+				{{ Form::select('customer_type', $customer_type_array, $application->customer_type, ['class' => 'form-control', 'id' => 'customer_type', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;']) }}
+			@else
+				{{ Form::select('customer_type', $customer_type_array, $application->customer_type, ['class' => 'form-control', 'id' => 'customer_type']) }}
+			@endif
+			</div>
 
-				<div class="col-md-3">
-				<label for="customer_company">Customer Company<span class="required-field">*</span></label>
-					<select name="customer_company" class="form-control" id="customer_company" disabled>
-						@foreach ($customer_company as $partnerCompany)
-							<option value="{{ $partnerCompany }}" {{ $partnerCompany === $application->customer_company ? 'selected' : '' }}>
-								{{ $partnerCompany }}
-							</option>
-						@endforeach
-					</select>
-				</div>
 
+				<div class="col-md-2">
+				<label for="customer_company">Client's Company<span class="required-field">*</span></label>
+				@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+					{{ Form::select('customer_company', $customer_company, null, ['class' => 'form-control', 'id' => 'customer_company', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;']) }}
+				@else
+					{{ Form::select('customer_company', $customer_company, null, ['class' => 'form-control', 'id' => 'customer_company']) }}
+				@endif
+				</div>
 				
-				<div class="col-md-4">
-					<label for="group_name">Group Name</label>
-					{{ Form::textarea('group_name', $application->group_name, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'group_name']) }}
-				</div>
 				<div class="col-md-2">
 				<label for="pickupMethod">Pick Up Method<span class="required-field">*</span></label>
 					<?php
 					$pickupMethodOptions = ['On-site' => 'On-site', 'Courier' => 'Courier'];
 					$defaultPickupMethod = $application->pickupMethod; // Fetch the value from the database
 					?>
-					{{ Form::select('pickupMethod', $pickupMethodOptions, $defaultPickupMethod, ['class' => 'form-control text-center']) }}
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{ Form::select('pickupMethod', $pickupMethodOptions, $defaultPickupMethod, ['class' => 'form-control text-center', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;']) }}
+					@else
+						{{ Form::select('pickupMethod', $pickupMethodOptions, $defaultPickupMethod, ['class' => 'form-control text-center']) }}
+					@endif
 				</div>
+				
+				<div class="col-md-2">
+						<label for="submitter">Submitter<span class="required-field">*</span></label>
+						{{ Form::textarea('submitter', $application->submitter, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'submitter', 'readonly' => 'readonly']) }}
+					</div>
+
+				<div class="col-md-3">
+					<label for="group_name">Group Name</label>
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{ Form::textarea('group_name', $application->group_name, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'group_name', 'readonly' => 'readonly']) }}
+					@else
+						{{ Form::textarea('group_name', $application->group_name, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'group_name']) }}
+					@endif
+				</div>
+
 			</div>
 
+			<div class="form-group row">
+			<div class="col-md-4">
+				<label for="visa_result">Visa Result</label>
+					@if ($application->application_status == 7)
+						{{ Form::textarea('visa_result', $application->visa_result, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'visa_result']) }}
+					@else
+						{{ Form::textarea('visa_result', $application->visa_result, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'visa_result', 'readonly' => 'readonly']) }}
+					@endif
+				</div>
+
+
+					<div class="col-md-4">
+						<label for="released_to">Released to</label>
+						@if (($application->application_status == 1) || in_array($application->application_status, ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11']))
+							{{ Form::textarea('released_to', $application->released_to, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'released_to', 'readonly' => 'readonly']) }}
+						@else
+							{{ Form::textarea('released_to', $application->released_to, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'released_to']) }}
+						@endif
+					</div>
+
+					<div class="col-md-4">
+						<label for="courier_tracking">Courier Tracking No.</label>
+						{{ Form::textarea('courier_tracking', $application->courier_tracking, ['class' => 'form-control text-center text-uppercase', 'rows' => '1', 'id' => 'courier_tracking']) }}
+					</div>
+				</div>
 				<br>
 				<div class="row">
 				<div class="col-md-4"><hr style="border: 1px solid black;"></div>
@@ -156,74 +361,128 @@ $branch_lookup = [];
 				<div class="form-group row">
 					<div class="col-md-3">
 					<label for="lastname">Last Name<span class="required-field">*</span></label>
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{ Form::text('lastname', $application->lastname, ['class' => 'form-control text-center text-uppercase', 'id' => 'editApplication_lastname', 'readonly' => 'readonly']) }}
+					@else
 						{{ Form::text('lastname', $application->lastname, ['class' => 'form-control text-center text-uppercase', 'id' => 'editApplication_lastname']) }}
-						<!-- {{Form::text('lastname', old('lastname'), ['class' => 'form-control text-center text-uppercase', 'id' => 'createApplication_lastname', 'maxlength' => '128'])}} -->
+					@endif
 					</div>
 					<div class="col-md-3">
 					<label for="firstname">First Name<span class="required-field">*</span></label>
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{Form::text('firstname', $application->firstname, ['class' => 'form-control text-center text-uppercase', 'id' => 'editApplication_firstname', 'readonly' => 'readonly']) }}
+					@else
 						{{Form::text('firstname', $application->firstname, ['class' => 'form-control text-center text-uppercase', 'id' => 'editApplication_firstname']) }}
+					@endif
 					</div>
 					<div class="col-md-3">
 						<label for="middlename">Middle Name</label>
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{Form::text('middlename', $application->middlename, ['class' => 'form-control text-center text-uppercase', 'id' => 'middlename', 'readonly' => 'readonly']) }}
+					@else
 						{{Form::text('middlename', $application->middlename, ['class' => 'form-control text-center text-uppercase', 'id' => 'middlename']) }}
+					@endif
 					</div>
 				</div>
 
 				<div class="form-group row">
-				<div class="col-md-3">
-				<label for="birthdate">Birthday<span class="required-field">*</span></label>
-					{{ Form::date('birthdate', $application->birthdate, ['class' => 'form-control text-center', 'id' => 'birthdate', 'max' => \Carbon\Carbon::now()->subDay()->format('Y-m-d'), 'title' => 'Please enter valid birthdate', 'required']) }}
-					@error('birthdate')
-						<span class="invalid-feedback" role="alert">
-							<strong>{{ $message }}</strong>
-						</span>
-					@enderror
-				</div>
-				<div class="col-md-2">
-				<label for="gender">Gender<span class="required-field">*</span></label>
-					  {{Form::select('gender', array('Female' => 'Female', 'Male' => 'Male'), $application->gender, ['class' => 'form-control'])}}
+					<div class="col-md-3">
+					<label for="birthdate">Birthday<span class="required-field">*</span></label>
+						@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+							{{ Form::date('birthdate', $application->birthdate, ['class' => 'form-control text-center', 'id' => 'birthdate', 'max' => \Carbon\Carbon::now()->subDay()->format('Y-m-d'), 'title' => 'Please enter valid birthdate', 'required', 'readonly' => 'readonly']) }}
+						@else
+							{{ Form::date('birthdate', $application->birthdate, ['class' => 'form-control text-center', 'id' => 'birthdate', 'max' => \Carbon\Carbon::now()->subDay()->format('Y-m-d'), 'title' => 'Please enter valid birthdate', 'required']) }}
+						@endif
+							@error('birthdate')
+								<span class="invalid-feedback" role="alert">
+									<strong>{{ $message }}</strong>
+								</span>
+							@enderror
 					</div>
 					<div class="col-md-2">
-					<label for="marital_status">Marital Status<span class="required-field">*</span></label>
-					  {{Form::select('marital_status', array('Single' => 'Single', 'Married' => 'Married', 'Widowed' => 'Widowed'), $application->marital_status, ['class' => 'form-control'])}}
+					<label for="gender">Gender<span class="required-field">*</span></label>
+						@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+							{{Form::select('gender', array('Female' => 'Female', 'Male' => 'Male'), $application->gender, ['class' => 'form-control', 'readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;'])}}
+						@else
+							{{Form::select('gender', array('Female' => 'Female', 'Male' => 'Male'), $application->gender, ['class' => 'form-control'])}}
+						@endif
 					</div>
+				<div class="col-md-2">
+				<label for="marital_status">Marital Status<span class="required-field">*</span></label>
+				@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+					{{Form::select('marital_status', array('Single' => 'Single', 'Married' => 'Married', 'Divorced' => 'Divorced', 'Annulled' => 'Annulled', 'Widowed' => 'Widowed'), $application->marital_status, ['class' => 'form-control','readonly' => 'readonly', 'style' => 'pointer-events: none; touch-action: none;'])}}
+				@else
+					{{Form::select('marital_status', array('Single' => 'Single', 'Married' => 'Married', 'Divorced' => 'Divorced', 'Annulled' => 'Annulled', 'Widowed' => 'Widowed'), $application->marital_status, ['class' => 'form-control'])}}
+				@endif
+				</div>
 					<div class="col-md-5">
 					  <label for="email">Email:</label>
-					  {{Form::text('email', $application->email, ['class' => 'form-control text-center'])}}
+				@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+				  	{{Form::text('email', $application->email, ['class' => 'form-control text-center', 'readonly' => 'readonly'])}}
+				@else
+					{{Form::text('email', $application->email, ['class' => 'form-control text-center'])}}
+				@endif
 					</div>
 				</div>
 
 				<div class="form-group row">
 					<div class="col-md-2">
 					  <label for="telephone_no">Telephone No</label>
-					  {{Form::text('telephone_no', $application->telephone_no, ['class' => 'form-control text-center', 'id' => 'telno', 'maxlength' => '15', 'onkeypress' => 'return isNumericKey(event)', 'onpaste' => 'return validatePastedText(event)', 'oninput' => 'validateTelephoneNo(this.value)']) }}
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{Form::text('telephone_no', $application->telephone_no, ['class' => 'form-control text-center', 'id' => 'telno', 'maxlength' => '15', 'onkeypress' => 'return isNumericKey(event)', 'onpaste' => 'return validatePastedText(event)', 'oninput' => 'validateTelephoneNo(this.value)', 'readonly' => 'readonly']) }}
+					@else
+						{{Form::text('telephone_no', $application->telephone_no, ['class' => 'form-control text-center', 'id' => 'telno', 'maxlength' => '15', 'onkeypress' => 'return isNumericKey(event)', 'onpaste' => 'return validatePastedText(event)', 'oninput' => 'validateTelephoneNo(this.value)']) }}
+					@endif
 					</div>
 					<div class="col-md-2">
 					  <label for="mobile_no">Mobile No:</label>
-					  {{Form::text('mobile_no', $application->mobile_no, ['class' => 'form-control text-center', 'id' => 'mobno', 'maxlength' => '15', 'onkeypress' => 'return isNumericKey(event)', 'onpaste' => 'return validatePastedText(event)', 'oninput' => 'validateMobileNo(this.value)'])}}
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{Form::text('mobile_no', $application->mobile_no, ['class' => 'form-control text-center', 'id' => 'mobno', 'maxlength' => '15', 'onkeypress' => 'return isNumericKey(event)', 'onpaste' => 'return validatePastedText(event)', 'oninput' => 'validateMobileNo(this.value)', 'readonly' => 'readonly'])}}
+					@else
+						{{Form::text('mobile_no', $application->mobile_no, ['class' => 'form-control text-center', 'id' => 'mobno', 'maxlength' => '15', 'onkeypress' => 'return isNumericKey(event)', 'onpaste' => 'return validatePastedText(event)', 'oninput' => 'validateMobileNo(this.value)'])}}
+					@endif
 					</div>
 					<div class="col-md-8">
-					<label for="address">Address (Characters: <span id="addressLength">0/50</span>)<span class="required-field">*</span></label>
-						{{Form::textarea('address', $application->address, ['class' => 'form-control text-center text-uppercase', 'rows' => '2', 'id' => 'address', 'oninput' => 'checkAddressLength()', 'maxlength' => '50'])}}
+					<label for="address">Address<span class="required-field">*</span></label>
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+						{{Form::textarea('address', $application->address, ['class' => 'form-control text-center text-uppercase', 'rows' => '2', 'id' => 'address', 'maxlength' => '500','readonly' => 'readonly'])}}
+					@else
+						{{Form::textarea('address', $application->address, ['class' => 'form-control text-center text-uppercase', 'rows' => '2', 'id' => 'address', 'maxlength' => '500'])}}
+					@endif
 					</div>
 				</div>
 
 				<div class="form-group row">
 					<div class="col-md-4">
 					<label for="passport_no">Passport No<span class="required-field">*</span></label>
-			  {{ Form::text('passport_no', $application->passport_no, ['class' => 'form-control text-center', 'id' => 'passport_no', 'style' => 'text-transform: uppercase;', 'onkeyup' => 'validatePassportNo(this.value)']) }}			  @error('passport_no')
-			<span class="invalid-feedback" role="alert">
-				<strong>{{ $message }}</strong>
-			</span>
-			@enderror
+				@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['6', '7', '8']))
+			  		{{ Form::text('passport_no', $application->passport_no, ['class' => 'form-control text-center', 'id' => 'passport_no', 'style' => 'text-transform: uppercase;', 'onkeyup' => 'validatePassportNo(this.value)', 'readonly' => 'readonly']) }}	
+				@else
+					{{ Form::text('passport_no', $application->passport_no, ['class' => 'form-control text-center', 'id' => 'passport_no', 'style' => 'text-transform: uppercase;', 'onkeyup' => 'validatePassportNo(this.value)']) }}	
+				@endif
+
+			  @error('passport_no')
+				<span class="invalid-feedback" role="alert">
+					<strong>{{ $message }}</strong>
+				</span>
+				@enderror
 			</div>
-					<div class="col-md-4">
-					<label for="passport_expiry">Passport Expiry<span class="required-field">*</span></label>
-					  {{Form::date('passport_expiry', $application->passport_expiry, ['class' => 'form-control text-center', 'min' => now()->addDay()->format('Y-m-d')]) }}
-					</div>
+			<div class="col-md-4">
+				<label for="passport_expiry">Passport Expiry<span class="required-field">*</span></label>
+				@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12']))
+					{{Form::date('passport_expiry', $application->passport_expiry, ['class' => 'form-control text-center', 'min' => now()->addDay()->format('Y-m-d'), 'readonly' => 'readonly']) }}
+				@else
+					{{Form::date('passport_expiry', $application->passport_expiry, ['class' => 'form-control text-center', 'id' => 'passport_expiry']) }}
+				@endif
+			</div>
+
 					<div class="col-md-4">
 					<label for="departure_date">Expected Departure Date<span class="required-field">*</span></label>
-					  {{Form::date('departure_date', $application->departure_date, ['class' => 'form-control text-center', 'min' => now()->addDay()->format('Y-m-d')]) }}
+					@if (($application->application_status == 2 && $user->branch === 'MNL') || in_array($application->application_status, ['3', '4', '5', '6', '7', '8', '9', '10', '11', '12']))
+						{{Form::date('departure_date', $application->departure_date, ['class' => 'form-control text-center', 'min' => now()->addDay()->format('Y-m-d'),'readonly' => 'readonly']) }}
+					@else
+						{{Form::date('departure_date', $application->departure_date, ['class' => 'form-control text-center']) }}
+					@endif
 					</div>
 				</div>
 
@@ -245,12 +504,13 @@ $branch_lookup = [];
 				<div class="form-group row">
 						<div class="col-md-4">
 						<label for="visa_type">Visa Type:<span class="required-field">*</span></label>
-								<select class="form-control" name="visa_type" id="visa_type">
+						<select class="form-control" name="visa_type" id="visa_type">
 								<option value="">--- Select a visa type ---</option>
 									@foreach($visatypes as $visaType)
 										<option value="{{ $visaType->name }}"
 											data-visa-fee="{{ $visaType->visa_fee }}"
 											data-handling-fee="{{ $visaType->handling_fee }}"
+											data-required-docs="{{ json_encode($visaType->documents) }}"
 											{{ $visaType->name === $application->visa_type ? 'selected' : '' }}>            	
 											{{ $visaType->name }}
 										</option>
@@ -259,82 +519,71 @@ $branch_lookup = [];
 						</div>
 
 
-				<div class="col-md-2">
+				<div class="col-md-3">
 					<label for="visa_price">Visa Price:</label>
 						{{ Form::text('visa_price', $application->visa_price, ['data-visa-fee' => $visaType->visa_fee, 'class' => 'form-control text-center', 'id' => 'visa_price', 'readonly' => 'readonly']) }}
-				</div>
+					</div>
 
-				<div class="col-md-2">
+				<div class="col-md-3">
 					<label for="handling_price">Handling Price:</label>
 					  {{ Form::text('handling_price', $application->handling_price, ['data-handling-fee' => $visaType->handling_fee, 'class' => 'form-control text-center', 'id' => 'handling_price', 'readonly' => 'readonly']) }}
 				</div>
-
-        
-				<div class="col-md-4">
-					<label for="promo_code">Promo Code:</label>
-					<div class="input-group">
-						{{Form::text('promo_code', $application->promo_code, ['class' => 'form-control text-center text-uppercase', 'id' => 'promo_code', 'placeholder' => '(optional)'])}}
-						&nbsp;	
-						<div class="input-group-append">
-								<a class="btn btn-success text-white" id="promo_code_btn">Use Promo Code</a>
-							</div>
-					</div>	
-				</div>
+				
+				<div class="col-md-2">
+						<label for="promo_code">Promo Code:</label>
+						{{ Form::text('promo_code', $application->promo_code, ['class' => 'form-control text-center text-uppercase', 'id' => 'promo_code', 'placeholder' => '(optional)', 'readonly' => in_array($application->application_status, ['6', '7', '8']) ? 'readonly' : '']) }}
+					</div>
+					<div class="col-md-5">
+						<a class="btn btn-success rounded text-white" id="promo_code_btn">Use Promo Code</a>
+					</div>
 
 					<div class="col-md-3">
 						{{Form::hidden('discount_amount', $application->discount_amount)}}
 						{{Form::hidden('discount', 0)}}
 					</div>
 				</div>
-				
 
 				<div class="form-group row">
-					<div class="col-md-12">
-					<label for="documents_submitted">Documents Required:<span class="required-field">*</span></label>
-					  {{Form::hidden('documents_submitted', $application->documents_submitted)}}
-					  <div class="table-responsive">
-						  <table class="table table-sm table-bordered">
-							  <thead class="thead-light">
-								  <th style="width:33.33%;" class="bg-success text-white">FILIPINO DOCUMENTS</th>
-								  <th style="width:33.33%;" class="bg-info text-white">JAPANESE DOCUMENTS</th>
-								  <th style="width:33.33%;" class="bg-dark text-white">FOREIGNER DOCUMENTS</th>
-							  </thead>
-							  <tbody>
+		    <div class="col-md-12">
+			{{ Form::hidden('documents_submitted', $application->documents_submitted, ['id' => 'documents_submitted']) }}
+				<label for="documents_submitted">Documents Required:<span class="required-field">*</span></label>
+				<div class="table-responsive">
+					<table class="table table-sm table-bordered">
+                                      <thead class="thead-light">
+                                          <th style="width:33.33%;" class="bg-success text-white">FILIPINO DOCUMENTS</th>
+                                          <th style="width:33.33%;" class="bg-info text-white">JAPANESE DOCUMENTS</th>
+                                          <th style="width:33.33%;" class="bg-dark text-white">FOREIGNER DOCUMENTS</th>
+                                      </thead>
+                                      	<tbody>
                                           <tr>
                                             <td class="bg-success text-left">
 											<div class="scrollable-div">
-                                                <ul class="list-group" id="filipino_documents">
-                                                    @foreach ($docs_filipino as $value)
-                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
-                                                    @endforeach
+                                                <ul class="list-group" id="filipino_documents">	
+												@foreach ($docs_filipino->sortBy('name') as $value)
+													<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>                                                    @endforeach
                                                 </ul>
 												</div>
                                             </td>
                                             <td class="bg-info text-left">
-											<div class="scrollable-div">
+												<div class="scrollable-div">
                                                 <ul class="list-group" id="japanese_documents">
-                                                    @foreach ($docs_japanese as $value)
-                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
-                                                    @endforeach
+												@foreach ($docs_japanese->sortBy('name') as $value)
+													<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>                                                    @endforeach
                                                 </ul>
 												</div>
                                             </td>
                                             <td class="bg-dark text-left">
-											<div class="scrollable-div">
+												<div class="scrollable-div">
                                                 <ul class="list-group" id="foreign_documents">
-                                                    @foreach ($docs_foreign as $value)
-                                                        <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
-                                                    @endforeach
+                                                @foreach ($docs_foreign->sortBy('name') as $value)
+													<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>                                                    @endforeach
                                                 </ul>
 												</div>
                                             </td>
                                           </tr>
-                                      </tbody>
-						  </table>
-					  </div>
-					</div>
+                                      	</tbody>
+                    </table>
 				</div>
-
 				{{Form::hidden('payment_status', $application->payment_status)}}
 				<div class="row">
 					<div class="col-md-2 offset-md-4">
@@ -345,12 +594,59 @@ $branch_lookup = [];
 						<a href="{{ url()->previous() }}" class="btn btn-danger">Back</a>
 					</div>
 				</div>
+
+			</div>
+        </div>
     </div>
 </div>
 @endsection
 
 @section('scripts')
 <script type="text/javascript">
+
+
+$(document).ready(function () {
+        // Function to update the value of documents_submitted hidden field
+        function updateDocumentsSubmitted() {
+            const selectedDocuments = $('input[name="submitted_documents"]:checked')
+                .map(function () {
+                    return this.value;
+                })
+                .get()
+                .join(',');
+            $('#documents_submitted').val(selectedDocuments);
+        }
+
+        // Call the function initially to populate the hidden field on page load
+        updateDocumentsSubmitted();
+
+        // Bind an event handler for when any checkbox is clicked
+        $('input[name="submitted_documents"]').on('change', function () {
+            updateDocumentsSubmitted();
+        });
+
+		$('#application_status').on('change', function () {
+        const selectedStatus = $(this).val();
+        const visaResultField = $('#visa_result');
+
+        if (selectedStatus === 'Received from Embassy') {
+            visaResultField.removeAttr('readonly');
+        } else {
+            visaResultField.attr('readonly', 'readonly');
+        }
+    });
+
+    });
+
+$(document).ready(function() {
+    var applicationStatus = "{{ $application->application_status }}";
+    var userBranch = "{{ $user->branch }}";
+
+    if ((applicationStatus === '2' && userBranch === 'MNL') || ['6', '7', '8'].includes(applicationStatus)) {
+      $("#visa_type").prop("readOnly", true);
+	  $("#visa_type").css({"pointer-events": "none", "touch-action": "none", "background-color": "#e8e8e8"});
+    }
+  });
 
 function validateInput(event) {
   const input = event.target;
@@ -361,13 +657,13 @@ function checkAddressLength() {
     var address = document.getElementById("address");
     var addressLength = document.getElementById("addressLength");
     
-    if (address.value.length > 50) {
+    if (address.value.length > 200) {
         addressLength.style.color = "red";
     } else {
         addressLength.style.color = "black";
     }
     
-    addressLength.textContent = address.value.length + "/50";
+    addressLength.textContent = address.value.length + "/200";
 }
 
 function isNumericKey(event) {
@@ -424,8 +720,32 @@ function validatePassportNo(value) {
 	$(document).ready(function(){
 
 		$(document).ready(function() {
-			restore_checkboxes();
-		});
+    restore_checkboxes();
+
+    // Add event listener to the form submit action
+    $('form').on('submit', function() {
+        updateHiddenInputValue();
+    });
+});
+
+function restore_checkboxes() {
+    var submitted_documents = "{{$application->documents_submitted}}".split(",");
+    $('input[name="submitted_documents"]').each(function(){
+        if(submitted_documents.includes($(this).val()))
+        {
+            $(this).attr("checked", true);
+        }
+    });
+}
+
+function updateHiddenInputValue() {
+    var selectedDocuments = [];
+    $('input[name="submitted_documents"]:checked').each(function() {
+        selectedDocuments.push($(this).val());
+    });
+    $('#documents_submitted').val(selectedDocuments.join(","));
+}
+
 		
 	$(document).on('keypress', '#editApplication_lastname, #editApplication_firstname, #middlename', function(event) {
     var inputValue = this.value;
@@ -448,46 +768,7 @@ function isLetter(char) {
 }
 
 
-
-
-	// document.getElementById("updateApplication").addEventListener("click", function(event){
-	// 	// event.preventDefault(); // Prevent the form from submitting
-	// 	validatefield(); // Call the validation function
-	// 	});
-
-	// function validatefield() {
-	// 		const lastname = $('#createApplication_lastname').val();
-	// 		const firstname = $('#createApplication_firstname').val();
-	// 		const bday = $('#birthdate').val();
-	// 		const home_address = $('#address').val();
-	// 		const passport_num = $('#passport_no').val();
-	// 		const departure = $('#departure_date').val();
-	// 		const rmk = $('#remarks').val();
-	// 		const v_type = $('#visa_type').val();
-	// 		const docs_sub = $('#documents_submitted').val();
-	// 		const customerType = $('#customer_type').val();
-	// 		// const handle = $('#handling_fee').val();
-	// 		// const vFee = $('#visa_price').val();
-			
-	// 	{
-	// 		if (lastname == '' || firstname == '' || bday == '' || home_address == '' || passport_num == '' || departure == '' || 
-	// 		rmk == '' || docs_sub == '' || customerType == '') {
-	// 			console.log("Not all fields are filled out.");
-	// 			Swal.fire({
-	// 				position: 'center',
-	// 				icon: 'warning',
-	// 				title: 'Please fill out all required fields.',
-	// 				showConfirmButton: true,
-    //                 timer: 6000	
-	// 			});
-	// 		} 
-	// 		else {
-	// 			console.log("Fields are filled out");
-	// 		}
-	// 	}
-	// }
-
-	const customerTypeSelect = document.getElementById('customer_type');
+const customerTypeSelect = document.getElementById('customer_type');
 	const customerCompanySelect = document.getElementById('customer_company');
 	const partnerCompanies = {!! json_encode($customer_company) !!};
 
@@ -496,9 +777,6 @@ function isLetter(char) {
     const selectedType = customerTypeSelect.value;
     const customerNameSelect = document.getElementById('customer_company');
     customerNameSelect.innerHTML = ''; // Clear previous options
-
-    console.log('Selected Type:', selectedType);
-    console.log('Customer Name Select:', customerCompanySelect);
 
     if (selectedType === 'Walk-in' || selectedType === '') {
       customerNameSelect.disabled = true;
@@ -522,27 +800,174 @@ function isLetter(char) {
   // Initial update of Customer Company options
   updateCustomerCompanyOptions();
 
+  document.getElementById('application_status_select').addEventListener('change', function(event) {
+    console.log('Change event triggered');
+        const releasedToField = document.getElementById('released_to');
+const visaResultField = document.getElementById('visa_result');
+        const selectedStatus = event.target.value.trim();
+        console.log('Selected status:', selectedStatus);
 
-	document.getElementById('visa_type').addEventListener('change', function(event) {
-        const selectedVisaType = event.target.value;
-        const selectedOption = event.target.selectedOptions[0];
-        const visaFee = selectedOption.dataset.visaFee;
-        const handlingFee = selectedOption.dataset.handlingFee;
 
-        const visaTypeField = document.getElementById('visa_type');
-        const visaPriceField = document.getElementById('visa_price');
-        const visaHandlingfeeField = document.getElementById('handling_price');
+  if (selectedStatus === '8') {
+    console.log('Removing readonly attribute');
+    releasedToField.removeAttribute('readonly');
+  } else {
+    console.log('Setting readonly attribute');
+    releasedToField.setAttribute('readonly', 'readonly');
+ 
+  }
+});
 
-        if(selectedVisaType) {
-            visaTypeField.value = selectedVisaType;
-            visaPriceField.value = visaFee;
-            visaHandlingfeeField.value = handlingFee;
+  document.getElementById('application_status_select').addEventListener('change', function(event) {
+    console.log('Change event triggered');
+const visaResultField = document.getElementById('visa_result');
+        const selectedStatus = event.target.value.trim();
+        console.log('Selected status:', selectedStatus);
+
+
+  if (selectedStatus === '12') {
+    console.log('Removing readonly attribute');
+visaResultField.removeAttribute('readonly');
+  } else {
+    console.log('Setting readonly attribute');
+    visaResultField.setAttribute('readonly', 'readonly');
+  }
+});
+
+  document.getElementById('application_status_select').addEventListener('change', function(event) {
+    console.log('Change event triggered');
+const verificationField = document.getElementById('verification_no');
+        const selectedStatus = event.target.value.trim();
+        console.log('Selected status:', selectedStatus);
+
+
+  if (selectedStatus === '7') {
+    console.log('Removing readonly attribute');
+verificationField.removeAttribute('readonly');
+  } else {
+    console.log('Setting readonly attribute');
+    verificationField.setAttribute('readonly', 'readonly');
+  }
+});
+
+let globalVisaFee;
+let globalHandlingFee;
+let customerType;
+
+  document.getElementById('visa_type').addEventListener('change', function(event) {
+  const selectedVisaType = event.target.value;
+  const selectedOption = event.target.selectedOptions[0];
+  const visaFee = selectedOption.dataset.visaFee;
+  const handlingFee = selectedOption.dataset.handlingFee;
+  const customerType = document.getElementById('customer_type').value;
+
+  const visaTypeField = document.getElementById('visa_type');
+  const visaPriceField = document.getElementById('visa_price');
+  const visaHandlingFeeField = document.getElementById('handling_price');
+  const documentsSubmittedField = document.getElementById('documents_submitted');
+  const filipinoDocumentsList = document.getElementById('filipino_documents');
+  const japaneseDocumentsList = document.getElementById('japanese_documents');
+  const foreignDocumentsList = document.getElementById('foreign_documents');
+
+  globalVisaFee = selectedOption.dataset.visaFee;
+  globalHandlingFee = selectedOption.dataset.handlingFee;
+
+  if (selectedVisaType) {
+    visaTypeField.value = selectedVisaType;
+    visaPriceField.value = visaFee;
+    visaHandlingFeeField.value = handlingFee;
+
+        if (selectedVisaType) {
+    if ((customerType === 'PIATA' || customerType === 'POEA' || customerType === 'PTAA') && selectedVisaType === 'FOREIGN PASSPORT') {
+      visaPriceField.value = 1200.00;
+      visaHandlingFeeField.value = 500.00;
+    } else {
+      visaPriceField.value = globalVisaFee;
+      if ((customerType === 'PIATA' || customerType === 'POEA' || customerType === 'PTAA') && selectedVisaType !== 'FOREIGN PASSPORT') {
+        visaHandlingFeeField.value = 500.00;
+      } else {
+        visaHandlingFeeField.value = globalHandlingFee;
+      }
+    }
+  }
+
+
+        if(customerType === 'Expo') {
+                visaPriceField.removeAttribute('readonly');
+                visaHandlingFeeField.removeAttribute('readonly');
         } else {
-            visaTypeField.value = '';
-            visaPriceField.value = '';
-            visaHandlingfeeField.value = '';
+            visaPriceField.setAttribute('readonly', 'readonly');
+                visaHandlingFeeField.setAttribute('readonly', 'readonly');
         }
-    });
+
+    // Clear existing document lists
+    filipinoDocumentsList.innerHTML = '';
+    japaneseDocumentsList.innerHTML = '';
+    foreignDocumentsList.innerHTML = '';
+
+    // Generate new document lists based on requiredDocs
+    const requiredDocs = JSON.parse(selectedOption.dataset.requiredDocs);
+    if (requiredDocs && requiredDocs.length > 0) {
+      requiredDocs.forEach(doc => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+                li.innerHTML = `<input type="checkbox" name="submitted_documents" value="${doc.id}" id="${doc.id}"/> ${doc.name}`;
+
+        if (doc.type === 'FILIPINO') {
+          filipinoDocumentsList.appendChild(li);
+        } else if (doc.type === 'JAPANESE') {
+          japaneseDocumentsList.appendChild(li);
+        } else if (doc.type === 'FOREIGN') {
+          foreignDocumentsList.appendChild(li);
+        }
+      });
+    }
+  } else {
+    visaTypeField.value = '';
+    visaPriceField.value = '';
+    visaHandlingFeeField.value = '';
+    documentsSubmittedField.value = '';
+    filipinoDocumentsList.innerHTML = '';
+    japaneseDocumentsList.innerHTML = '';
+    foreignDocumentsList.innerHTML = '';
+  }
+});
+
+document.getElementById('customer_type').addEventListener('change', function(event) {
+  const selectedCustomerType = event.target.value;
+  const selectedVisaType = document.getElementById('visa_type').value;
+  const selectedOption = event.target.selectedOptions[0];
+  const visaFee = selectedOption.dataset.visaFee;
+  const handlingFee = selectedOption.dataset.handlingFee;
+  const customerType = document.getElementById('customer_type').value;
+
+  const visaTypeField = document.getElementById('visa_type');
+  const visaPriceField = document.getElementById('visa_price');
+  const visaHandlingFeeField = document.getElementById('handling_price');
+
+
+  if (selectedVisaType) {
+    if ((customerType === 'PIATA' || customerType === 'POEA' || customerType === 'PTAA') && selectedVisaType === 'FOREIGN PASSPORT') {
+      visaPriceField.value = 1200.00;
+      visaHandlingFeeField.value = 500.00;
+    } else {
+      visaPriceField.value = globalVisaFee;
+      if ((customerType === 'PIATA' || customerType === 'POEA' || customerType === 'PTAA') && selectedVisaType !== 'FOREIGN PASSPORT') {
+        visaHandlingFeeField.value = 500.00;
+      } else {
+        visaHandlingFeeField.value = globalHandlingFee;
+      }
+    }
+  }
+
+  if(customerType === 'Expo') {
+                visaPriceField.removeAttribute('readonly');
+                visaHandlingFeeField.removeAttribute('readonly');
+        } else {
+            visaPriceField.setAttribute('readonly', 'readonly');
+                visaHandlingFeeField.setAttribute('readonly', 'readonly');
+        }
+});
 
 
 
@@ -552,176 +977,44 @@ function isLetter(char) {
 		// get_promo_code();
 
         var visaType = $('#visa_type').find('option:selected').val();
-		// on_change_visa_type(visaType,true);
 
-		// function populate_partner_companies(filterType = '')
-		// {
-		// 	$('#customer_company').html('');
-		// 	$('#customer_company').attr('disabled', true);
+		$(document).ready(function () {
+        // Restore the checkboxes based on the stored value in the hidden input field
+        var submitted_documents = "{{$application->documents_submitted}}".split(",");
+        $('input[name="submitted_documents"]').each(function () {
+            if (submitted_documents.includes($(this).val())) {
+                $(this).prop("checked", true);
+            }
+        });
 
-		// 	if(filterType != 'Walk-In')
-		// 	{
-		// 		$.ajax({
-		// 			url: "../../partner_companies/getpartners",
-		// 			data: {filterType:filterType},
-		// 			success: function(data)
-		// 			{
-		// 				var options = '';
-		// 				var selected = '';
+        // Update the hidden input field when checkboxes are changed
+        $(document).on('change', 'input[name="submitted_documents"]', function () {
+            var checkboxes = $('input[name="submitted_documents"]:checked');
+            var output = [];
 
-		// 				data.forEach(function(row){
-		// 					selected = '';
-		// 					if("{{$application->customer_company}}" == row.id) selected = "selected ";
-		// 					options += "<option " + selected + "value='" + row.id + "'>" + row.name + "</option>"
-		// 				});
+            checkboxes.each(function () {
+                output.push($(this).val());
+            });
 
-		// 				$('#customer_company').attr('disabled', false);
-		// 				$('#customer_company').html(options);
-		// 			}
-		// 		});
-		// 	}
-		// }
-
-		// function on_change_visa_type(visaType,fromUser)
-		// {
-		// 	var selectedVisaType = $.grep(visaTypeArray, function(obj){return obj.id == visaType;})[0];
-		// 	get_required_documents(selectedVisaType);
-		// 	restore_checkboxes();
-		// 	$('#visa_price').val(selectedVisaType.price);
-		// 	get_promo_code();
-		// }
-
-		// function get_required_documents(selectedVisaType)
-		// {
-		// 	var filipinoDocuments = selectedVisaType.filipino_documents.split(",");
-		// 	var japaneseDocuments = selectedVisaType.japanese_documents.split(",");
-		// 	var foreignDocuments = selectedVisaType.foreign_documents.split(",");
-
-		// 	$('#filipino_documents').html(generate_checkboxes(filipinoDocuments));
-		// 	$('#japanese_documents').html(generate_checkboxes(japaneseDocuments));
-		// 	$('#foreign_documents').html(generate_checkboxes(foreignDocuments));
-		// }
-
-		function generate_checkboxes(documentArray = [])
-		{
-			var outputString = '';
-			var docsArray = {!! $documentlist->toJson() !!};
-
-			documentArray.forEach(function(item){
-				var req_document = $.grep(docsArray, function(obj){return obj.id == item})[0];
-				outputString += "<li class='list-group-item'> <input type='checkbox' name='submitted_documents' value='" + req_document.id + "'/>" + req_document.name + "</li>";
-			});
-
-			return outputString;
-		}
-
-		function restore_checkboxes()
-		{
-			var submitted_documents = "{{$application->documents_submitted}}".split(",");
-			$('input[name="submitted_documents"]').each(function(){
-				if(submitted_documents.includes($(this).val()))
-				{
-					$(this).attr("checked", true);
-				}
-			});
-		}
-
-		// function update_visa_price()
-		// {
-		// 	if($("input[name='promo_code']:checked").val() === 'Promo')
-		// 	{
-		// 		$('#visa_price').attr('readonly', false);
-		// 	}
-		// 	else
-		// 	{
-		// 		$('#visa_price').attr('readonly', true);
-		// 		$('#visa_type').change();
-		// 	}
-		// }
-
-		// function get_promo_code()
-		// {
-		// 	var promo_code = $("#promo_code").val().toUpperCase();
-		// 	if(promo_code != "")
-		// 	{
-		// 		var id = {{$application->id}};
-		// 		$.ajax({
-		// 			url: "../redeem_promo_code",
-		// 			data: {id:id, promo_code:promo_code, page:"edit"},
-		// 			success: function(data)
-		// 			{
-		// 				apply_promo_code(data[0]);
-		// 			}
-		// 		});
-		// 	}
-		// 	else {
-		// 		apply_promo_code("");
-		// 	}
-		// }
-
-		// function apply_promo_code(discount)
-		// {
-        //     var currentVisaType = {{$application->visa_type}};
-		// 	var visaType = $('#visa_type').find('option:selected').val();
-		// 	var selectedVisaType = $.grep(visaTypeArray, function(obj){return obj.id == visaType;})[0];
-		// 	if(discount != "")
-		// 	{
-		// 		var discount_amount = 0;
-
-		// 		if(discount.substring(discount.length-1, discount.length) == '%')
-		// 		{
-		// 			discount_amount = selectedVisaType.price * (Number(discount.substring(0, discount.length-1))/100);
-		// 		} else {
-		// 			discount_amount = Number(discount);
-		// 		}
-		// 		$('#discount-text').html('-'.concat(discount_amount.toFixed(2)));
-
-        //         if (currentVisaType == selectedVisaType.id) {
-        //             $('#visa_price').val(({{ $application->visa_price }} - discount_amount).toFixed(2));
-        //         } else {
-        //             $('#visa_price').val((selectedVisaType.price - discount_amount).toFixed(2));
-        //         }
-
-		// 	}
-		// 	else
-		// 	{
-		// 		$('#discount-text').html('');
-        //         if (currentVisaType == selectedVisaType.id) {
-        //             $('#visa_price').val({{ $application->visa_price }});
-        //         } else {
-        //             $('#visa_price').val(selectedVisaType.price);
-        //         }
-
-		// 	}
-		// }
-
-		// $(document).on('change', '#customer_type', function(){
-		// 	var filterType = $(this).val();
-		// 	populate_partner_companies(filterType);
-		// });
-
+            $('input[name="documents_submitted"]').val(output.join(","));
+        });
+    });
+	
 		$(document).on('change', '#visa_type', function(){
 			var visaType = $(this).find('option:selected').val();
 			// on_change_visa_type(visaType,true);
 		});
 
-		$(document).on('change', 'input[name="submitted_documents"]', function(){
-			var checkboxes = $('input[name="submitted_documents"]:checked');
-
-			var output = [];
-
-			checkboxes.each(function(){
-				output.push($(this).val());
-			});
-
-			$('input[name="documents_submitted"]').val(output.join(","));
-		});
 
 		// $(document).on('click', '#promo_code_btn', function(){
 		// 	get_promo_code();
 		// });
 
 	});
+
+
+
+
 
 </script>
 @endsection

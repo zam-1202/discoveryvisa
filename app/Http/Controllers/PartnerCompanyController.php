@@ -8,17 +8,30 @@ use Illuminate\Http\Request;
 
 class PartnerCompanyController extends Controller
 {
+    
+		    protected $customer_type_array = array("Walk-In" => "Walk-In",
+                                            "Corporate" => "Corporate",
+                                            "Courier" => "Courier",
+                                            "Expo" => "Expo",
+                                            "Others" => "Others",
+                                            "PIATA" => "PIATA",
+                                            "POEA" => "POEA",
+                                            "PTAA" => "PTAA");
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {       
+        
+        $customer_type_array = $this->customer_type_array;
+		$customer_company = PartnerCompany::all(); // Fetch the customer company data
         $result = DB::table('partner_companies')->orderBy('type', 'asc')->orderBy('name', 'asc')->paginate(20);
+        $names = PartnerCompany::distinct()->get(['name']);
         $types = PartnerCompany::distinct()->get(['type']);
         $types = collect($types)->pluck('type')->push('Other');
-		return view('admin.partner_companies', compact('result', 'types'));
+		return view('admin.partner_companies', compact('result', 'types', 'names', 'customer_type_array', 'customer_company'));
     }
 
 	public function filterList(Request $request)
@@ -81,14 +94,13 @@ class PartnerCompanyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required',
-			'name' => 'required'
-
+			'name' => 'required',
+			'type' => 'required'
 		]);
 
 		$partnerCompany = new PartnerCompany([
-			'type' => $request->get('type'),
-            'name' => $request->get('name')
+			'name' => $request->get('name'),
+			'type' => $request->get('type')
 		]);
 
 		$partnerCompany->save();
@@ -114,7 +126,9 @@ class PartnerCompanyController extends Controller
      */
     public function edit($id)
     {
-        //
+        $customer_company = PartnerCompany::all(); // Fetch the customer company data
+    
+        return view('partner_companies.edit', compact('customer_company'));
     }
 
     /**
@@ -162,6 +176,7 @@ class PartnerCompanyController extends Controller
             return response()->json(['success' => true]); // Send a success response
 		}
 	}
+    
 
     /**
 	 *
@@ -183,21 +198,22 @@ class PartnerCompanyController extends Controller
 	 *
 	 */
     
-    public function updatepartnerCompanies(Request $request)
-    {
-		if($request->ajax()){
-
-			$name = $request->get('name');
-			$type = $request->get('type');
-
-
-            $partnerComp->name = $request->get('name');
-            $partnerComp->type = $request->get('type');
-            $partnerComp->save();
-
-            $request->session()->flash('status', 'Partner Company successfully updated');
-		}
-	}
-
+     public function updatepartnerCompanies(Request $request, $id)
+     {
+         $request->validate([
+             'type' => 'required',
+             'name' => 'required',
+         ]);
+     
+         $partnerComp = PartnerCompany::find($id);
+     
+         $partnerComp->name = $request->name;
+         $partnerComp->type = $request->type;
+         $partnerComp->save();
+     
+         $request->session()->flash('status', 'Partner Company successfully updated');
+     
+     }
+     
     
 }

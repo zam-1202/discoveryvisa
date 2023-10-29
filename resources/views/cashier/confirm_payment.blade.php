@@ -1,10 +1,27 @@
+<style>
+    .error-message {
+        color: red;
+        font-size: 12px;
+    }
+
+    .error-message-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 5px;
+        height: 20px; /* Adjust the height as needed */
+    }
+</style>
+
+
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-12">
         <table class="table">
             <thead class="thead-dark">
+            MNL230712KAO
                 <tr>
                     <th class="text-right align-top" style="width:30%;">Reference No:</th>
-                    <th class="text-break align-top" style="width:70%;">{{ $searchString }}</th>
+                    <th class="text-break align-top" style="width:70%;">{{ $searchString != '' ? '' : $searchString }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -13,6 +30,10 @@
                 <tr class="border bg-white">
                     <td class="text-right">Name of Applicant:</td>
                     <td>{{ $application->lastname }}, {{ $application->firstname }} {{ $application->middlename }}</td>
+                </tr>
+                <tr class="border bg-white">
+                    <td class="text-right">Visa Type:</td>
+                    <td>{{ $application->visa_type }}</td>
                 </tr>
                 <tr class="border bg-white">
                     <td class="text-right">Visa Price:</td>
@@ -26,11 +47,19 @@
                     <td class="text-right">Pick Up Fee:</td>
                     <td>{{ $application->pickup_fee }}</td>
                 </tr>
-                @if ($application->customer_type != 'Corporate')
                 <tr class="border bg-white">
+                    <td class="text-right">Customer Type:</td>
+                    <td>{{ $application->customer_type }}</td>
+                </tr>
+                <tr class="border bg-white">
+                    <td class="text-right">Customer Company:</td>
+                    <td>{{ $application->customer_company }}</td>
+                </tr>
+                @if ($application->customer_type != 'Corporate')
+                <tr class="border bg-white ">
                     <td class="text-right">OR/ SI/ PR No.:</td>
                     <td>
-                        {{Form::text('or_number', $application->or_number, ['class' => 'form-control', 'id' => 'or_number', 'placeholder' => '(optional)', 'autocomplete' => 'off', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}
+                        {{Form::text('or_number', $application->or_number, ['class' => 'form-control text-center', 'id' => 'or_number', 'placeholder' => '(optional)', 'autocomplete' => 'off', 'disabled' => ($application->payment_status == 'UNPAID' ? false : true)])}}
                     </td>
                 </tr>
                 <tr class="border bg-white">
@@ -81,27 +110,38 @@
         </table>
     </div>
     @if ($application && $application->customer_type != 'Corporate')
-    <a href="{{ route('cashier.download_acknowledgement_receipt_pdf', ['ref_no' => $application->reference_no]) }}" id="btn_receipt" class="btn btn-primary w-100">ACKNOWLEDGEMENT RECEIPT<span style="font-size:20px;" class="material-icons align-bottom"></span></a>
-
+    <a href="{{ route('cashier.download_acknowledgement_receipt_pdf', ['ref_no' => $application->reference_no]) }}" id="btn_receipt" class="btn btn-primary w-100" target="_blank">ACKNOWLEDGEMENT RECEIPT<span style="font-size:20px;" class="material-icons align-bottom"></span></a>
     @endif
 </div>
 
-<div class="modal fade" id="modify_payment">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header bg-secondary text-white">
-				<h4 class="modal-title">Modify Payment</h4>
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-			</div>
-			<div class="modal-body d-flex justify-content-center">
-				<div class="spinner-border text-info"></div>
-			</div>
-			<div class="modal-footer">
+<div id="modify_payment" class="modal fade">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h4 class="modal-title">Modify Payment</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row p-1">
+                        <div class="col-md-4 text-center">Approval Code: </div>
+                        <div class="col-md-8">
+                            <input class="form-control @error('approval_code') is-invalid @enderror" type="password" name="approval_code" required autofocus type="text" id="approval_code">
+                        </div>
+                    </div>
+                    <div class="error-message-container">
+                <div id="invalid_password_message" class="text-danger"></div>
+            </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="send_otp">Send OTP</button>
                 <button type="button" class="btn btn-success" id="modify_payment_btns">Modify Payment</button>
-				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-		    </div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script type="text/javascript">
     
@@ -118,7 +158,7 @@ $(document).ready(function() {
     // Add event listener to the "Modify Payment" button
     $('#edit_btn').click(function() {
         $('#payment_status').prop('disabled', true);
-        console.log("clicked")
+        $('#invalid_password_message').empty(); // Clear any previous error message
     });
 });
 
@@ -160,14 +200,44 @@ $(document).ready(function() {
     confirmButton.prop('disabled', true);
 });
 
+
+
+
+// Add a variable to track if OTP is currently being sent
+var isSendingOTP = false;
+
+$(document).one('click', '#send_otp', function() {
+    if (!isSendingOTP) {
+        isSendingOTP = true; // Set the flag to indicate OTP request is in progress
+        $.ajax({
+            url: "../application_batches/generate_approval_code",
+            success: function(response) {
+                $('#invalid_password_message').text("One Time Password is sent");
+                console.log("OTP Sent!");
+            },
+            complete: function() {
+                // Enable the button after the request is complete
+                isSendingOTP = false;
+            }
+        });
+    }
+});
+
 function modify_payment_btn() {
     var approvalCode = $('#approval_code').val();
+
+    // Check if the approval code is empty
+    if (approvalCode.trim() === '') {
+        $('#invalid_password_message').text("Field cannot be empty");
+        return;
+    }
+
     $.ajax({
-        url: "../cashier/check_approval_code",
+        url: "../cashier/check_otp_code",
         data: { approval_code: approvalCode },
         success: function(response) {
             if (response.status === "success") {
-                // If the approval code is valid, continue with the modification of payment
+                // If the approval code is valid, proceed with the modification of payment
                 $.ajax({
                     url: "../cashier/confirm_payment",
                     data: { approval_code: approvalCode },
@@ -175,73 +245,45 @@ function modify_payment_btn() {
                         $('#btn_receipt').addClass('disabled');
                         $('#payment_status').prop('disabled', false); // Enable payment status
 
-                        // Close the modal
+                         // Close the modal
                         $('#modify_payment').modal('hide');
 
-                        // Remove the disable for the button
-                        $('#confirm_btn_modify').prop('disabled', true);
-
+                        // Remove the disabled state for the button
+                        $('#confirm_btn_modify').prop('disabled', false);
+                    },
+                    error: function() {
+                        // Handle error if confirm_payment AJAX request fails
+                        // For example, show an error message to the user
+                        $('#invalid_password_message').text("Payment confirmation failed.");
                     }
                 });
+            } else if (response.message === "OTP has expired") {
+                // The provided OTP has expired
+                $('#invalid_password_message').text("OTP has expired. Please request a new OTP.");
+                $('#approval_code').val('');
             } else {
-                // If the approval code is invalid, show an error message
-                $('#approval_code').addClass('invalid-field'); // Add the CSS class to make the field red
-                if (response.status === 'Request has been rejected') {
-                    $('#modify_payment div.modal-dialog').addClass('shake');
-                    setTimeout(function() {
-                        $('#modify_payment div.modal-dialog').removeClass('shake');
-                        $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>Request has been rejected</div>");
-                    }, 500);
-                } else {
-                    $('#modify_payment div.modal-dialog').addClass('shake');
-                    setTimeout(function() {
-                        $('#modify_payment div.modal-dialog').removeClass('shake');
-                        $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>Incorrect Password</div>");
-                    }, 500);
-                }
+                // The provided OTP is incorrect
+                $('#invalid_password_message').text("Incorrect OTP");
+                $('#approval_code').val('');
             }
         },
         error: function() {
-            // Handle the error condition
-            console.log('Error occurred during AJAX request');
-            // Show a generic error message to the user
-            $('#modify_payment div.modal-dialog').addClass('shake');
-            setTimeout(function() {
-                $('#modify_payment div.modal-dialog').removeClass('shake');
-                $('#modify_payment div div.modal-body').html("<div class='text-center text-danger'>An error occurred. Please try again later.</div>");
-            }, 500);
+            // Handle error if checkOtpCode AJAX request fails
+            // For example, show an error message to the user
+            $('#invalid_password_message').text("OTP verification failed.");
         }
     });
 }
 
 
-
-
-
-$('#modify_payment').on('hidden.bs.modal', function(){
-    $('#modify_payment div div.modal-body').html('<div class="spinner-border text-info"></div>');
-    // $('#payment_status').prop('disabled', false); // Disable payment status when modal is closed
-});
-
-
-$(document).on('click','button[name="edit_btn"]',function(){
-		var current_row = $(this).closest('tr');
-		var modify_payment_html = "<div class='container'>" +
-                                   "<div class='row p-1'>" +
-								   "<div class='col-md-4 text-right'>Approval Code: </div>" +
-								   "<div class='col-md-8'><input class='form-control text-center' type='text' id='approval_code'></div>" +
-								   "</div>" +
-								   "</div>";
-		$('#modify_payment div div.modal-body').html(modify_payment_html);
-	});
-
     $(document).on('click','#modify_payment_btns', function(){
 		modify_payment_btn();
 	});
 
-	$('#modify_payment').on('hidden.bs.modal', function(){
-		$('#modify_payment div div.modal-body').html('<div class="spinner-border text-info"></div>');
-	});
+
+	// $('#modify_payment').on('hidden.bs.modal', function(){
+	// 	$('#modify_payment div div.modal-body').html('<div class="spinner-border text-info"></div>');
+	// });
 
 
 

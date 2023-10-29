@@ -3,11 +3,23 @@
 <style>
     .row {
   margin-top: 10px;
-}
+    }
 
-h6 {
+    .row-two {
+  margin-top: -70px;
+    }
+
+    h6 {
   margin-bottom: 10px;
-}
+    }
+
+    .smaller-font {
+        font-size: 12px;
+    }
+
+    .tight-line-height {
+        line-height: 1; 
+    }
 
 
     </style>
@@ -26,18 +38,19 @@ h6 {
 
   </head>
   <body style="background-color: white">
-    <div class="row">
-        <div class="col-7">
+	<div class="row">
+        <div class="col-6">
             <div class="bg-dark text-center">
                 <h6 class="text-white" style="font-size: 20px;">ACKNOWLEDGEMENT</h6>
             </div>
         </div>
-        <div class="offset-7 col-5">
+        <div class="offset-6 col-6">
             <div class="text-center">
-                <h6 style="font-size: 10px;">*Please bring this receipt to claim your passport.</h6>
-                <img src="{{ asset('img/logo.png') }}" alt="tag">
-                <h6 class="m-0" style="font-size: 11px;">(02) 892-2849 / 818-7716 (Manila Office)</h6>
-                <h6 class="m-0" style="font-size: 11px;">(032) 341-1923 / 341-1935 (Cebu Office)</h6>
+            <img src="{{ asset('img/logo.png') }}" alt="tag">
+                <h6 style="font-size: 10px; color: red;">Please bring this receipt to claim your passport.</h6>
+                <h6 class="m-0" style="font-size: 11px;">(02) 8812-3328 / 0917-576-8472 / 0917-181-8472 (Manila Office)</h6>
+                <h6 class="m-0" style="font-size: 11px;">(032) 340-1819 / 0917-101-8472 (Cebu Office)</h6>
+                <h6 class="m-0" style="font-size: 11px;">(082) 284-4114 / 0917-111-8472 / 0917-121-8472 (Davao Office)</h6>
             </div>
         </div>
     </div>
@@ -79,7 +92,7 @@ h6 {
     <div class="col-6">
         <div class="text-left">
             @foreach ($docs->slice(0, round(count($docs) / 2)) as $doc)
-                <div class="form-check">
+                <div class="form-check smaller-font tight-line-height">
                     <input class="form-check-input" type="checkbox" name="docs[]" value="{{ $doc->id }}" id="{{ 'doc-' . $doc->id }}" checked>{{ $doc->name }}</input>
                 </div>
             @endforeach
@@ -88,16 +101,23 @@ h6 {
     <div class="col-6 offset-6">
         <div class="text-left">
             @foreach ($docs->slice(round(count($docs) / 2)) as $doc)
-                <div class="form-check">
+                <div class="form-check smaller-font tight-line-height">
                     <input class="form-check-input" type="checkbox" name="docs[]" value="{{ $doc->id }}" id="{{ 'doc-' . $doc->id }}" checked>{{ $doc->name }}</input>
                 </div>
             @endforeach
         </div>
     </div>
 </div>
-    <div class="row">
+<div class="row">
+    <div class="col-12">
+        <br>
+        <br>
+        <br>
+    </div>
+</div>
+    <div class="row-two">
         <div class="col-12">
-            <h6 style="font-size: 15px; margin-top: 1%" class="mb-3">TERMS AND CONDITIONS</h6>
+            <h6 style="font-size: 15px" class="mb-3">TERMS AND CONDITIONS</h6>
     
             <h6 style="font-size: 11px;">1. We will strictly implements the visa procedure of Discovery Tour, Inc starting from receipt up to claiming of the documents by applicant.</h6>
             <h6 style="font-size: 11px;">2. All necessary documents must be prepared by the applicant, the submission and claiming of passports must be done in person.</h6>

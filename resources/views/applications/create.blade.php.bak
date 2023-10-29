@@ -242,41 +242,47 @@ $branch_lookup = [];
           </div>
 		  <div class="form-group row">
 		    <div class="col-md-12">
-        {{Form::hidden('documents_submitted', null, ['id' => 'documents_submitted'])}}
-        <label for="documents_submitted">Documents Required:<span class="required-field">*</span></label>
-        {{Form::hidden('documents_submitted')}}
-
-                <div class="col-md-12 d-flex align-items-center" style="margin-top: 15px;">
-                        <input type="text" class="form-control text-center" id="searchString" name="searchString" placeholder="Search documents">
-                </div>
-        
-                <div class="table-responsive">
-            <table class="table table-sm table-bordered">
-                <thead class="thead-light">
-                    <th style="width:100%;" class="bg-primary text-white">ALL DOCUMENTS</th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="bg-primary text-left">
-                            <div class="scrollable-div">
-                                <ul class="list-group" id="all_documents">
-                                    @foreach ($docs_filipino->sortBy('name') as $value)
-                                    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
-                                    @endforeach
-                                    @foreach ($docs_japanese->sortBy('name') as $value)
-                                    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
-                                    @endforeach
-                                    @foreach ($docs_foreign->sortBy('name') as $value)
-                                    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+				{{Form::hidden('documents_submitted', null, ['id' => 'documents_submitted'])}}
+				<label for="documents_submitted">Documents Required:<span class="required-field">*</span></label>
+				{{Form::hidden('documents_submitted')}}
+				<div class="table-responsive">
+					<table class="table table-sm table-bordered">
+                                      <thead class="thead-light">
+                                          <th style="width:33.33%;" class="bg-success text-white">FILIPINO DOCUMENTS</th>
+                                          <th style="width:33.33%;" class="bg-info text-white">JAPANESE DOCUMENTS</th>
+                                          <th style="width:33.33%;" class="bg-dark text-white">FOREIGNER DOCUMENTS</th>
+                                      </thead>
+                                      	<tbody>
+                                          <tr>
+                                            <td class="bg-success text-left">
+											<div class="scrollable-div">
+                                                <ul class="list-group" id="filipino_documents">	
+												@foreach ($docs_filipino->sortBy('name') as $value)
+													<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>                                                    @endforeach
+                                                </ul>
+												</div>
+                                            </td>
+                                            <td class="bg-info text-left">
+												<div class="scrollable-div">
+                                                <ul class="list-group" id="japanese_documents">
+												@foreach ($docs_japanese->sortBy('name') as $value)
+													<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>                                                    @endforeach
+                                                </ul>
+												</div>
+                                            </td>
+                                            <td class="bg-dark text-left">
+												<div class="scrollable-div">
+                                                <ul class="list-group" id="foreign_documents">
+												@foreach ($docs_foreign->sortBy('name') as $value)
+													<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>                                                    @endforeach
+                                                </ul>
+												</div>
+                                            </td>
+                                          </tr>
+                                      	</tbody>
+                    </table>
+				</div>
+			</div>
         </div>
 
 		  <div class="row">
@@ -312,55 +318,6 @@ $branch_lookup = [];
 @section('scripts')
 <script type="text/javascript">
 
-$(document).ready(function() {
-    // Store the original list of documents
-    var originalDocuments = $('#all_documents').html();
-    // Keep track of selected checkboxes
-    var selectedCheckboxes = {};
-
-    // Function to filter documents based on search input
-    function filterDocuments(searchString) {
-        var filteredHTML = '';
-        var searchRegex = new RegExp(searchString, 'i'); // Case-insensitive search
-
-        $('#all_documents li').each(function() {
-            var documentName = $(this).text();
-            if (searchRegex.test(documentName)) {
-                var checkbox = $(this).find('input[type="checkbox"]');
-                var checkboxId = checkbox.attr('id');
-                // Check if the checkbox was previously selected
-                var isChecked = selectedCheckboxes[checkboxId] ? 'checked' : '';
-                filteredHTML += `<li class='list-group-item'><input type='checkbox' name='submitted_documents' value='${checkboxId}' id='${checkboxId}' ${isChecked}/> ${documentName} </li>`;
-            }
-        });
-
-        $('#all_documents').html(filteredHTML);
-    }
-
-    // Handle checkbox changes and update selectedCheckboxes
-    $('#all_documents').on('change', 'input[type="checkbox"]', function() {
-        var checkboxId = $(this).attr('id');
-        if (this.checked) {
-            selectedCheckboxes[checkboxId] = true;
-        } else {
-            delete selectedCheckboxes[checkboxId];
-        }
-    });
-
-    $('#searchString').on('input', function() {
-        var searchString = $(this).val();
-        // Restore the original list of documents if the search input is empty
-        if (searchString === '') {
-            $('#all_documents').html(originalDocuments);
-            // Restore the selected state of checkboxes
-            for (var checkboxId in selectedCheckboxes) {
-                $('#' + checkboxId).prop('checked', true);
-            }
-        } else {
-            filterDocuments(searchString);
-        }
-    });
-});
 
 
 
@@ -595,11 +552,11 @@ let customerType;
                 visaHandlingFeeField.setAttribute('readonly', 'readonly');
         }
 
-   /* // Clear existing document lists
+    // Clear existing document lists
     filipinoDocumentsList.innerHTML = '';
     japaneseDocumentsList.innerHTML = '';
     foreignDocumentsList.innerHTML = '';
-*/
+
     // Generate new document lists based on requiredDocs
     const requiredDocs = JSON.parse(selectedOption.dataset.requiredDocs);
     if (requiredDocs && requiredDocs.length > 0) {
@@ -608,13 +565,13 @@ let customerType;
         li.className = 'list-group-item';
                 li.innerHTML = `<input type="checkbox" name="submitted_documents" value="${doc.id}" id="${doc.id}"/> ${doc.name}`;
 
- /*       if (doc.type === 'FILIPINO') {
+        if (doc.type === 'FILIPINO') {
           filipinoDocumentsList.appendChild(li);
         } else if (doc.type === 'JAPANESE') {
           japaneseDocumentsList.appendChild(li);
         } else if (doc.type === 'FOREIGN') {
           foreignDocumentsList.appendChild(li);
-        }*/
+        }
       });
     }
   } else {

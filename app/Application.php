@@ -12,6 +12,7 @@ class Application extends Model
 		'customer_type',
 		'customer_company',
 		'group_name',
+		'submitter',
 		'pickupMethod',
 		'pickup_fee',
 		'branch',
@@ -46,7 +47,13 @@ class Application extends Model
 		'payment_date',
 		'batch_no',
 		'date_received_by_main_office',
-		'date_received_from_embassy',
-		'submission_batch_no'
+		'submission_batch_no',
+		'submitted_to_embassy',
+		'receiver_from_embassy',
+		'released_by_embassy',
+		'visa_result',
+		'released_to',
+		'courier_tracking'
+
 	];
 }

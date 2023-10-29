@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\RequiredDocument;
 use App\VisaType;
 use Illuminate\Http\Request;
+use App\Branch;
 
 class VisaTypeController extends Controller
 {
@@ -16,7 +17,7 @@ class VisaTypeController extends Controller
     public function index()
     {
         $result = VisaType::with('documents')->orderBy('id', 'asc')->paginate(20);
-
+        $branches = Branch::all();
         $documents = [];
         foreach ($result as $value) {
             $docs_filipino = [];
@@ -34,7 +35,7 @@ class VisaTypeController extends Controller
             array_push($documents, ['filipino' => $docs_filipino, 'japanese' => $docs_japanese, 'foreign' => $docs_foreign]);
         }
 
-        return view('admin.visa.index', compact('result', 'documents', 'docs_filipino', 'docs_japanese', 'docs_foreign'));
+        return view('admin.visa.index', compact('result', 'documents', 'docs_filipino', 'docs_japanese', 'docs_foreign', 'branches'));
     }
 
     /**
@@ -44,13 +45,21 @@ class VisaTypeController extends Controller
      */
     public function create()
     {
-        $docs = RequiredDocument::all();
+       $result = VisaType::with('documents')->orderBy('id', 'asc')->first();
 
+
+        $selected_docs = [];
+        foreach ($result->documents as $key => $value) {
+            array_push($selected_docs, $value->id);
+        }
+
+        $docs = RequiredDocument::all();
+        $branches = Branch::all();
         $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
         $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
         $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
 
-        return view('admin.visa.create', compact('docs_filipino', 'docs_japanese', 'docs_foreign'));
+        return view('admin.visa.create', compact('docs_filipino', 'docs_japanese', 'docs_foreign', 'docs', 'branches', 'result', 'selected_docs'));
     }
 
 
@@ -63,16 +72,19 @@ class VisaTypeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-			'name' => 'required|unique:visa_types',
+			'name' => 'required',
             'handling_fee' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'visa_fee' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+            'branch' => 'nullable',
 		]);
 
         $visa = VisaType::create(
             [
                 'name' => $request->name,
                 'handling_fee' => $request->handling_fee,
-                'visa_fee' => $request->visa_fee
+                'visa_fee' => $request->visa_fee,
+                'branch' =>  $request->input('branch_visa')
+
             ]);
 
         if ($request->documents_submitted) {
@@ -104,6 +116,7 @@ class VisaTypeController extends Controller
     public function edit($id)
     {
         $result = VisaType::where('id', $id)->with('documents')->orderBy('id', 'asc')->first();
+        $branches = Branch::all();
 
         $selected_docs = [];
         foreach ($result->documents as $key => $value) {
@@ -111,11 +124,11 @@ class VisaTypeController extends Controller
         }
 
         $docs = RequiredDocument::all();
-
+        $branches = Branch::all();
         $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
         $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
         $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
-        return view('admin.visa.edit', compact('result', 'selected_docs', 'docs_filipino', 'docs_japanese', 'docs_foreign'));
+        return view('admin.visa.edit', compact('result', 'selected_docs', 'docs_filipino', 'docs_japanese', 'docs_foreign', 'branches'));
     }
 
     /**
@@ -128,15 +141,17 @@ class VisaTypeController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-			'name' => 'required|unique:visa_types,name,' .$id,
+			'name' => 'required',
             'handling_fee' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'visa_fee' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
+            'branch' => 'nullable',
 		]);
 
         $visa = VisaType::findOrFail($id);
         $visa->name = $request->name;
         $visa->handling_fee = $request->handling_fee;
         $visa->visa_fee = $request->visa_fee;
+        $visa->branch = $request->input('branch_visa');
         $visa->save();
 
         if ($request->documents_submitted) {

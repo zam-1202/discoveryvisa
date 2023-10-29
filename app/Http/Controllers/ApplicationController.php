@@ -24,11 +24,14 @@ $visaTypes = VisaType::all();
 
 class ApplicationController extends Controller
 {
-		protected $customer_type_array = array("Walk-In" => "Walk-In",
-											"PIATA" => "PIATA",
-											"PTAA" => "PTAA",
-											"Corporate" => "Corporate",
-											"POEA" => "POEA");
+		    protected $customer_type_array = array("Walk-In" => "Walk-In",
+                                            "Corporate" => "Corporate",
+                                            "Courier" => "Courier",
+                                            "Expo" => "Expo",
+                                            "Others" => "Others",
+                                            "PIATA" => "PIATA",
+                                            "POEA" => "POEA",
+                                            "PTAA" => "PTAA");
 
     /**
      * Display a listing of the resource.
@@ -46,69 +49,132 @@ class ApplicationController extends Controller
 	 */
 	public function fetch_data(Request $request)
 	{
-		if($request->ajax())
-		{
+
+		$application_status_array = [
+			'1' => 'NEW Application',
+			'2' => 'Sent to Main Office',
+			'3' => 'Received by Main Office',
+			'4' => 'Sent to Original Branch',
+			'5' => 'Received by Original Branch',
+			'6' => 'Submitted to Embassy',
+			'7' => 'Received from Embassy',
+			'8' => 'Sent to/Claimed by Client',
+			'9' => 'Incomplete',
+			'10' => 'Pending Approval',
+			'11' => 'Additional Documents Required',
+ 			'12' => 'Released by Embassy',
+                        '13' => 'Resubmitted to JPN',
+                        '14' => 'Passport Return from JPN Embassy'
+		];
+		
+
+		if ($request->ajax()) {
 			$searchString = $request->get('searchString');
-			$start_date = $request->get('start_date');
-			$end_date = $request->get('end_date');
-
-			if($searchString != '')
-			{
-				$data = DB::table('applications')
-				//  ->where('branch', '=', $request->user()->branch)
-				 ->where(function($query) use ($searchString){
-							$query->where('reference_no','LIKE','%'.$searchString.'%')
-								  ->orWhere('firstname','LIKE','%'.$searchString.'%')
-								  ->orWhere('middlename','LIKE','%'.$searchString.'%')
-								  ->orWhere('lastname','LIKE','%'.$searchString.'%')
-								  ->orWhere('group_name','LIKE','%'.$searchString.'%');
-						})
-				 ->orderBy('id','desc')
-				 ->paginate(20);
+			$start_date = $request->input('fromdate');
+			$end_date = $request->input('todate');
+			$application_status = $request->input('application_status');
+	
+			$user = $request->user();
+			$role = $user->role;
+			$branch = Auth::user()->branch;
+	
+			$query = DB::table('applications')->orderBy('id', 'desc');
+			
+	
+			if ($role !== 'Admin') {
+				if ($role === 'Encoder' && $branch === 'MNL') {
+					$query->where(function ($query) {
+						$query->where('application_status', 2)
+							->orWhere('branch', 'MNL');
+					});
+				} else {
+					$query->where('branch', $branch);
+				}
 			}
-			else {
-				$data = DB::table('applications')->orderBy('id','desc')->paginate(20);
-				// $data = DB::table('applications')->where('branch', '=', $request->user()->branch)->orderBy('id','desc')->paginate(20);
-
+	
+			if (!empty($searchString)) {
+				$query->where(function ($query) use ($searchString) {
+					$query->where('reference_no', 'LIKE', '%' . $searchString . '%')
+						->orWhere('firstname', 'LIKE', '%' . $searchString . '%')
+						->orWhere('middlename', 'LIKE', '%' . $searchString . '%')
+						->orWhere('lastname', 'LIKE', '%' . $searchString . '%')
+						->orWhere('group_name', 'LIKE', '%' . $searchString . '%');
+				});
 			}
-			if ($request->user()->branch !== 'MNL') {
-				$query->where('branch', '=', $request->user()->branch);
+	
+			if (!empty($application_status)) {
+				$statusValues = explode(',', $application_status); // Convert the selected status string to an array
+				$query->whereIn('application_status', $statusValues);
+			}
+			
+
+
+			if (!empty($start_date) && !empty($end_date)) {
+				$start_datetime = $start_date . ' 00:00:00';
+				$end_datetime = $end_date . ' 23:59:59';
+				$query->whereBetween('created_at', [$start_datetime, $end_datetime]);
 			}
 
-			return view('applications.application_list', compact('data'))->render();
+	
+			$data = $query->paginate(20);
+			// dd($request->all());
+
+	
+			return view('applications.application_list', compact('data', 'application_status_array'));
 		}
 	}
-
-	/**
-	 * AJAX function for Application Search FOR ADMIN ONLY
-	 */
-	// public function fetch_data_forAdmin(Request $request)
-	// {
-	// 	if($request->ajax())
-	// 	{
-	// 		$searchString = $request->get('searchString');
-
-	// 		if($searchString != '')
-	// 		{
-	// 			$data = DB::table('applications')
-	// 			 ->where(function($query) use ($searchString){
-	// 						$query->where('reference_no','LIKE','%'.$searchString.'%')
-	// 							  ->orWhere('firstname','LIKE','%'.$searchString.'%')
-	// 							  ->orWhere('middlename','LIKE','%'.$searchString.'%')
-	// 							  ->orWhere('lastname','LIKE','%'.$searchString.'%')
-	// 							  ->orWhere('group_name','LIKE','%'.$searchString.'%');
-	// 					})
-	// 			 ->orderBy('application_date','desc')
-	// 			 ->paginate(20);
-	// 		}
-	// 		else {
-	// 			$data = DB::table('applications')->orderBy('id','desc')->paginate(20);
-	// 		}
-
-	// 		return view('applications.application_list', compact('data'))->render();
-	// 	}
-	// }
 	
+	
+	
+		
+	
+
+	
+	
+
+	public function filterStatus(Request $request)
+	{
+		$application_status = $request->get('application_status');
+	
+		$application_status_array = array(
+			'1' => 'NEW Application',
+			'2' => 'Sent to Main Office',
+			'3' => 'Received by Main Office',
+			'4' => 'Sent to Original Branch',
+			'5' => 'Received by Original Branch',
+			'6' => 'Submitted to Embassy',
+			'7' => 'Received from Embassy',
+			'8' => 'Sent to/Claimed by Client',
+			'9' => 'Incomplete',
+			'10' => 'Pending Approval',		
+			'11' => 'Additional Documents Required',
+ 			'12' => 'Released by Embassy',
+                        '13' => 'Resubmitted to JPN',
+                        '14' => 'Passport Return from JPN Embassy'
+		);
+	
+		$application_status = (int)$request->get('application_status');
+
+		if ($application_status === 0) {
+			$data = Application::orderBy('id', 'desc')->paginate(20);
+		} else {
+			$data = Application::where('application_status', $application_status)->orderBy('id', 'desc')->paginate(20);
+		}
+		
+	
+		$view = view('applications.application_list')
+			->with('data', $data)
+			->with('application_status_array', $application_status_array)
+			->render();
+	
+		$response = [
+			'view' => $view,
+			'application_status_array' => $application_status_array
+		];
+	
+		return response()->json($response);
+	}
+		
 
 	/**
 	 * For Past Applications pop-up window
@@ -128,7 +194,7 @@ class ApplicationController extends Controller
 				->paginate(10);
 
 
-			return view('applications.past_applications', compact('pastApplications', 'application_status_array'))->render();
+			return view('applications.past_applications', compact('pastApplications'))->render();
 		}
 	}
 
@@ -139,7 +205,9 @@ class ApplicationController extends Controller
      */
 	public function create(Request $request)
 	{
-		$visatypes = VisaType::orderBy('id', 'asc')->get();
+		$userBranch = auth()->user()->branch;
+		$visatypes = VisaType::where('branch', $userBranch)->orderBy('id', 'asc')->get();
+		$selectedVisaType = $request->input('visa_type');
 		$documentlist = RequiredDocument::orderBy('id', 'asc')->get();
 		$customer_type_array = $this->customer_type_array;
 		$customer_company = PartnerCompany::all(); // Fetch the customer company data
@@ -151,8 +219,16 @@ class ApplicationController extends Controller
 		$branch = Auth::user()->branch;
 		$pickupPrice = Branch::where('code', $branch)->pluck('pickup_price')->first();
 		$branches = Branch::all();
+
+		if ($selectedVisaType) {
+			$visaType = VisaType::where('name', $selectedVisaType)->first();
+			$requiredDocs = $visaType->documents_submitted;
+		} else {
+			$requiredDocs = null;
+		}
+		
 	
-		return view('applications.create', compact('branches', 'pickupPrice', 'visatypes', 'documentlist', 'documents', 'result', 'selected_docs', 'docs_filipino', 'docs_japanese', 'docs_foreign', 'customer_type_array', 'customer_company'))->with('pickupPrice', $pickupPrice);
+		return view('applications.create', compact('userBranch','docs','requiredDocs','branches', 'pickupPrice', 'visatypes', 'documentlist',  'result', 'docs_filipino', 'docs_japanese', 'docs_foreign', 'customer_type_array', 'customer_company'))->with('pickupPrice', $pickupPrice);
 	}
 	
 	
@@ -170,10 +246,11 @@ class ApplicationController extends Controller
 			'customer_type' => 'required',
 			'customer_company' => 'required',
 			'group_name' => 'nullable',
+ 			'submitter' => 'required',
 			'pickupMethod' => 'required',
 			'pickup_fee' => 'nullable',
-			'lastname' => 'required',
-			'firstname' => 'required',
+                        'lastname' => ($request->input('visa_type') === 'FOREIGN PASSPORT' || $request->input('visa_type') === 'FOREIGN PASSPORT (INDIAN)') ? 'required_without:firstname' : 'required',
+                        'firstname' => ($request->input('visa_type') === 'FOREIGN PASSPORT' || $request->input('visa_type') === 'FOREIGN PASSPORT (INDIAN)') ? 'required_without:lastname' : 'required',
 			'middlename' => 'nullable',
 			'birthdate' => ['required', 'date_format:Y-m-d'],
 			'gender' => 'required',
@@ -200,6 +277,7 @@ class ApplicationController extends Controller
 			'customer_type' => $request->get('customer_type'),
 			'customer_company'  => $request->get('customer_company'),
 			'group_name' => strtoupper($request->get('group_name')),
+			'submitter' => strtoupper($request->input('submitter')),
 			'pickupMethod' => $request->input('pickupMethod'),
 			'pickup_fee' => ($request->pickupMethod === 'On-site') ? null : $request->input('pickup_fee'),
 			'branch' => $request->user()->branch,
@@ -225,7 +303,11 @@ class ApplicationController extends Controller
 			'payment_status' => 'UNPAID',
 			'application_date' => Carbon::now(),
 			'encoded_by' => $request->user()->username,
-			'last_update_by' => $request->user()->username
+			'last_update_by' => $request->user()->username,
+			'visa_result' => strtoupper($request->get('visa_result')),
+			'released_to' => strtoupper($request->get('released_to')),
+			'courier_tracking' => $request->get('courier_tracking')
+
 		]);
 
 		$application->save();
@@ -249,32 +331,32 @@ class ApplicationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-
-        $application = Application::find($id);
-		// $application = Application::where('reference_no', $request->ref_no)->first();
-		$visatypes = VisaType::orderBy('id', 'asc')->get();
+	public function edit($id)
+	{
+		$application = Application::find($id);
+		$user = auth()->user();
+		$visatypes = VisaType::where('branch', $user->branch)->orderBy('id', 'asc')->get();
 		$documentlist = RequiredDocument::orderBy('id', 'asc')->get();
 		$customer_type_array = $this->customer_type_array;
-		$customer_company = PartnerCompany::all(); // Fetch the customer company data
-        $submittedDocs = explode(",",$application->documents_submitted);
-        $documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
+		$customer_company = PartnerCompany::all();
+		$submittedDocs = explode(",", $application->documents_submitted);
+		$documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
 		$branch = Auth::user()->branch;
-
-		
-        
-		
 		$result = VisaType::with('documents')->orderBy('id', 'asc')->paginate(20);
-
 		$docs = RequiredDocument::all();
-
-        $docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
-        $docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
-        $docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
-
-		return view('applications.edit', compact('submittedDocs', 'application', 'visatypes', 'documentlist', 'customer_type_array', 'documents', 'result', 'selected_docs', 'docs_filipino', 'docs_japanese', 'docs_foreign', 'customer_company', 'branch'));
-    }
+		$docs_filipino = collect($docs)->whereIn('type', 'FILIPINO');
+		$docs_japanese = collect($docs)->whereIn('type', 'JAPANESE');
+		$docs_foreign = collect($docs)->whereIn('type', 'FOREIGN');
+	
+		if (in_array($application->application_status, [1, 4, 5, 9, 10, 11])) {
+			$batch_no_string = null; // or $batch_no_string = '';
+		} else {
+			$batch_no_string = $application->batch_no;
+		}
+	
+		return view('applications.edit', compact('user', 'submittedDocs', 'application', 'visatypes', 'documentlist', 'customer_type_array', 'documents', 'result', 'docs_filipino', 'docs_japanese', 'docs_foreign', 'customer_company', 'branch', 'batch_no_string'));
+	}
+	
 
     /**
      * Update the specified resource in storage.
@@ -291,11 +373,12 @@ class ApplicationController extends Controller
 			'customer_type' => 'required',
 			'customer_company' => 'required',
 			'group_name' => 'nullable',
+ 			'submitter' => 'required',
 			'pickupMethod' => 'required',
 			'pickup_fee' => 'nullable',
 			'branch' => 'required',
-			'lastname' => 'required',
-			'firstname' => 'required',
+			'lastname' => ($request->input('visa_type') === 'FOREIGN PASSPORT' || $request->input('visa_type') === 'FOREIGN PASSPORT (INDIAN)') ? 'required_without:firstname' : 'required',
+                        'firstname' => ($request->input('visa_type') === 'FOREIGN PASSPORT' || $request->input('visa_type') === 'FOREIGN PASSPORT (INDIAN)') ? 'required_without:lastname' : 'required',
 			'middlename' => 'nullable',
 			'birthdate' => 'required|date',
 			'gender' => 'required',
@@ -309,61 +392,66 @@ class ApplicationController extends Controller
 			'visa_type' => 'required',
 			'visa_price' => 'nullable',
 			'handling_price' => 'required',
-			'documents_submitted' => 'required',
+			'documents_submitted' => 'sometimes|nullable',
 			'payment_status' => 'required',
 			'verification_no' => 'nullable',
-			'tracking_no' => 'nullable'
+			'tracking_no' => 'nullable',
+			'visa_result' => 'nullable',
+			'released_to' => 'nullable',
+			'courier_tracking' => 'nullable'
 			
 		]);
 
 		$application = Application::find($id);
 
-        if ($application->application_status != $request->get('application_status'))
-        {
-            if ($request->get('application_status') == '1'){
-                $request_type = 'Mark as New Application';
-				$application->application_status = $request->get('application_status');
-            } elseif ($request->get('application_status') == '2') {
-				$request_type = 'Sent to Main Office';
-				$application->application_status = $request->get('application_status');
-			} elseif ($request->get('application_status') == '3') {
-				$request_type = 'Received by Main Office';
-				$application->application_status = $request->get('application_status');
-			} elseif ($request->get('application_status') == '4') {
-				$request_type = 'Sent to Original Branch';
-				$application->application_status = $request->get('application_status');
-			} elseif ($request->get('application_status') == '5') {
-				$request_type = 'Received by Original Branch';
-				$application->application_status = $request->get('application_status');
-			} elseif ($request->get('application_status') == '6') {
-				$request_type = 'Submitted to Embassy';
-				$application->application_status = $request->get('application_status');
-			} elseif ($request->get('application_status') == '7') {
-				$request_type = 'Received from Embassy';
-				$application->application_status = $request->get('application_status');
-			} elseif ($request->get('application_status') == '8') {
-				$request_type = 'Sent to/Claimed by Client';
-				$application->application_status = $request->get('application_status');
+		if ($application->application_status != $request->get('application_status')) {
+			if ($request->get('application_status') == '1') {
+				$request_type = 'Mark as New Application';
 			} else {
-                $request_type = 'Mark as Incomplete';
-				$application->application_status = '10';
-            }
+				$request_type = 'Mark as Incomplete';
+			}
+		
+			if (!in_array($request->get('application_status'), ['6', '2'])) {
+				$approval_request = new PendingApprovals([
+					'application_id' => $id,
+					'request_type' => $request_type,
+					'requested_by' => $request->user()->username,
+					'request_date' => Carbon::now()
+				]);
+				$approval_request->save();
+			}
+		
+			$application->application_status = $request->get('application_status');
 
-            $approval_request = new PendingApprovals([
-                'application_id' => $id,
-                'request_type' => $request_type,
-                'requested_by' => $request->user()->username,
-                'request_date' => Carbon::now()
-            ]);
-            $approval_request->save();
+			if ($request->get('application_status') == 7) {
+				$application->receiver_from_embassy = $request->user()->username;
+				$dateField = 'date_received_from_embassy';
+                        } elseif ($request->get('application_status') == 6) {
+                                $application->submitted_to_embassy = $request->user()->username;
+                                $dateField = 'date_submitted_to_embassy';
+			} elseif ($request->get('application_status') == 8) {
+				$application->distributed_by = $request->user()->username;
+				$dateField = 'date_distributed';
+			} elseif ($request->get('application_status') == 11) {
+                                $application->additional_docs = $request->user()->username;
+                                $dateField = 'date_docsRequired';
+                        } elseif ($request->get('application_status') == 12) {
+                                $application->released_by_embassy = $request->user()->username;
+                                $dateField = 'date_released_by_embassy';
+                        }
 
-            
-        }
-
+			if (isset($dateField)) {
+				$application->$dateField = Carbon::now();
+				$application->save();
+			}
+		}
+		
 		$application->reference_no = $request->get('reference_no');
+		$application->application_status = $request->get('application_status');
 		$application->customer_type = $request->get('customer_type');
 		$application->customer_company = $request->get('customer_company');
 		$application->group_name = $request->get('group_name');
+		$application->submitter = strtoupper($request->get('submitter'));
 		$application->pickupMethod = $request->get('pickupMethod');
 		$application->pickup_fee = $request->get('pickup_fee');
 		$application->branch = $request->get('branch');
@@ -393,9 +481,12 @@ class ApplicationController extends Controller
 		$application->tracking_no = $request->get('tracking_no');
 		$application->verification_no = $request->get('verification_no');
 		$application->last_update_by = $request->user()->username;
+		$application->visa_result = strtoupper($request->get('visa_result'));
+		$application->released_to = strtoupper($request->get('released_to'));
+		$application->courier_tracking = $request->get('courier_tracking');
 
 		$application->save();
-
+		
 		return redirect('/applications')->with('success', 'Application saved!');
     }
 
@@ -425,22 +516,24 @@ class ApplicationController extends Controller
 	public function retrievePaymentForm(Request $request)
 	{
 		if ($request->ajax()) {
-			$userBranch = DB::table('users')->select('branch')->where('branch', '=', $request->user()->branch)->first();
-	
+			$branch = Auth::user()->branch;
+			$branches = Branch::all();
 			$searchString = $request->get('searchString');
-			$application = Application::where('reference_no', '=', $searchString)->first();
+			$application = Application::where('reference_no', '=', $searchString)
+			->where('branch', $branch)
+			->first();
+			
 			$modeOfPayment = Arr::pluck(collect(Other::where('type', 'mop')->get()), 'name', 'name');
 			$modeOfPayment = Arr::prepend($modeOfPayment, '', '');
 			$paymentRequest = Arr::pluck(collect(Other::where('type', 'pr')->get()), 'name', 'name');
 			$paymentRequest = Arr::prepend($paymentRequest, '', '');
-			$branch = Auth::user()->branch;
-			$isBranchMatch = ($userBranch && $userBranch->branch == $application->branch);
 			$visaType = null;
 			if ($application) {
-				$visaType = VisaType::where('name', $application->visa_type)->first();
+				$visaType = VisaType::where('name', $application->visa_type)->first()
+				->where('branch','=',$branch);
 			}
 	
-			return view('cashier.confirm_payment', compact('isBranchMatch', 'branch', 'searchString', 'application', 'modeOfPayment', 'paymentRequest', 'visaType', 'userBranch'));
+			return view('cashier.confirm_payment', compact('branch', 'branches', 'searchString', 'application', 'modeOfPayment', 'paymentRequest', 'visaType'));
 		}
 	}
 	
@@ -562,14 +655,16 @@ class ApplicationController extends Controller
 
     }
 
-    public function downloadAcknowledgementReceipt(Request $request){
-        $application = Application::where('reference_no', $request->ref_no)->first();
-        $submittedDocs = explode(",",$application->documents_submitted);
-        $documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
-        $pdf = PDF::loadView('cashier.acknowledgement_receipt', ['application' => $application, 'docs' => $documents]);
-		return $pdf->download($application->reference_no . ' Acknowledgement Receipt.pdf');
-
-    }
+	public function downloadAcknowledgementReceipt(Request $request){
+		$application = Application::where('reference_no', $request->ref_no)->first();
+		$submittedDocs = explode(",",$application->documents_submitted);
+		$documents = RequiredDocument::whereIn('id', $submittedDocs)->get();
+		$pdf = PDF::loadView('cashier.acknowledgement_receipt', ['application' => $application, 'docs' => $documents]);
+	
+		return response($pdf->output(), 200)
+			->header('Content-Type', 'application/pdf')
+			->header('Content-Disposition', 'inline; filename="'.$application->reference_no.' Acknowledgement Receipt.pdf"');
+	}
 	
 	public function showVisaType($visaID)
 	{
@@ -592,53 +687,100 @@ class ApplicationController extends Controller
 
 	public function checkApprovalCode(Request $request)
 	{
-		if($request->ajax())
-		{
+		if ($request->ajax()) {
 			$approval_code = $request->get('approval_code');
 			$user_type = $request->user()->role;
-
 			$code_is_valid = false;
-
 			$approver;
 			$approval_request;
-
-					if($approval_code != '') {
-						$approver = DB::table('users')->where('approval_code', $approval_code);
-						
-						if($approver->count() > 0){
-							$code_is_valid = true;
-							return response()->json(['status' => 'success']);
-						}
-					} return response()->json(['status' => 'Request has been rejected'], 400);
+	
+			if ($approval_code != '') {
+				$approver = DB::table('users')->where('approval_code', $approval_code);
+	
+				if ($approver->count() > 0) {
+					$code_is_valid = true;
+					return response()->json(['status' => 'success']);
+				}
+			}
+	
+			// If the code reaches this point, it means the approval code is invalid or empty.
+			return response('', 200);
 		}
 	}
-
-		public function showUnpaidApplicants(Request $request)
-		{		
-			
-			$list = DB::table('applications')
-					->where('payment_status', 'UNPAID')
-					->whereDate('created_at', Carbon::today())
-					->get();
 	
+	
+	
+public function showUnpaidApplicants(Request $request)
+        {                
+                $branch = Auth::user()->branch;
+                $branches = Branch::all();
+                $application = Application::where('branch', $branch)
+                        ->first();
+                $list = DB::table('applications')
+                        ->where('payment_status', 'UNPAID')
+                        // ->whereDate('created_at', Carbon::today())
+                        ->where('branch', $branch)
+                        ->orderBy('id', 'desc')
+                        ->paginate(20);
+        
+                return view('cashier.unpaidList', compact('list'));
+        }
+	
+public static function generateApprovalcode(Request $request)
+{
 
-		return view('cashier.unpaidList', compact ('list'));
-			
-		}
+    // Generate OTP code
+    $otp_code = rand(100000, 999999);
+    $current_date = Carbon::now()->toFormattedDateString();
+    $branch = Branch::where('code', $request->user()->branch)->first();
+    $branchEmail = $branch->email;
 
-		public function filter(Request $request)
-		{
-			$start_date = $request->input('start_date');
-			$end_date = $request->input('end_date');
+    // Save the OTP code to the user's session
+    $request->session()->put('approval_code', $otp_code);
+    $adminUser = User::where('role', 'Admin')->first();
+    $adminUser->approval_code = $otp_code;
+    $adminUser->save();
 
-			// dd($start_date, $end_date);
-		
-			$data = DB::table('applications')
-				->whereDate('application_date', '>=', $start_date)
-				->whereDate('application_date', '<=', $end_date)
-				->orderBy('id', 'desc')
-				->paginate(20);
-		
-			return view('applications.index', compact('data'));
-		}
+        // Save the OTP code to the user's session
+    $request->session()->put('approval_code', $otp_code);
+
+    // Set expiration for 24 hours
+    $expiration_time = Carbon::now()->addHours(24);
+    $request->session()->put('otp_expiration', $expiration_time);
+
+    // Send email to the admin user
+    $branch = Branch::where('code', $adminUser->branch)->first();
+    $branchEmail = $branch->email;
+    $mailing_list = User::where('role', 'ADMIN')->pluck('email')->toArray();
+    Mail::to($mailing_list)->send(new ApprovalCodeGenerated($otp_code, $current_date, $branchEmail));
+}
+
+
+public function checkOtpCode(Request $request)
+{
+    $userProvidedOtp = $request->input('approval_code');
+
+    // Retrieve the user with the role "Admin" from the database
+    $adminUser = User::where('role', 'Admin')->first();
+
+    // Retrieve the OTP code for the admin user from the database
+    $storedOtp = $adminUser->approval_code;
+
+        
+    // Check if the OTP is expired
+    $otpExpiration = $request->session()->get('otp_expiration');
+    if (Carbon::now()->gt($otpExpiration)) {
+        return response()->json(['status' => 'error', 'message' => 'OTP has expired']);
+    }
+
+    if ($userProvidedOtp == $storedOtp) {
+        // The provided OTP matches the stored OTP for the admin user
+        // Proceed with the necessary action (e.g., updating payment status)
+        return response()->json(['status' => 'success']);
+    } else {
+        // The provided OTP is incorrect
+        return response()->json(['status' => 'error', 'message' => 'Incorrect OTP']);
+    }
+}
+
 }

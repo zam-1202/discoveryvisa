@@ -26,9 +26,10 @@
 						placeholder="Type batch number to search">
 				</div>
 
-				<div id='applicationBatch_list'>
-					@include('application_batches.applicationBatch_list')
+				<div id="applicationbatch_list">
+    				@include('application_batches.applicationbatch_list')
 				</div>
+
 
 
 					</table>
@@ -59,24 +60,21 @@ $(document).ready(function()
 		function searchBatchNum(page)
 		{
 			$.ajax({
-				url: "application_batches/applicationBatch_list?page=" + page,
+				url: "application_batches/applicationbatch_list?page=" + page,
 				data: { searchString: $('#batchNum').val() },
-				headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-    },
 				success: function(data)
 				{
-					$('#applicationBatch_list').html(data);
+					$('#applicationbatch_list').html(data);
 				}
 			});
 		}
 
-		// $(document).on('click','.pagination a', function(event)
-		// {
-		// 	event.preventDefault();
-		// 	var page = $(this).attr('href').split('page=')[1];
-		// 	searchBatchNum(page);
-		// });
+		$(document).on('click','.pagination a', function(event)
+		{
+			event.preventDefault();
+			var page = $(this).attr('href').split('page=')[1];
+			searchBatchNum(page);
+		});
 
 
 		$(document).on('keyup', '#batchNum', function(){

@@ -159,6 +159,7 @@ class PendingApprovalsController extends Controller
 					{
                         $application = Application::find($application_id);
                         $application->application_status = 10;
+                        $application->batch_no = null;
 						$application->save();
 
 						$approval_request = new PendingApprovals([
@@ -216,10 +217,11 @@ class PendingApprovalsController extends Controller
                                     }
                                 }
                             }
-                            $application->application_status = 9;
+                            $application->application_status = 1;
                             $application->batch_no = null;
                         } else {
-                            $application->application_status = 1;
+                            $application->application_status = 9;
+                            $application->batch_no = null;
                         }
 						$application ->save();
 
@@ -230,6 +232,7 @@ class PendingApprovalsController extends Controller
                         $application = Application::find($id);
                         if ($requestType == 'Mark as Incomplete') {
                             $application->application_status = 1;
+                            $application->batch_no = null;
                         } else {
                             if ($application->batch_no) {
                                 $applicationBatch = ApplicationBatch::where('batch_no', $application->batch_no)->first();

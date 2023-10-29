@@ -9,7 +9,8 @@ class VisaType extends Model
     protected $fillable = [
 		'name',
 		'handling_fee',
-		'visa_fee'
+		'visa_fee',
+        'branch'
 	];
 
     public function documents()

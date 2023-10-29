@@ -1,4 +1,19 @@
 @extends('layouts.app')
+@if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+<style>
+    			.scrollable-div {
+			max-height: 200px; /* Adjust the height as needed */
+			overflow-y: auto;
+			}
+</style>
 
 @section('content')
 <div class="container">
@@ -25,6 +40,28 @@
                             </div>
                         </div>
 
+                        <div class="form-group row">
+                            <label for="branch_visa" class="col-md-4 col-form-label text-md-right">{{ __('Branch Visa') }}</label>
+
+                            <div class="col-md-6">
+                                <select class="form-control text-center @error('branch_visa') is-invalid @enderror" name="branch_visa" required>
+                                    <option value="">Select Branch</option>
+                                    @foreach($branches as $branch)
+                                        <option value="{{ $branch->code }}" {{ old('branch_visa', $result->branch_visa) == $branch->code ? 'selected' : '' }}>
+                                            {{ $branch->code }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            @error('branch_visa')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
+
+                        
                         <div class="form-group row">
                             <label for="handling_fee" class="col-md-4 col-form-label text-md-right">{{ __('Handling Fee') }}</label>
 
@@ -67,25 +104,31 @@
                                       <tbody>
                                           <tr>
                                             <td class="bg-success text-left">
+                                            <div class="scrollable-div">
                                             <ul class="list-group" id="filipino_documents">
                                                     @foreach ($docs_filipino as $value)
 													    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
                                                     @endforeach
                                                 </ul>
+                                            </div>
                                             </td>
                                             <td class="bg-info text-left">
+                                            <div class="scrollable-div">
                                                 <ul class="list-group" id="japanese_documents">
                                                     @foreach ($docs_japanese as $value)
 													    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
                                                     @endforeach
                                                 </ul>
+                                                </div>
                                             </td>
                                             <td class="bg-dark text-left">
+                                            <div class="scrollable-div">
                                                 <ul class="list-group" id="foreign_documents">
                                                     @foreach ($docs_foreign as $value)
 													    <li class='list-group-item'><input type='checkbox' name='submitted_documents' value='{{ $value->id }}' id='{{ $value->id }}'/> {{ $value->name }} </li>
                                                     @endforeach
                                                 </ul>
+                                                </div>
                                             </td>
                                           </tr>
                                       </tbody>
@@ -124,6 +167,11 @@
 
 			$('input[name="documents_submitted"]').val(output);
 		});
+    });
+    $(document).ready(function(){
+        $(document).on('change', 'select[name="branch_visa"]', function(){
+            console.log($(this).val()); // Add this line to log the selected branch value
+        });
     });
 </script>
 @endsection

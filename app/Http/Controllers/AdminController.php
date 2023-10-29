@@ -122,17 +122,30 @@ class AdminController extends Controller
 	 * Show list of pending approvals
 	 *
 	 */
-	public function pendingApprovals()
-	{
-		$approval_requests = DB::table('pending_approvals')
-		->where(function ($query) {
-            $query->whereNull('action')
-                  ->orWhere('action', '<>', 'APPROVED')
-                  ->orWhere('action', '<>', 'REJECTED');
-        })
-		->orderby('request_date', 'asc')
-		->get();
-		return view('admin.approvals', compact('approval_requests'));
-	}
+	
+	 public function pendingApprovals()
+	 {
+		 $approval_requests = DB::table('pending_approvals')
+			 ->where(function ($query) {
+				 $query->whereNull('action')
+					 ->orWhereNotIn('action', ['APPROVED', 'REJECTED']);
+			 })
+			 ->orderBy('request_date', 'asc')
+			 ->get();
+	 
+		 foreach ($approval_requests as $request) {
+			 if ($request->action == 'REJECTED') {
+				 $application = Application::find($request->application_id);
+				 if ($application && $application->batch_no) {
+					 $application->batch_no = null;
+					 $application->save();
+				 }
+			 }
+		 }
+	 
+		 return view('admin.approvals', ['approval_requests' => $approval_requests]);
+	 }
+	 
+
 
 }

@@ -41,7 +41,7 @@ class GenerateSubmissionList extends Command
     {
 		$this->info('Creating submission list for each branch...');
 		
-        ApplicationBatchController::generateSubmissionList();
+        // ApplicationBatchController::generateSubmissionList();
 		
 		$this->info('Submission lists for ' . Carbon::now()->toDateString() . ' has been generated.');
     }

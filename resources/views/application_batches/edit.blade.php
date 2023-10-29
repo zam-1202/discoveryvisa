@@ -18,7 +18,11 @@
                                       '7' => 'Received from Embassy',
                                       '8' => 'Sent to/Claimed by Client',
                                       '9' => 'Incomplete',
-                                      '10' => 'Pending Approval');
+                                      '10' => 'Pending Approval',
+					'11' => 'Additional Documents Required',
+					'12' => 'Released by Embassy',
+					'13' => 'Resubmitted to JPN',
+                        		'14' => 'Passport Return from JPN Embassy');
 @endphp
 
 <div class="container">
@@ -64,6 +68,16 @@
 
 					<div class="form-group row">
 						<div class="col-md-3 offset-md-3 text-right">
+							<label for="tracking_no">Branch: </label>
+						</div>
+
+						<div class="col-md-4">
+							<label>{{$batch->branch}}</label>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-md-3 offset-md-3 text-right">
 							<label for="status">Status: </label>
 						</div>
 
@@ -71,6 +85,7 @@
 							{{Form::select('status', $status_list, $batch->status, ['class' => 'form-control text-center']) }}
 						</div>
 					</div>
+					
 
 					<div class="form-group row">
 						<div class="col-md-3 offset-md-3 text-right">
@@ -129,7 +144,7 @@
 							@endforeach
 						@else
 							<tr>
-								<td colspan="5" class="text-center font-weight-bold">No Data Found</td>
+								<td colspan="6" class="text-center font-weight-bold">No Data Found</td>
 							</tr>
 						@endif
 						</tbody>

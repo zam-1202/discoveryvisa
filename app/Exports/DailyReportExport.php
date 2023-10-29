@@ -24,6 +24,10 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
     private $branch;
     private $role;
     private $rowCount;
+    private $gTotal = 0;
+    private $visaRegularTotal = 0;
+    private $ckmhTotal = 0;
+
 
     public function __construct(string $date, string $branch, string $role)
     {
@@ -40,7 +44,7 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                             ->leftJoin('users', 'applications.encoded_by', '=', 'users.username')
                             ->leftJoin('branches', 'applications.branch', '=', 'branches.code')
                             ->leftJoin('visa_types', 'applications.visa_type', '=', 'visa_types.id')
-                            ->whereRaw("DATE_FORMAT(applications.application_date, '%Y-%m-%d') = '".$this->date."' AND (applications.payment_status = 'PAID' OR (applications.payment_status = 'UNPAID' AND applications.customer_type = 'PIATA'))")
+                            ->whereRaw("DATE_FORMAT(applications.application_date, '%Y-%m-%d') = '".$this->date."' AND (applications.payment_status = 'PAID' OR (applications.payment_status = 'UNPAID' AND applications.customer_type = 'PIATA') OR (applications.payment_status = 'UNPAID' AND applications.customer_type = 'Corporate'))")
                             ->orderBy('applications.application_date', 'ASC')
                             ->select('applications.reference_no',
                                       DB::raw("CONCAT(applications.lastname, ', ', applications.firstname, ' ', applications.middlename) AS fullname"),
@@ -48,19 +52,25 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                                       DB::raw("users.name as username"),
                                       DB::raw("MONTHNAME(applications.application_date)"),
                                       DB::raw("DATE_FORMAT(applications.application_date, '%Y')"),
-                                      DB::raw("DATE_FORMAT(applications.application_date, '%d-%m-%Y %H:%i:%s')"),
+                                      DB::raw("DATE_FORMAT(applications.application_date, '%d-%m-%Y %h:%i:%s %p')"), //12hr format
                                       'branches.description',
                                       DB::raw("applications.visa_type"),
                                       'applications.customer_type',
                                       'applications.passport_no',
                                       'applications.payment_mode',
-                                      DB::raw("IF(IFNULL(applications.or_number, 'ACKNOWLEDGEMENT') = 'ACKNOWLEDGEMENT', 'ACKNOWLEDGEMENT', 'OR')"),
+                                      'applications.pickupMethod',
+                                      'applications.pickup_fee',
+                                      DB::raw("IFNULL(applications.payment_request, 'ACKNOWLEDGEMENT')"),
                                       'applications.visa_price',
                                       DB::raw("visa_types.visa_fee - applications.visa_price"), //discount
                                       DB::raw('applications.handling_price'),
                                       DB::raw('(COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0)) - ((COALESCE(applications.handling_price, 0) + COALESCE(applications.visa_price, 0)) / 1.12)'), // VAT
-                                      DB::raw('(COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0))'),
-                                      'applications.visa_price'
+                                      DB::raw('applications.or_number'),
+                                      DB::raw('(COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0) + COALESCE(applications.pickup_fee, 0))'),
+                                      'applications.visa_price',
+                                      DB::raw("IF(applications.payment_request = 'OR', (COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0) + COALESCE(applications.pickup_fee, 0)), NULL) as `REGULAR VISA`"),
+                                      DB::raw("IF(applications.payment_request != 'OR', (COALESCE(applications.visa_price, 0) + COALESCE(applications.handling_price, 0) + COALESCE(applications.pickup_fee, 0)), NULL) as `CK/MH`")                                    
+                                    
                                     )
                             ->get();
 
@@ -114,14 +124,19 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
             "Area",
             "Visa Type",
             "Application Type",
-            "PassportNo",
-            "PaymentMode",
-            "PaymentRequest",
+            "Passport No",
+            "Payment Mode",
+            "Pick Up Method",
+            "Pick Up Fee",
+            "Payment Request",
             "Visa Fee",
             "Discount",
             "Handling Fee",
             "VAt",
+            "OR No",
             "Grand Total",
+            "VISA REGULAR",
+            "CK/MH",
         ];
     }
 
@@ -133,7 +148,7 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
 
         return [
             AfterSheet::class => function(AfterSheet $event) {
-                $event->sheet->styleCells('A1:R1', [
+                $event->sheet->styleCells('A1:W1', [
                     'alignment' => [
                         'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                     ],
@@ -142,7 +157,43 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
                     ]
                 ]);
 
-                $event->sheet->getStyle('A1:R1')->applyFromArray([
+                $columnU = 'U';
+                $columnV = 'V';
+                $columnW = 'W';
+                $rowCount = $event->sheet->getHighestRow();
+                
+                $formulaU = '=SUM(' . $columnU . '2:' . $columnU . $rowCount . ')';
+                $formulaV = '=SUM(' . $columnV . '2:' . $columnV . $rowCount . ')';
+                $formulaW = '=SUM(' . $columnW . '2:' . $columnW . $rowCount . ')';
+                
+                $event->sheet->setCellValue($columnU . ($rowCount + 1), $formulaU);
+                $event->sheet->setCellValue($columnV . ($rowCount + 1), $formulaV);
+                $event->sheet->setCellValue($columnW . ($rowCount + 1), $formulaW);
+                
+                $event->sheet->getStyle($columnU . ($rowCount + 1))->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+                $event->sheet->getStyle($columnV . ($rowCount + 1))->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+                $event->sheet->getStyle($columnW . ($rowCount + 1))->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_00);
+                
+                $sumRow = $rowCount + 1;
+                $event->sheet->getStyle($columnU . $sumRow . ':' . $columnW . $sumRow)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                            'color' => ['argb' => '00000000'],
+                        ]
+                    ],
+                    'font' => [
+                        'bold' => true,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => [
+                            'argb' => 'FFDEDEDE',
+                        ],
+                    ],
+                ]);
+
+                $event->sheet->getStyle('A1:W1')->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -159,7 +210,7 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
 
                 $currentRow = 2;
                 for ($i=0; $i < COUNT($this->rowCount); $i++) {
-                    $event->sheet->getStyle('A' .$currentRow .':R' .($this->rowCount[$i] + $currentRow - 1))->applyFromArray([
+                    $event->sheet->getStyle('A' .$currentRow .':W' .($this->rowCount[$i] + $currentRow - 1))->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -188,10 +239,14 @@ class DailyReportExport implements FromCollection, WithHeadings, WithEvents, Sho
     {
         return [
             'N' => NumberFormat::FORMAT_NUMBER_00,
-            'O' => NumberFormat::FORMAT_NUMBER_00,
             'P' => NumberFormat::FORMAT_NUMBER_00,
             'Q' => NumberFormat::FORMAT_NUMBER_00,
-            'R' => NumberFormat::FORMAT_NUMBER_00
+            'R' => NumberFormat::FORMAT_NUMBER_00,
+            'S' => NumberFormat::FORMAT_NUMBER_00,
+            'T' => NumberFormat::FORMAT_NUMBER,
+            'U' => NumberFormat::FORMAT_NUMBER_00,
+            'V' => NumberFormat::FORMAT_NUMBER_00,
+            'W' => NumberFormat::FORMAT_NUMBER_00
         ];
     }
 }

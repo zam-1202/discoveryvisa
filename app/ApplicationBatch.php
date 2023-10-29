@@ -11,6 +11,7 @@ class ApplicationBatch extends Model
 		'batch_date',
 		'total_applications',
 		'status',
+		'branch',
 		'tracking_no'
 	];
 }

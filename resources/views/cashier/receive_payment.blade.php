@@ -4,9 +4,11 @@
 	<div class="row justify-content-center">
 		<div class="card col-md-12">
 			<div class="row card-header bg-success text-white font-weight-bold"><h4>Receive Payment</h4></div>
+		
 			<div class="row card-body align-items-center">
-				<div class="col-md-3 text-right font-weight-bold">Enter Reference No:</div>
-				<div class="col-md-7">{{Form::text('reference_no', $referenceNo, ['class' => 'form-control', 'id' => 'search_string']) }}</div>
+			<a href="{{ route('cashier.unpaidList')}}" class="btn btn-danger">Back</a>
+			<div class="col-md-3 text-right font-weight-bold">Enter Reference No:</div>
+				<div class="col-md-6">{{Form::text('reference_no', $referenceNo, ['class' => 'form-control', 'id' => 'search_string']) }}</div>
 				<div class="col-md-2"><a type="button" class="btn btn-success text-white" id="receive_payment_btn">SEARCH</a></div>
 			</div>
 			<div class="card-footer mb-3">

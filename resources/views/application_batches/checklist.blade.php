@@ -1,6 +1,21 @@
+<style>
+    .error-message {
+        color: red;
+        font-size: 12px;
+    }
+
+    .error-message-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 5px;
+        height: 20px; /* Adjust the height as needed */
+    }
+</style>
 @extends('layouts.app')
 
 @section('content')
+
 
 <div class="container">
 	<div class="row justify-content-center">
@@ -230,6 +245,7 @@
 									</tr>
 								@endif
 							</table>
+						{!! $walkin_applications->links() !!}
 						</div>
 					</div>
 				</div>
@@ -238,7 +254,7 @@
 	</div>
 </div>
 
-<div class="modal" id="mark_as_incomplete">
+<div class="modal fade" id="mark_as_incomplete">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-secondary text-white">
@@ -248,12 +264,13 @@
 			<div class="modal-body d-flex justify-content-center">
 				<div class="spinner-border text-info"></div>
 			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-		    </div>
+				<div class="error-message-container">
+					<div id="invalid_password_message" class="text-danger"></div>
+				</div><br>	
 		</div>
 	</div>
 </div>
+
 
 @endsection
 
@@ -264,10 +281,117 @@ $(document).ready(function(){
 
 	console.log(@json($walkin_applications));
 	
-	function submit_incomplete_form(){
+	$(document).on('click','button[name="incomplete_btn"]',function(){
+		var current_row = $(this).closest('tr');
+		var incomplete_form_html = "<div class='container'>" +
+								   "<input type='hidden' value='" + $(this).attr('id') + "' id='selected_application'>" +
+								   "<div class='row p-1'>" +
+								   "<div class='col-md-4 text-right'>Reference No: </div>" +
+								   "<div class='col-md-8 font-weight-bold'>" + current_row.find('td:nth-child(3)').html() + "</div>" +
+								   "</div>" +
+								   "<div class='row p-1'>" +
+								   "<div class='col-md-4 text-right'>Name: </div>" +
+								   "<div class='col-md-8 font-weight-bold'>" + current_row.find('td:nth-child(2)').html() + "</div>" +
+								   "</div>" +
+								   "<div class='row p-1'>" +
+								   "<div class='col-md-4 text-right'>Approval Code: </div>" +
+								   "<div class='col-md-8'><input class='form-control text-center' type='text' id='approval_code'></div>" +
+								   "</div>" +
+								   "<div class='row p-1'>" +
+									"<div class='col-md-4 offset-md-4 text-center'>" +
+									"<a class='btn btn-primary text-white' id='send_otp'>Send OTP</a>" +
+									"</div>" +
+									"<div class='col-md-4 text-center'>" +
+									"<a class='btn btn-success text-white' id='incomplete_form_btn'>Confirm</a>" +
+									"</div>" +
+								   "</div>";
+		$('#mark_as_incomplete div div.modal-body').html(incomplete_form_html);
+	});
+
+	// $(document).on('click','#incomplete_form_btn', function(){
+	// 	submit_incomplete_form();
+	// });
+
+	$('#mark_as_incomplete').on('hidden.bs.modal', function(){
+		$('#mark_as_incomplete div div.modal-body').html('<div class="spinner-border text-info"></div>');
+		$('#invalid_password_message').text('');
+	});
+});
+
+// Add a variable to track if OTP is currently being sent
+var isSendingOTP = false;
+
+$(document).one('click', '#send_otp', function() {
+    if (!isSendingOTP) {
+        isSendingOTP = true; // Set the flag to indicate OTP request is in progress
+        $.ajax({
+            url: "../application_batches/generate_approval_code",
+            success: function(response) {
+                $('#invalid_password_message').text("One Time Password is sent");
+                console.log("OTP Sent!");
+            },
+            complete: function() {
+                // Enable the button after the request is complete
+                isSendingOTP = false;
+            }
+        });
+    }
+});
+
+function mark_as_inc() {
+	
+    var approval_code = $('#approval_code').val();
+
+    // Check if the approval code is empty
+    if (approval_code.trim() === '') {
+        $('#invalid_password_message').text("Field cannot be empty");
+        return false;
+    }
+
+    $.ajax({
+        url: "../application_batches/check_otp_code",
+        data: { approval_code: approval_code },
+        success: function(response) {
+            if (response.status === "success") {
+                // If the approval code is valid, proceed with the modification of payment
+                $.ajax({
+                    url: "../application_batches/checklist",
+                    data: { approval_code: approval_code },
+                    success: function(message) {
+						submit_incomplete_form();
+						$('#mark_as_incomplete').modal('hide');
+                    },
+                    error: function() {
+                        // Handle error if confirm_payment AJAX request fails
+                        // For example, show an error message to the user
+                        $('#invalid_password_message').text("Validation failed.");
+                    }
+                });
+            } else if (response.message === "OTP has expired") {
+                // The provided OTP has expired
+                $('#invalid_password_message').text("OTP has expired. Please request a new OTP.");
+                $('#approval_code').val('');
+            } else {
+                // The provided OTP is incorrect
+                $('#invalid_password_message').text("Incorrect OTP");
+                $('#approval_code').val('');
+            }
+        },
+        error: function() {
+            // Handle error if checkOtpCode AJAX request fails
+            // For example, show an error message to the user
+            $('#invalid_password_message').text("OTP verification failed.");
+        }
+    });
+}
+
+function submit_incomplete_form(){
 		$.ajax({
 			url: "../applications/mark_as_incomplete",
-			data: {request_type:'Mark as Incomplete',application_id:$('#selected_application').val(), approval_code:$('#approval_code').val()},
+			data: {
+				request_type:'Mark as Incomplete',
+				application_id:$('#selected_application').val(),
+				approval_code:$('#approval_code').val()},
 			success: function()
 			{
 				location.reload(true);
@@ -275,37 +399,10 @@ $(document).ready(function(){
 		});
 	}
 
-	$(document).on('click','button[name="incomplete_btn"]',function(){
-		var current_row = $(this).closest('tr');
-		var incomplete_form_html = "<div class='container'>" +
-								   "<input type='hidden' value='" + $(this).attr('id') + "' id='selected_application'>" +
-								   "<div class='row p-1'>" +
-								   "<div class='col-md-4 text-right'>Reference No: </div>" +
-								   "<div class='col-md-8 text-center font-weight-bold'>" + current_row.find('td:nth-child(3)').html() + "</div>" +
-								   "</div>" +
-								   "<div class='row p-1'>" +
-								   "<div class='col-md-4 text-right'>Name: </div>" +
-								   "<div class='col-md-8 text-center font-weight-bold'>" + current_row.find('td:nth-child(2)').html() + "</div>" +
-								   "</div>" +
-								   "<div class='row p-1'>" +
-								   "<div class='col-md-4 text-right'>Approval Code: </div>" +
-								   "<div class='col-md-8'><input class='form-control text-center' type='text' id='approval_code'></div>" +
-								   "</div>" +
-								   "<div class='row p-1'>" +
-								   "<div class='col-md-8 offset-md-4 text-center'><a class='btn btn-success text-white' id='incomplete_form_btn'>Mark as Incomplete</a></div>" +
-								   "</div>" +
-								   "</div>";
-		$('#mark_as_incomplete div div.modal-body').html(incomplete_form_html);
+    $(document).on('click','#incomplete_form_btn', function(){
+		mark_as_inc();
 	});
 
-	$(document).on('click','#incomplete_form_btn', function(){
-		submit_incomplete_form();
-	});
-
-	$('#mark_as_incomplete').on('hidden.bs.modal', function(){
-		$('#mark_as_incomplete div div.modal-body').html('<div class="spinner-border text-info"></div>');
-	});
-});
 </script>
 
 @endsection

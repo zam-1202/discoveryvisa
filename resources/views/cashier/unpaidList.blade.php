@@ -16,7 +16,11 @@
                                       '7' => 'Received from Embassy',
                                       '8' => 'Sent to/Claimed by Client',
                                       '9' => 'Incomplete',
-                                      '10' => 'Pending Approval');
+                                      '10' => 'Pending Approval',
+					'11' => 'Additional Documents Required',
+					'12' => 'Released by Embassy',
+					'13' => 'Resubmitted to JPN',
+                        		'14' => 'Passport Return from JPN Embassy');
 @endphp
 
 @section('content')
@@ -60,12 +64,12 @@
 				@endforeach
 			@else
 				<tr>
-					<td colspan='6' class="font-weight-bold"><h1>No Data Found</h1></td>
+					<td colspan='7' class="font-weight-bold"><h1>No Data Found</h1></td>
 				</tr>
 			@endif
 		</tbody>
 	</table>
-
+	{!! $list->links() !!}
 </div>
 
 <div class="row">

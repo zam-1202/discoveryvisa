@@ -2,9 +2,10 @@
 
 @section('content')
 
+
 <div class="container">
 	<div class="row justify-content-center">
-		<div class="col-md-8">
+		<div class="col-md-12">
 			@if (session('status'))
 				<div class="alert alert-primary alert-dismissible fade show text-center" role="alert">
 					<strong>{{ session('status') }}</strong>
@@ -15,7 +16,19 @@
 			@endif
 
 			<div class="card">
-				<div class="card-header bg-primary text-white text-center"><h1>Approval Requests</h1></div>
+				<div class="card-header bg-primary text-white text-center">
+					<h1>Approval Requests</h1>
+					<div class="text-white text-center">
+						<!-- <h4 style="font-size: 14px;">
+							<span class="custom-success" style="background-color: #28a745; color: #fff; padding: 4px 8px; border-radius: 4px;">Approve is INCOMPLETE</span>
+							
+							<span class="custom-danger" style="background-color: #dc3545; color: #fff; padding: 4px 8px; border-radius: 4px;">Reject is NEW Application</span>
+						</h4> -->
+					</div>
+				</div>
+			</div>
+
+
 				<div class="card-body">
 					<table class="table table-hover table-bordered text-center">
 						<thead class="thead-dark">
@@ -58,7 +71,7 @@
 	</div>
 </div>
 
-<div class="modal" id="confirm_modal">
+<div class="modal fade" id="confirm_modal">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-success text-white">

@@ -4,7 +4,7 @@
 
 <div class="container">
 	<div class="row justify-content-center">
-		<div class="col-md-10">
+		<div class="col-md-12">
 			@if (session('status'))
 				<div class="alert alert-primary alert-dismissible fade show text-center" role="alert">
 					<strong>{{ session('status') }}</strong>
@@ -27,11 +27,12 @@
 					<table class="table table-hover table-bordered text-center">
 						<thead class="thead-dark">
 							<tr>
-								<th style="width:20%;">Category</th>
+								<th style="width:15%;">Visa Type</th>
+								<th style="width:10%;">Branch</th>
                                 <th style="width:15%;">Handling Fee</th>
                                 <th style="width:10%;">Visa Fee</th>
                                 <th style="width:45%;">Required Documents</th>
-								<th style="width:10%;"></th>
+								<th style="width:10%;">Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -39,6 +40,14 @@
 								@foreach($result as $key => $row)
 									<tr>
 										<td>{{$row->name}}</td>
+										<td>
+            @php
+                $branches = explode(',', $row->branch);
+            @endphp
+            @foreach($branches as $branch)
+                {{$branch}}<br>
+            @endforeach
+        </td>
                                         <td>{{number_format($row->handling_fee, 2, '.', ',')}}</td>
                                         <td>{{number_format($row->visa_fee, 2, '.', ',')}}</td>
                                         <td>
