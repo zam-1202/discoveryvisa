@@ -314,177 +314,95 @@ class ApplicationBatchController extends Controller
 		$branch = $request->user()->branch;
 
 
-                $walkin_applications = DB::table('applications')
-                                                                ->where(function($query){
-                                                                                        $query->where('customer_type','=','Walk-In')
-                                                                                        ->orWhere('customer_type','=','Mobile Service')
-                                                                                        ->orWhere('customer_type','=','Via Courier')
-                                                                                        ->orWhere('customer_type','=','Courier')
-                                                                                        ->orWhere('customer_type','=','Expo')
-                                                                                        ->orWhere('customer_type','=','Others');
-                                                                                })
-                                                                ->where('branch','=',$branch)
-                                                                ->where('application_status','=','1')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where(function ($query) {
-                                                                        $query->whereNotNull('batch_no')
-                                                                                ->orWhereNull('batch_no');
-                                                                })
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->orderBy('lastname','asc')
-                                                                ->paginate(10);
+		$walkin_applications = DB::table('applications')
+								->where(function($query){
+											$query->where('customer_type','=','Walk-In')
+											->orWhere('customer_type','=','Mobile Service')
+											->orWhere('customer_type','=','Via Courier')
+											->orWhere('customer_type','=','Courier')
+											->orWhere('customer_type','=','Expo')
+											->orWhere('customer_type','=','Others');
+										})
+								->where('branch','=',$branch)
+								->where('application_status','=','1')
+								->where('payment_status','=','PAID')
+								->where(function ($query) {
+									$query->whereNotNull('batch_no')
+										->orWhereNull('batch_no');
+								})
+								->whereDate('created_at', Carbon::today())
+								->orderBy('lastname','asc')
+								->paginate(10);
 
-                $piata_applications = DB::table('applications')
-                                                                ->where('customer_type','=','PIATA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('application_status','=','1')
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereNotNull('batch_no')
-                                                                                ->orWhereNull('batch_no');
-                                                                })
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->orderBy('lastname','asc')
-                                                                ->paginate(10);
+		$piata_applications = DB::table('applications')
+								->where('customer_type','=','PIATA')
+								->where('payment_status','=','PAID')
+								->where('application_status','=','1')
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->whereNotNull('batch_no')
+										->orWhereNull('batch_no');
+								})
+								->whereDate('created_at', Carbon::today())
+								->orderBy('lastname','asc')
+								->paginate(10);
 
-                $ptaa_applications = DB::table('applications')
-                                                                ->where('customer_type','=','PTAA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('application_status','=','1')
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereNotNull('batch_no')
-                                                                                ->orWhereNull('batch_no');
-                                                                })
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->orderBy('lastname','asc')
-                                                                ->paginate(10);
+		$ptaa_applications = DB::table('applications')
+								->where('customer_type','=','PTAA')
+								->where('payment_status','=','PAID')
+								->where('application_status','=','1')
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->whereNotNull('batch_no')
+										->orWhereNull('batch_no');
+								})
+								->whereDate('created_at', Carbon::today())
+								->orderBy('lastname','asc')
+								->paginate(10);
 
-                $corporate_applications = DB::table('applications')
-                                                                ->where('customer_type', '=', 'Corporate')
-                                                                ->where('application_status', '=', '1')
-                                                                ->where('branch', '=', $branch)
-                                                                ->where(function ($query) {
-                                                                        $query->where('payment_status', '=', 'PAID')
-                                                                                ->orWhere('payment_status', '=', 'UNPAID');
-                                                                })
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where(function ($query) {
-                                                                        $query->whereNotNull('batch_no')
-                                                                                ->orWhereNull('batch_no');
-                                                                })
-                                                                ->orderBy('lastname', 'asc')
-                                                                ->paginate(10);
-                                                        
+		$corporate_applications = DB::table('applications')
+								->where('customer_type', '=', 'Corporate')
+								->where('application_status', '=', '1')
+								->where('branch', '=', $branch)
+								->where(function ($query) {
+									$query->where('payment_status', '=', 'PAID')
+										->orWhere('payment_status', '=', 'UNPAID');
+								})
+								->whereDate('created_at', Carbon::today())
+								->where(function ($query) {
+									$query->whereNotNull('batch_no')
+										->orWhereNull('batch_no');
+								})
+								->orderBy('lastname', 'asc')
+								->paginate(10);
+							
 
         $poea_applications = DB::table('applications')
-                                                                ->where('customer_type','=','POEA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('application_status','=','1')
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereNotNull('batch_no')
-                                                                                ->orWhereNull('batch_no');
-                                                                })
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->orderBy('lastname','asc')
-                                                                ->paginate(10);
-        
+								->where('customer_type','=','POEA')
+								->where('payment_status','=','PAID')
+								->where('application_status','=','1')
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->whereNotNull('batch_no')
+										->orWhereNull('batch_no');
+								})
+								->whereDate('created_at', Carbon::today())
+								->orderBy('lastname','asc')
+								->paginate(10);
+	
 
-        return view('application_batches.checklist', compact('branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
-        }
+	return view('application_batches.checklist', compact('branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications'));
+	}
 
-        public function downloadChecklist(Request $request)
-        {
-
-                $pdf = new TCPDF();
-                $pdf->AddPage();
-                $pdf->resetColumns();
-                $pdf->setEqualColumns(2, 30);
-
-                $currentDate = Carbon::now()->format('Y-m-d');
-                $randomToken = Str::random(10); // Generate a random token
-
-                $qrCodeContent = 'http://192.168.1.4/discovery-visa-system/public/application_batches/checklist?date=' . $currentDate . '&token=' . $randomToken;                $qrCode = QrCode::format('png')->errorCorrection('H')->generate($qrCodeContent);
-                $base64QrCode = base64_encode($qrCode);
-                
-                $date = Carbon::now()->toFormattedDateString();
-                $current_date = $date;
-                $visatypes = VisaType::orderBy('id', 'asc')->get();
-                $branch = $request->user()->branch;
-                
-                $walkin_applications = DB::table('applications')
-                ->where(function ($query) use ($branch) {
-                        $query->where(function ($query) {
-                                $query->where('customer_type', '=', 'Walk-In')
-                                        ->orWhere('customer_type', '=', 'Corporate')
-                                        ->orWhere('customer_type', '=', 'POEA')
-                                        ->orWhere('customer_type', '=', 'Courier')
-                                        ->orWhere('customer_type', '=', 'Expo')
-                                        ->orWhere('customer_type', '=', 'Others');
-                        })
-                        ->where('branch', '=', $branch)
-                        ->where('application_status', '!=', '10')
-                        ->where(function ($query) {
-                                $query->whereDate('created_at', Carbon::today())
-                                        ->orWhere(function ($query) {
-                                                // Include previously incomplete applications updated and approved today
-                                                $query->whereDate('updated_at', Carbon::today())
-                                                        ->where('application_status', '=', '1');
-                                        });
-                        })
-                        ->where('application_status', '!=', '9')
-                        ->where(function ($query) {
-                                $query->where('payment_status', '=', 'PAID')
-                                        ->orWhere('payment_status', '=', 'UNPAID');
-                        })
-                        ->where('batch_no', '=', NULL);
-                })
-                ->orderBy('lastname', 'asc')
-                ->get();
-        
+	public function downloadChecklist(Request $request)
+	{
 
 		$pdf = new TCPDF();
 		$pdf->AddPage();
 		$pdf->resetColumns();
 		$pdf->setEqualColumns(2, 30);
 
-	/*	$currentDate = Carbon::now()->format('Y-m-d');
+		$currentDate = Carbon::now()->format('Y-m-d');
 		$randomToken = Str::random(10); // Generate a random token
 
 		$qrCodeContent = 'http://192.168.1.4/discovery-visa-system/public/application_batches/checklist?date=' . $currentDate . '&token=' . $randomToken;		$qrCode = QrCode::format('png')->errorCorrection('H')->generate($qrCodeContent);
@@ -516,48 +434,49 @@ class ApplicationBatchController extends Controller
 		})
 		->orderBy('lastname', 'asc')
 		->get();
-	*/
+	
 
-                $piata_applications = DB::table('applications')
-                                                                // ->where('application_status','!=','10')
-                                                                // ->where('application_status','!=','9')
-                                                                ->where('customer_type','=','PIATA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
+		$pdf->resetColumns();
+		$pdf->setEqualColumns(2, 30);
 
-                $ptaa_applications = DB::table('applications')
-                                                                // ->where('application_status','!=','10')
-                                                                // ->where('application_status','!=','9')
-                                                                ->where('customer_type','=','PTAA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
-                
-                                
-        $pdf = PDF::loadView('application_batches.checklist_pdf', compact('qrCodeContent','base64QrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications'));
-        //return $pdf->stream($branch . ' Checklist for ' . $date . '.pdf');
-        return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
+		$piata_applications = DB::table('applications')
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
+								->where('customer_type','=','PIATA')
+								->where('payment_status','=','PAID')
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+
+		$ptaa_applications = DB::table('applications')
+								->where('application_status','!=','10')
+								->where('application_status','!=','9')
+								->where('customer_type','=','PTAA')
+								->where('payment_status','=','PAID')
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+		
+				
+	$pdf = PDF::loadView('application_batches.checklist_pdf', compact('qrCodeContent','base64QrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications'));
+	return $pdf->stream($branch . ' Checklist for ' . $date . '.pdf');
+	// return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
 
     // Save the PDF file on the server
     $pdfPath = storage_path('app/checklist_' . $branch . '_' . $date . '.pdf');
@@ -567,303 +486,317 @@ class ApplicationBatchController extends Controller
     $pdfUrl = url('storage/checklist_' . $branch . '_' . $date . '.pdf');
 
     return $pdfUrl;
-        // return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
-        }
+	// return $pdf->download($branch . ' Checklist for ' . $date . '.pdf');
+	}
 
-        public function finalPDFChecklist(Request $request)
-        {
-                
-                $date = Carbon::now()->toFormattedDateString();
-                $current_date = $date;
-                $visatypes = VisaType::orderBy('id', 'asc')->get();
-                $branchCode = $request->user()->branch;
-                
-                $walkin_applications = DB::table('applications')
-                                                                ->where(function ($query) {
-                                                                        $query->where('customer_type', '=', 'Walk-In')
-                                                                                ->orWhere('customer_type', '=', 'Mobile Service')
-                                                                                ->orWhere('customer_type', '=', 'Via Courier')
-                                                                                ->orWhere('customer_type', '=', 'Corporate')
-                                                                                ->orWhere('customer_type', '=', 'POEA')
-                                                                                ->orWhere('customer_type', '=', 'Courier')
-                                                                                ->orWhere('customer_type', '=', 'Expo')
-                                                                                ->orWhere('customer_type', '=', 'Others');
-                                                                })
-                                                                ->where('branch','=',$branch)
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('branch', '=', $request->user()->branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
+	public function finalPDFChecklist(Request $request)
+	{
+		
+		$date = Carbon::now()->toFormattedDateString();
+		$current_date = $date;
+		$visatypes = VisaType::orderBy('id', 'asc')->get();
+		$branchCode = $request->user()->branch;
+		
+		$walkin_applications = DB::table('applications')
+								->where(function ($query) {
+									$query->where('customer_type', '=', 'Walk-In')
+										->orWhere('customer_type', '=', 'Mobile Service')
+										->orWhere('customer_type', '=', 'Via Courier')
+										->orWhere('customer_type', '=', 'Corporate')
+										->orWhere('customer_type', '=', 'POEA')
+										->orWhere('customer_type', '=', 'Courier')
+										->orWhere('customer_type', '=', 'Expo')
+										->orWhere('customer_type', '=', 'Others');
+								})
+								->where('branch','=',$branch)
+								->where('payment_status','=','PAID')
+								->where('branch', '=', $request->user()->branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
 
-                $piata_applications = DB::table('applications')
-                                                                ->where('customer_type','=','PIATA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('branch', '=', $request->user()->branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
+		$piata_applications = DB::table('applications')
+								->where('customer_type','=','PIATA')
+								->where('payment_status','=','PAID')
+								->where('branch', '=', $request->user()->branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
 
-                $ptaa_applications = DB::table('applications')
-                                                                ->where('customer_type','=','PTAA')
-                                                                ->where('payment_status','=','PAID')
-                                                                ->where('branch', '=', $request->user()->branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
+		$ptaa_applications = DB::table('applications')
+								->where('customer_type','=','PTAA')
+								->where('payment_status','=','PAID')
+								->where('branch', '=', $request->user()->branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
 
-                $corporate_applications = DB::table('applications')
-                                                                ->where('customer_type','=','Corporate')
-                                                                ->where('branch', '=', $request->user()->branch)
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
+		$corporate_applications = DB::table('applications')
+								->where('customer_type','=','Corporate')
+								->where('branch', '=', $request->user()->branch)
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
 
         $poea_applications = DB::table('applications')
-                                                                ->where('customer_type','=','POEA')
-                                                                ->where('branch', '=', $request->user()->branch)
-                                                                ->where('branch','=',$branch)
-                                                                ->where(function ($query) {
-                                                                        $query->whereDate('created_at', Carbon::today())
-                                                                                ->orWhere(function ($query) {
-                                                                                        // Include previously incomplete applications updated and approved today
-                                                                                        $query->whereDate('updated_at', Carbon::today())
-                                                                                                ->where('application_status', '=', '1');
-                                                                                });
-                                                                })
-                                                                ->where('batch_no','=',NULL)
-                                                                ->orderBy('lastname','asc')
-                                                                ->get();
-                
-                $walkin_applications = $walkin_applications->concat($corporate_applications)->concat($poea_applications);
-                
-                                                                 $pdf = new TCPDF();
-                                                                
-                                                                // $pdf->SetMargins(10, 10, 10); // Set the page margins
-                                                                $pdf->SetAutoPageBreak(true, 10); // Enable auto page breaks
-                                                                $pdf->AddPage(); // Add a new page
-                                                        
-                                                                $html = view('application_batches.pdf', compact('visatypes','qrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications', 'current_date'))->render();
-                                                        
-                                                                $pdf->writeHTML($html, true, false, true, false, '');
-                                                        
-                                                                $pdf->Output($branch . ' Checklist for ' . $date . '.pdf', 'I');
-        }
-        
-        public function showFinalizeBatchPage()
-        {
-                return view('application_batches.finalize_batch');
-        }
-        
+								->where('customer_type','=','POEA')
+								->where('branch', '=', $request->user()->branch)
+								->where('branch','=',$branch)
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})								
+								->where('batch_no','=',NULL)
+								->orderBy('lastname','asc')
+								->get();
+		
+		$walkin_applications = $walkin_applications->concat($corporate_applications)->concat($poea_applications);
+		
+								 $pdf = new TCPDF();
+								
+								// $pdf->SetMargins(10, 10, 10); // Set the page margins
+								$pdf->SetAutoPageBreak(true, 10); // Enable auto page breaks
+								$pdf->AddPage(); // Add a new page
+							
+								$html = view('application_batches.pdf', compact('visatypes','qrCode','branch', 'date', 'walkin_applications', 'piata_applications', 'ptaa_applications', 'corporate_applications', 'poea_applications', 'current_date'))->render();
+							
+								$pdf->writeHTML($html, true, false, true, false, '');
+							
+								$pdf->Output($branch . ' Checklist for ' . $date . '.pdf', 'I');
+	}
+	
+	public function showFinalizeBatchPage()
+	{
+		return view('application_batches.finalize_batch');
+	}
+	
 
-        public function finalizeBatchContents(Request $request)
-        {
-                $currentUserBranch = $request->user()->branch;
-                $branch = Branch::where('code', $currentUserBranch)->first();
-                $branch_code = $branch->code;
-                $batch_no_string = Carbon::now()->format('Ymd') . $branch_code;
-                
+	public function finalizeBatchContents(Request $request)
+	{
+		$currentUserBranch = $request->user()->branch;
+		$branch = Branch::where('code', $currentUserBranch)->first();
+		$branch_code = $branch->code;
+		$batch_no_string = Carbon::now()->format('Ymd') . $branch_code;
+		
 
-                // if(ApplicationBatch::where('batch_no', $batch_no_string)->exists()){
-                //         return back()->with('status', "Submission List Generated.");
-                // }
-                
-                $status = 2; //Sent to Main Office (Batch Status)
-                // if($branch->id == 1) $status = 6; //if batch is for Main Office, go straight to Submitted to Embassy (Batch Status)
+		// if(ApplicationBatch::where('batch_no', $batch_no_string)->exists()){
+		// 	return back()->with('status', "Submission List Generated.");
+		// }
+		
+		$status = 2; //Sent to Main Office (Batch Status)
+		if($branch->id == 1) $status = 6; //if batch is for Main Office, go straight to Submitted to Embassy (Batch Status)
 
-                $paid_applications = DB::table('applications')
-                ->where('branch', '=', $branch->code)
-                ->where(function ($query) {
-                        $query->where('customer_type', '=', 'Walk-In')
-                                ->orWhere('customer_type', '=', 'PIATA')
-                                ->orWhere('customer_type', '=', 'PTAA')
-                                ->orWhere('customer_type', '=', 'POEA')
-                                ->orWhere('customer_type', '=', 'Courier')
-                                ->orWhere('customer_type', '=', 'Expo')
-                                ->orWhere('customer_type', '=', 'Others')
-                                ->orWhere(function ($query) {
-                                        $query->where('customer_type', '!=', 'Corporate')
-                                                ->where('payment_status', '=', 'PAID');
-                                });
-                })
-                ->where('application_status', '=', 1)
-                ->where('batch_no', '=', NULL)
-                ->where(function ($query) {
-                                $query->whereNotNull('branch')
-                                        ->orWhereNull('branch');
-                        })
-                ->update(['batch_no' => $batch_no_string, 'application_status' => $status]);
-                
+		$paid_applications = DB::table('applications')
+		->where('branch', '=', $branch->code)
+		->where(function ($query) {
+			$query->where('customer_type', '=', 'Walk-In')
+				->orWhere('customer_type', '=', 'PIATA')
+				->orWhere('customer_type', '=', 'PTAA')
+				->orWhere('customer_type', '=', 'POEA')
+				->orWhere('customer_type', '=', 'Courier')
+				->orWhere('customer_type', '=', 'Expo')
+				->orWhere('customer_type', '=', 'Others')
+				->orWhere(function ($query) {
+					$query->where('customer_type', '!=', 'Corporate')
+						->where('payment_status', '=', 'PAID');
+				});
+		})
+		// ->where('application_status', '=', 1)
+		->whereIn('application_status', [1, 2])
+		->where('payment_status','=','PAID')
+		->where('batch_no', '=', NULL)
+		->where(function ($query) {
+				$query->whereNotNull('branch')
+					->orWhereNull('branch');
+			})
+		->update(['batch_no' => $batch_no_string, 'application_status' => $status]);
+		
 
-                $finalized_batch = new ApplicationBatch([
-                        'batch_no' => $batch_no_string,
-                        'batch_date' => Carbon::today(),
-                        'total_applications' => $paid_applications,
-                        'status' => $status,
-                        'branch' => $branch_code
-                ]);
-                $finalized_batch->save();
+		$finalized_batch = new ApplicationBatch([
+			'batch_no' => $batch_no_string,
+			'batch_date' => Carbon::today(),
+			'total_applications' => $paid_applications,
+			'status' => $status,
+			'branch' => $branch_code
+		]);
+		$finalized_batch->save();
 
-                AccountReceivableController::generateAccountReceivables($batch_no_string, Carbon::today());
+		AccountReceivableController::generateAccountReceivables($batch_no_string, Carbon::today());
 
-                // if($branch->id == 1) //if user is from head office
-                if ($currentUserBranch == $branch->code) {
-                        DB::table('applications')
-                                ->where('batch_no', '=', $batch_no_string)
-                                ->update(['date_received_by_main_office' => Carbon::today()]);
-        
-                        // Introduce a flag variable to track if the email has been sent
-                        $emailSent = false;
-        
-                        if (!$branch->submission_list_generated) {
-                                $this->generateSubmissionList($request);
-                                $emailSent = true;
-                        }
-        
-                        // Set the submission_list_generated flag to true
-                        // $branch->submission_list_generated = true;
-                        $branch->save();
-        
-                        if ($emailSent) {
-                                return redirect('/application_batches/finalize_batch_page')->with('status', 'Submission List Generated!');
-                        } else {
-                                return redirect('/application_batches/finalize_batch_page')->with('status', 'Submission List already generated!');
-                        }
-                }
-        
-                return redirect('/application_batches/finalize_batch_page')->with('status', $batch_no_string . ' has been finalized.');
-        }
+		// if($branch->id == 1) //if user is from head office
+		if ($currentUserBranch == $branch->code) {
+			DB::table('applications')
+				->where('batch_no', '=', $batch_no_string)
+				->update(['date_received_by_main_office' => Carbon::today()]);
+	
+			// Introduce a flag variable to track if the email has been sent
+			$emailSent = false;
+	
+			if (!$branch->submission_list_generated) {
+				$this->generateSubmissionList($request);
+				$emailSent = true;
+			}
+	
+			// Set the submission_list_generated flag to true
+			// $branch->submission_list_generated = true;
+			$branch->save();
+	
+			if ($emailSent) {
+				return redirect('/application_batches/finalize_batch_page')->with('status', 'Submission List Generated!');
+			} else {
+				return redirect('/application_batches/finalize_batch_page')->with('status', 'Submission List already generated!');
+			}
+		}
+	
+		return redirect('/application_batches/finalize_batch_page')->with('status', $batch_no_string . ' has been finalized.');
+	}
 	
 	
 	public static function generateSubmissionList(Request $request)
-        {
-                $current_date = Carbon::now()->toFormattedDateString();
-                $branch = Branch::where('code', $request->user()->branch)->first();
-                // $sub_batch_no = "S" . $branch . "_" . Carbon::now()->format('Ymd');
-                $branchCode = $branch->code;
-                $sub_batch_no = $branchCode . Carbon::now()->format('Ymd');
-                
-                //for e-mail
-                // $mailing_list = User::find(1); // Get the user with ID 1
-                $mailing_list = User::where('role', 'ADMIN')->pluck('email');
-                $mailing_list = $mailing_list->toArray();                
-                $branchEmail = $branch->email;
+	{
+		$current_date = Carbon::now()->toFormattedDateString();
+		$branch = Branch::where('code', $request->user()->branch)->first();
+		// $sub_batch_no = "S" . $branch . "_" . Carbon::now()->format('Ymd');
+		$branchCode = $branch->code;
+		$sub_batch_no = $branchCode . Carbon::now()->format('Ymd');
+		
+		//for e-mail
+		// $mailing_list = User::find(1); // Get the user with ID 1
+		$mailing_list = User::where('role', 'ADMIN')->pluck('email');
+		$mailing_list = $mailing_list->toArray();		
+		$branchEmail = $branch->email;
 
-                $partner_companies = PartnerCompany::all();
-                $partner_companies_array = array();
-                foreach ($partner_companies as $company) {
-                        $partner_companies_array[$company->id] = $company->name;
-                }
-        
-                DB::table('applications')
-                        ->whereIn('application_status', [1, 2, 3])
-                        ->update(['submission_batch_no' => $sub_batch_no]);
+		$partner_companies = PartnerCompany::all();
+		$partner_companies_array = array();
+		foreach ($partner_companies as $company) {
+			$partner_companies_array[$company->id] = $company->name;
+		}
+	
+		DB::table('applications')
+			->whereIn('application_status', [1, 2, 3, 4, 5, 6, 7, 8, 11])
+			->update(['submission_batch_no' => $sub_batch_no]);
 
-                        if ($branchCode === "MNL") {
-                                // If branch is "MNL", set application_status to 3
-                                DB::table('applications')
-                                        ->whereIn('application_status', [1, 2, 3])
-                                        ->update(['application_status' => 6]);
-                        } else {
-                                // If branch is not "MNL", set application_status to 2
-                                DB::table('applications')
-                                        ->whereIn('application_status', [1, 2, 3])
-                                        ->update(['application_status' => 2]);
-                        }
-        
-                $walkin_applications = DB::table('applications')
-                        ->where(function ($query) {
-                                $query->where('customer_type', '=', 'Walk-In')
-                                        ->orWhere('customer_type', '=', 'Mobile Service')
-                                        ->orWhere('customer_type', '=', 'Via Courier')
-                                        ->orWhere('customer_type', '=', 'Corporate')
-                                        ->orWhere('customer_type', '=', 'POEA')
-                                        ->orWhere('customer_type', '=', 'Courier')
-                                        ->orWhere('customer_type', '=', 'Expo')
-                                        ->orWhere('customer_type', '=', 'Others');
-                        })
-                        ->where('submission_batch_no', '=', $sub_batch_no)
-                        ->where('branch', '=', $request->user()->branch)
-                        ->orderByRaw("visa_type ASC, lastname ASC")
-                        ->where(function ($query) {
-                                $query->whereDate('created_at', Carbon::today())
-                                        ->orWhereDate('updated_at', Carbon::today()); // Include applications updated today
-                        })
-                        ->where('payment_status','=','PAID')
-                        ->get();
-        
-                $piata_applications = DB::table('applications')
-                        ->where('customer_type', '=', 'PIATA')
-                        ->where('submission_batch_no', '=', $sub_batch_no)
-                        ->where('branch', '=', $request->user()->branch)
-                        ->orderByRaw("visa_type ASC, lastname ASC")
-                        ->where(function ($query) {
-                                $query->whereDate('created_at', Carbon::today())
-                                        ->orWhereDate('updated_at', Carbon::today()); // Include applications updated today
-                        })
-                        ->where('payment_status','=','PAID')
-                        ->get();
-        
-                $ptaa_applications = DB::table('applications')
-                        ->where('customer_type', '=', 'PTAA')
-                        ->where('submission_batch_no', '=', $sub_batch_no)
-                        ->where('branch', '=', $request->user()->branch)
-                        ->orderByRaw("visa_type ASC, lastname ASC")
-                        ->where(function ($query) {
-                                $query->whereDate('created_at', Carbon::today())
-                                        ->orWhereDate('updated_at', Carbon::today()); // Include applications updated today
-                        })
-                        ->where('payment_status','=','PAID')
-                        ->get();
-        
-                $pdf = PDF::loadView('application_batches/pdf', compact('walkin_applications', 'piata_applications', 'ptaa_applications', 'poea_applications',
-                        'partner_companies_array', 'current_date'));
-                $pdf_array[$sub_batch_no] = $pdf->download()->getOriginalContent();
-                Storage::put('public/pdf/' . $sub_batch_no . '.pdf', $pdf_array[$sub_batch_no]);
-        
-                if ($branch->submission_list_generated) {
-                        // The submission list has already been generated and sent
-                        // You can choose to return an error message or handle it as per your requirement
-                        return redirect()->back()->with('status', 'Submission list has already been generated and sent.');
-                }
-                
-                //send email to admins
-                Mail::to($mailing_list)->send(new SubmissionListGenerated($pdf_array, $current_date, $branch, $branchEmail));
-        }
-
+			if ($branchCode === "MNL") {
+				// If branch is "MNL", set application_status to 3
+				DB::table('applications')
+					->whereIn('application_status', [1, 2, 3, 4, 5, 6, 7, 8, 11])
+					->update(['application_status' => 3]);
+			} else {
+				// If branch is not "MNL", set application_status to 2
+				DB::table('applications')
+					->whereIn('application_status', [1, 2, 3, 4, 5, 6, 7, 8, 11])
+					->update(['application_status' => 2]);
+			}
+	
+		$walkin_applications = DB::table('applications')
+		->where(function ($query) {
+			$query->where('customer_type', '=', 'Corporate')
+				->orWhere(function ($query) {
+					$query->where('customer_type', '!=', 'Corporate')
+						->where('payment_status', '=', 'PAID');
+				});
+			$query->orWhere(function ($query) {
+				$query->where('customer_type', '=', 'Walk-In')
+					->orWhere('customer_type', '=', 'Mobile Service')
+					->orWhere('customer_type', '=', 'Via Courier')
+					->orWhere('customer_type', '=', 'POEA')
+					->orWhere('customer_type', '=', 'Courier')
+					->orWhere('customer_type', '=', 'Expo')
+					->orWhere('customer_type', '=', 'Others');
+			});
+		})
+			->where('submission_batch_no', '=', $sub_batch_no)
+			->whereIn('application_status', [1, 2, 3])
+			// ->where('payment_status','=','PAID')
+			->where(function ($query) {
+				$query->where('created_at', '<', Carbon::today())
+					->orWhere(function ($query) {
+						$query->where('created_at', '>=', Carbon::today())
+						->whereIn('application_status', [1, 2, 3]);
+					});
+			})		
+			->where('branch', '=', $request->user()->branch)
+			->orderByRaw("visa_type ASC, lastname ASC")
+			->get();
+	
+		$piata_applications = DB::table('applications')
+			->where('customer_type', '=', 'PIATA')
+			->where('submission_batch_no', '=', $sub_batch_no)
+			->whereIn('application_status', [1, 2, 3])
+			->where('payment_status','=','PAID')
+			->where(function ($query) {
+				$query->where('created_at', '<', Carbon::today())
+					->orWhere(function ($query) {
+						$query->where('created_at', '>=', Carbon::today())
+						->whereIn('application_status', [1, 2, 3]);
+					});
+			})		
+			->where('branch', '=', $request->user()->branch)
+			->orderByRaw("visa_type ASC, lastname ASC")
+			->get();
+	
+		$ptaa_applications = DB::table('applications')
+			->where('customer_type', '=', 'PTAA')
+			->where('submission_batch_no', '=', $sub_batch_no)
+			->whereIn('application_status', [1, 2, 3])
+			->where('payment_status','=','PAID')
+			->where(function ($query) {
+				$query->where('created_at', '<', Carbon::today())
+					->orWhere(function ($query) {
+						$query->where('created_at', '>=', Carbon::today())
+							->whereIn('application_status', [1, 2, 3]);
+					});
+			})		
+			->where('branch', '=', $request->user()->branch)
+			->orderByRaw("visa_type ASC, lastname ASC")
+			->get();
+	
+		$pdf = PDF::loadView('application_batches/pdf', compact('walkin_applications', 'piata_applications', 'ptaa_applications', 'poea_applications',
+			'partner_companies_array', 'current_date'));
+		$pdf_array[$sub_batch_no] = $pdf->download()->getOriginalContent();
+		Storage::put('public/pdf/' . $sub_batch_no . '.pdf', $pdf_array[$sub_batch_no]);
+	
+		if ($branch->submission_list_generated) {
+			// The submission list has already been generated and sent
+			// You can choose to return an error message or handle it as per your requirement
+			return redirect()->back()->with('status', 'Submission list has already been generated and sent.');
+		}
+		
+		//send email to admins
+		Mail::to($mailing_list)->send(new SubmissionListGenerated($pdf_array, $current_date, $branch, $branchEmail));
+	}
 	
 
 
