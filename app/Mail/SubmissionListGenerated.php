@@ -49,8 +49,8 @@ class SubmissionListGenerated extends Mailable
             ->with('branch', $this->branch)
             ->with('batch_no_string', $batch_no_string);
 			
-			$ccEmails = ['junichi@discoverytour.ph', 'connie@discoverytour.ph', 'carmen@discoverytour.ph'];
-            $mail->cc($ccEmails);
+			// $ccEmails = ['junichi@discoverytour.ph', 'connie@discoverytour.ph', 'carmen@discoverytour.ph'];
+            // $mail->cc($ccEmails);
     
 		foreach($this->pdf_files as $key => $value)
 		{
