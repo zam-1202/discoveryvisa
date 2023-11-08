@@ -330,7 +330,13 @@ class ApplicationBatchController extends Controller
 									$query->whereNotNull('batch_no')
 										->orWhereNull('batch_no');
 								})
-								->whereDate('created_at', Carbon::today())
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})			
 								->orderBy('lastname','asc')
 								->paginate(10);
 
@@ -343,7 +349,13 @@ class ApplicationBatchController extends Controller
 									$query->whereNotNull('batch_no')
 										->orWhereNull('batch_no');
 								})
-								->whereDate('created_at', Carbon::today())
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})			
 								->orderBy('lastname','asc')
 								->paginate(10);
 
@@ -356,7 +368,13 @@ class ApplicationBatchController extends Controller
 									$query->whereNotNull('batch_no')
 										->orWhereNull('batch_no');
 								})
-								->whereDate('created_at', Carbon::today())
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})			
 								->orderBy('lastname','asc')
 								->paginate(10);
 
@@ -368,7 +386,13 @@ class ApplicationBatchController extends Controller
 									$query->where('payment_status', '=', 'PAID')
 										->orWhere('payment_status', '=', 'UNPAID');
 								})
-								->whereDate('created_at', Carbon::today())
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})			
 								->where(function ($query) {
 									$query->whereNotNull('batch_no')
 										->orWhereNull('batch_no');
@@ -386,7 +410,13 @@ class ApplicationBatchController extends Controller
 									$query->whereNotNull('batch_no')
 										->orWhereNull('batch_no');
 								})
-								->whereDate('created_at', Carbon::today())
+								->where(function ($query) {
+									$query->where('created_at', '<', Carbon::today())
+										->orWhere(function ($query) {
+											$query->where('created_at', '>=', Carbon::today())
+												->whereIn('application_status', [1, 2]);
+										});
+								})			
 								->orderBy('lastname','asc')
 								->paginate(10);
 	
@@ -498,18 +528,24 @@ class ApplicationBatchController extends Controller
 		$branchCode = $request->user()->branch;
 		
 		$walkin_applications = DB::table('applications')
-								->where(function ($query) {
-									$query->where('customer_type', '=', 'Walk-In')
-										->orWhere('customer_type', '=', 'Mobile Service')
-										->orWhere('customer_type', '=', 'Via Courier')
-										->orWhere('customer_type', '=', 'Corporate')
-										->orWhere('customer_type', '=', 'POEA')
-										->orWhere('customer_type', '=', 'Courier')
-										->orWhere('customer_type', '=', 'Expo')
-										->orWhere('customer_type', '=', 'Others');
-								})
+		->where(function ($query) {
+			$query->where('customer_type', '=', 'Corporate')
+				->orWhere(function ($query) {
+					$query->where('customer_type', '!=', 'Corporate')
+						->where('payment_status', '=', 'PAID');
+				});
+			$query->orWhere(function ($query) {
+				$query->where('customer_type', '=', 'Walk-In')
+					->orWhere('customer_type', '=', 'Mobile Service')
+					->orWhere('customer_type', '=', 'Via Courier')
+					->orWhere('customer_type', '=', 'POEA')
+					->orWhere('customer_type', '=', 'Courier')
+					->orWhere('customer_type', '=', 'Expo')
+					->orWhere('customer_type', '=', 'Others');
+			});
+		})
 								->where('branch','=',$branch)
-								->where('payment_status','=','PAID')
+								// ->where('payment_status','=','PAID')
 								->where('branch', '=', $request->user()->branch)
 								->where(function ($query) {
 									$query->where('created_at', '<', Carbon::today())
@@ -705,51 +741,57 @@ class ApplicationBatchController extends Controller
 		}
 	
 		DB::table('applications')
-			->whereIn('application_status', [1, 2, 3, 4, 5, 6, 7, 8, 11])
+			->whereIn('application_status', [1])
 			->update(['submission_batch_no' => $sub_batch_no]);
 
 			if ($branchCode === "MNL") {
 				// If branch is "MNL", set application_status to 3
 				DB::table('applications')
-					->whereIn('application_status', [1, 2, 3, 4, 5, 6, 7, 8, 11])
+					->whereIn('application_status', [1])
 					->update(['application_status' => 3]);
 			} else {
 				// If branch is not "MNL", set application_status to 2
 				DB::table('applications')
-					->whereIn('application_status', [1, 2, 3, 4, 5, 6, 7, 8, 11])
+					->whereIn('application_status', [1])
 					->update(['application_status' => 2]);
 			}
 	
-		$walkin_applications = DB::table('applications')
-		->where(function ($query) {
-			$query->where('customer_type', '=', 'Corporate')
-				->orWhere(function ($query) {
-					$query->where('customer_type', '!=', 'Corporate')
-						->where('payment_status', '=', 'PAID');
+			$walkin_applications = DB::table('applications')
+			->where(function ($query) {
+				$query->where('customer_type', '=', 'Corporate')
+					->orWhere(function ($query) {
+						$query->where('customer_type', '!=', 'Corporate')
+							->where('payment_status', '=', 'PAID');
+					});
+				$query->orWhere(function ($query) {
+					$query->where('customer_type', '=', 'Walk-In')
+						->orWhere('customer_type', '=', 'Mobile Service')
+						->orWhere('customer_type', '=', 'Via Courier')
+						->orWhere('customer_type', '=', 'POEA')
+						->orWhere('customer_type', '=', 'Courier')
+						->orWhere('customer_type', '=', 'Expo')
+						->orWhere('customer_type', '=', 'Others');
 				});
-			$query->orWhere(function ($query) {
-				$query->where('customer_type', '=', 'Walk-In')
-					->orWhere('customer_type', '=', 'Mobile Service')
-					->orWhere('customer_type', '=', 'Via Courier')
-					->orWhere('customer_type', '=', 'POEA')
-					->orWhere('customer_type', '=', 'Courier')
-					->orWhere('customer_type', '=', 'Expo')
-					->orWhere('customer_type', '=', 'Others');
-			});
-		})
+			})
 			->where('submission_batch_no', '=', $sub_batch_no)
 			->whereIn('application_status', [1, 2, 3])
-			// ->where('payment_status','=','PAID')
 			->where(function ($query) {
 				$query->where('created_at', '<', Carbon::today())
 					->orWhere(function ($query) {
 						$query->where('created_at', '>=', Carbon::today())
-						->whereIn('application_status', [1, 2, 3]);
+							->whereIn('application_status', [1, 2, 3]);
 					});
-			})		
+			})    
 			->where('branch', '=', $request->user()->branch)
+			->where(function ($query) use ($sub_batch_no) {
+				$query->where('batch_no', '=', NULL)
+					->orWhere(function ($query) use ($sub_batch_no) {
+						$query->where('batch_no', 'NOT LIKE', "%$sub_batch_no%");
+					});
+			})
 			->orderByRaw("visa_type ASC, lastname ASC")
 			->get();
+		
 	
 		$piata_applications = DB::table('applications')
 			->where('customer_type', '=', 'PIATA')
@@ -764,6 +806,12 @@ class ApplicationBatchController extends Controller
 					});
 			})		
 			->where('branch', '=', $request->user()->branch)
+			->where(function ($query) use ($sub_batch_no) {
+				$query->where('batch_no', '=', NULL)
+					->orWhere(function ($query) use ($sub_batch_no) {
+						$query->where('batch_no', 'NOT LIKE', "%$sub_batch_no%");
+					});
+			})
 			->orderByRaw("visa_type ASC, lastname ASC")
 			->get();
 	
@@ -780,6 +828,12 @@ class ApplicationBatchController extends Controller
 					});
 			})		
 			->where('branch', '=', $request->user()->branch)
+			->where(function ($query) use ($sub_batch_no) {
+				$query->where('batch_no', '=', NULL)
+					->orWhere(function ($query) use ($sub_batch_no) {
+						$query->where('batch_no', 'NOT LIKE', "%$sub_batch_no%");
+					});
+			})
 			->orderByRaw("visa_type ASC, lastname ASC")
 			->get();
 	
